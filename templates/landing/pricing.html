@@ -1,0 +1,255 @@
+{% extends "landing/base.html" %}
+
+{% block title %}Pricing — WebMail{% endblock %}
+
+{% block content %}
+
+<div class="bg-gradient-to-b from-indigo-50 to-white py-20 text-center">
+  <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+    <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl mb-4">
+      Simple, transparent pricing
+    </h1>
+    <p class="text-lg text-gray-500">
+      Pay only for what you send. No seat fees, no hidden charges.
+      Upgrade or downgrade any time.
+    </p>
+  </div>
+</div>
+
+{# ── Usage Calculator ─────────────────────────────────────────────── #}
+<section class="py-12 bg-white border-b border-gray-100" x-data="usageCalc()">
+  <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+    <h2 class="text-xl font-bold text-gray-900 text-center mb-8">Estimate your plan</h2>
+    <div class="bg-gray-50 rounded-2xl border border-gray-200 p-8">
+      <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+        <label class="text-sm font-medium text-gray-700 shrink-0">I send</label>
+        <input
+          type="range"
+          min="0"
+          max="100"
+          x-model="sliderVal"
+          @input="compute()"
+          class="flex-1 h-2 accent-indigo-600"
+        />
+        <span class="text-sm font-semibold text-gray-900 shrink-0 w-32 text-right font-mono" x-text="emailsLabel"></span>
+        <span class="text-sm text-gray-500 shrink-0">emails / mo</span>
+      </div>
+
+      <div class="text-center rounded-xl border-2 p-6 transition-colors"
+           :class="planBorder">
+        <p class="text-sm text-gray-500 mb-1">You'd be on the</p>
+        <p class="text-2xl font-extrabold text-gray-900 mb-1" x-text="planName"></p>
+        <p class="text-4xl font-extrabold mb-1"
+           :class="planColor"
+           x-text="planPrice"></p>
+        <p class="text-sm text-gray-400" x-text="planDesc"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# ── Plan cards ───────────────────────────────────────────────────── #}
+<section class="pb-24 -mt-4">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="grid gap-8 lg:grid-cols-3">
+
+      {# Developer #}
+      <div class="rounded-2xl border border-gray-200 bg-white p-8 flex flex-col">
+        <p class="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-3">Developer</p>
+        <div class="flex items-end gap-1 mb-1">
+          <span class="text-5xl font-extrabold text-gray-900">Free</span>
+        </div>
+        <p class="text-sm text-gray-400 mb-6">Forever. No credit card.</p>
+        <ul class="space-y-3 text-sm text-gray-600 mb-8 flex-1">
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> 1 000 emails / month</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> 1 sending domain</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Open &amp; click tracking</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> 7-day message history</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Community support</li>
+          <li class="flex items-center gap-2 text-gray-300"><span>–</span> Webhooks</li>
+          <li class="flex items-center gap-2 text-gray-300"><span>–</span> Promotional stream</li>
+          <li class="flex items-center gap-2 text-gray-300"><span>–</span> CSV export</li>
+        </ul>
+        <a href="/signup/"
+           class="block rounded-lg border border-gray-300 py-2.5 text-center text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+          Get started free
+        </a>
+      </div>
+
+      {# Startup — highlighted #}
+      <div class="rounded-2xl border-2 border-indigo-500 bg-white p-8 flex flex-col relative shadow-xl">
+        <div class="absolute -top-3 left-1/2 -translate-x-1/2">
+          <span class="rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white shadow">
+            Most popular
+          </span>
+        </div>
+        <p class="text-sm font-semibold text-indigo-600 uppercase tracking-widest mb-3">Startup</p>
+        <div class="flex items-end gap-1 mb-1">
+          <span class="text-5xl font-extrabold text-gray-900">$29</span>
+          <span class="text-gray-400 mb-2">/ month</span>
+        </div>
+        <p class="text-sm text-gray-400 mb-6">Up to 50 000 emails / month.</p>
+        <ul class="space-y-3 text-sm text-gray-600 mb-8 flex-1">
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> 50 000 emails / month</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> 10 sending domains</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Open &amp; click tracking</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> 30-day message history</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Outbound webhooks</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Transactional &amp; promotional streams</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> CSV export</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Email support (&lt; 4 h SLA)</li>
+        </ul>
+        <a href="/signup/?plan=startup"
+           class="block rounded-lg bg-indigo-600 py-2.5 text-center text-sm font-semibold text-white hover:bg-indigo-700 shadow transition-colors">
+          Start free trial
+        </a>
+      </div>
+
+      {# Enterprise #}
+      <div class="rounded-2xl border border-gray-200 bg-white p-8 flex flex-col">
+        <p class="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-3">Enterprise</p>
+        <div class="flex items-end gap-1 mb-1">
+          <span class="text-5xl font-extrabold text-gray-900">Custom</span>
+        </div>
+        <p class="text-sm text-gray-400 mb-6">Volume pricing for high senders.</p>
+        <ul class="space-y-3 text-sm text-gray-600 mb-8 flex-1">
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Unlimited emails</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Unlimited domains</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Dedicated IP pools</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> 90-day message history</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Priority webhook queue</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> SSO / SAML</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Deliverability consulting</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> 24 / 7 phone support</li>
+        </ul>
+        <a href="mailto:sales@webmail.io"
+           class="block rounded-lg border border-gray-300 py-2.5 text-center text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+          Contact sales
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{# ── FAQ ──────────────────────────────────────────────────────────── #}
+<section class="border-t border-gray-100 py-20 bg-gray-50" x-data="{ open: null }">
+  <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+    <h2 class="text-2xl font-bold text-center mb-10">Frequently asked questions</h2>
+
+    <div class="space-y-3">
+
+      <div class="rounded-xl bg-white border border-gray-100 overflow-hidden">
+        <button @click="open = open === 0 ? null : 0"
+                class="flex w-full items-center justify-between px-6 py-4 text-sm font-medium text-gray-900 text-left">
+          <span>What counts as an email send?</span>
+          <svg class="h-4 w-4 text-gray-400 transition-transform duration-200"
+               :class="open === 0 && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+        <div x-show="open === 0" x-transition class="px-6 pb-4 text-sm text-gray-500">
+          One recipient address in one API call. A batch send to 10 recipients counts as 10 emails.
+        </div>
+      </div>
+
+      <div class="rounded-xl bg-white border border-gray-100 overflow-hidden">
+        <button @click="open = open === 1 ? null : 1"
+                class="flex w-full items-center justify-between px-6 py-4 text-sm font-medium text-gray-900 text-left">
+          <span>Can I switch plans mid-cycle?</span>
+          <svg class="h-4 w-4 text-gray-400 transition-transform duration-200"
+               :class="open === 1 && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+        <div x-show="open === 1" x-transition class="px-6 pb-4 text-sm text-gray-500">
+          Yes — upgrade takes effect immediately (prorated). Downgrades apply at the next billing cycle.
+        </div>
+      </div>
+
+      <div class="rounded-xl bg-white border border-gray-100 overflow-hidden">
+        <button @click="open = open === 2 ? null : 2"
+                class="flex w-full items-center justify-between px-6 py-4 text-sm font-medium text-gray-900 text-left">
+          <span>Is there a free trial for paid plans?</span>
+          <svg class="h-4 w-4 text-gray-400 transition-transform duration-200"
+               :class="open === 2 && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+        <div x-show="open === 2" x-transition class="px-6 pb-4 text-sm text-gray-500">
+          Yes. Startup comes with a 14-day free trial — no credit card required to start.
+        </div>
+      </div>
+
+      <div class="rounded-xl bg-white border border-gray-100 overflow-hidden">
+        <button @click="open = open === 3 ? null : 3"
+                class="flex w-full items-center justify-between px-6 py-4 text-sm font-medium text-gray-900 text-left">
+          <span>What happens if I exceed my send limit?</span>
+          <svg class="h-4 w-4 text-gray-400 transition-transform duration-200"
+               :class="open === 3 && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+        <div x-show="open === 3" x-transition class="px-6 pb-4 text-sm text-gray-500">
+          We email a warning at 80 % of your monthly limit. Sends above the limit return HTTP 429 until you upgrade or the billing cycle resets.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{# ── CTA ──────────────────────────────────────────────────────────── #}
+<section class="bg-indigo-700 py-16 text-white text-center">
+  <div class="mx-auto max-w-xl px-4">
+    <h2 class="text-2xl font-bold mb-4">Get started for free today</h2>
+    <a href="/signup/"
+       class="rounded-xl bg-white px-8 py-3 text-sm font-semibold text-indigo-700 hover:bg-indigo-50 shadow transition-colors inline-block">
+      Create your free account
+    </a>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function usageCalc() {
+  function sliderToEmails(v) {
+    if (v >= 100) return Infinity;
+    const min = Math.log10(1000);
+    const max = Math.log10(500001);
+    return Math.round(Math.pow(10, min + (v / 100) * (max - min)));
+  }
+  function fmt(n) {
+    if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+    if (n >= 1000)    return Math.round(n / 1000) + 'K';
+    return String(n);
+  }
+  const plans = [
+    { max: 10000,    name: 'Developer', price: 'Free',          color: 'text-gray-700',   border: 'border-gray-300',  desc: 'Up to 10,000 emails free forever.' },
+    { max: 50000,    name: 'Startup',   price: '$29 / month',   color: 'text-indigo-600', border: 'border-indigo-400',desc: 'Up to 50,000 emails per month.' },
+    { max: 500000,   name: 'Growth',    price: '$79 / month',   color: 'text-purple-600', border: 'border-purple-400',desc: 'Up to 500,000 emails per month.' },
+    { max: Infinity, name: 'Enterprise',price: 'Contact us',    color: 'text-gray-700',   border: 'border-gray-400',  desc: 'Volume pricing for high senders.' },
+  ];
+  return {
+    sliderVal: 10,
+    emailsLabel: '1K',
+    planName: 'Developer', planPrice: 'Free',
+    planColor: 'text-gray-700', planBorder: 'border-2 border-gray-300',
+    planDesc: 'Up to 10,000 emails free forever.',
+    compute() {
+      const emails = sliderToEmails(parseInt(this.sliderVal));
+      this.emailsLabel = emails === Infinity ? '500K+' : fmt(emails);
+      const plan = plans.find(p => emails <= p.max) ?? plans[plans.length - 1];
+      this.planName   = plan.name;
+      this.planPrice  = plan.price;
+      this.planColor  = plan.color;
+      this.planBorder = 'border-2 ' + plan.border;
+      this.planDesc   = plan.desc;
+    },
+    init() { this.compute(); },
+  };
+}
+</script>
+{% endblock %}

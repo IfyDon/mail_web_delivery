@@ -1,0 +1,84 @@
+{% extends "landing/base.html" %}
+
+{% block title %}Privacy Policy — WebMail{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
+
+  <h1 class="text-4xl font-extrabold text-gray-900 mb-2">Privacy Policy</h1>
+  <p class="text-sm text-gray-400 mb-10">Last updated: June 1, 2025</p>
+
+  <div class="space-y-8 text-gray-700 text-sm leading-relaxed">
+
+    <section>
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">1. Who We Are</h2>
+      <p>WebMail ("we", "us") operates the transactional email platform at webmail.io.
+         Our registered address is 123 Main Street, Suite 100, San Francisco, CA 94105, United States.</p>
+    </section>
+
+    <section>
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">2. Data We Collect</h2>
+      <ul class="list-disc pl-5 space-y-1">
+        <li><strong>Account data</strong> — email address, password hash, billing information.</li>
+        <li><strong>Message data</strong> — from/to addresses, subject, body, send status.</li>
+        <li><strong>Event data</strong> — open timestamps, clicked URLs, IP addresses (hashed after 30 days).</li>
+        <li><strong>Usage data</strong> — API request logs, error traces, rate-limit counters.</li>
+        <li><strong>Cookies</strong> — see our <a href="{% url 'gdpr' %}" class="text-indigo-600 underline">Cookie Policy</a>.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">3. How We Use Your Data</h2>
+      <ul class="list-disc pl-5 space-y-1">
+        <li>To provide and improve the Service;</li>
+        <li>To detect and prevent abuse and fraud;</li>
+        <li>To send transactional notices (password resets, billing receipts);</li>
+        <li>To comply with legal obligations.</li>
+      </ul>
+      <p class="mt-2">We do not sell your personal data to third parties.</p>
+    </section>
+
+    <section>
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">4. Data Retention</h2>
+      <p>Message bodies are stored for the duration of your plan's history window (7 / 30 / 90 days).
+         Account data is retained for 30 days after deletion, then permanently erased.</p>
+    </section>
+
+    <section>
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">5. Third-Party Processors</h2>
+      <ul class="list-disc pl-5 mt-2 space-y-1">
+        <li><strong>AWS</strong> — email relay (SES) and infrastructure.</li>
+        <li><strong>Stripe / Paddle</strong> — payment processing.</li>
+        <li><strong>Sentry</strong> — error monitoring (no PII in traces).</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">6. Your Rights (GDPR / CCPA)</h2>
+      <p>You may have the right to access, correct, delete, or export personal data we hold.
+         Submit a request to
+         <a href="mailto:privacy@webmail.io" class="text-indigo-600 underline">privacy@webmail.io</a>
+         and we will respond within 30 days.</p>
+    </section>
+
+    <section>
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">7. Security</h2>
+      <p>All data is encrypted in transit (TLS 1.2+) and at rest (AES-256).
+         API keys are stored as SHA-256 hashes; raw values are never logged.</p>
+    </section>
+
+    <section>
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">8. Contact</h2>
+      <p>Privacy inquiries:
+         <a href="mailto:privacy@webmail.io" class="text-indigo-600 underline">privacy@webmail.io</a>.
+      </p>
+    </section>
+
+  </div>
+
+  <div class="mt-12 flex gap-4 text-sm">
+    <a href="{% url 'terms' %}" class="text-indigo-600 hover:underline">Terms of Service</a>
+    <a href="{% url 'gdpr' %}"  class="text-indigo-600 hover:underline">Cookie Policy</a>
+  </div>
+</div>
+{% endblock %}

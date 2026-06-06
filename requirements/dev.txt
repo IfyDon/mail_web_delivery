@@ -1,0 +1,25 @@
+-r base.txt
+
+# ── Database (dev only — binary wheel, no build deps needed) ──────────
+psycopg2-binary>=2.9
+
+# ── Dev / debug ───────────────────────────────────────────────────────
+django-debug-toolbar>=4.3
+ipython>=8.23
+watchdog>=4.0                  # auto-reload
+
+# ── Testing ───────────────────────────────────────────────────────────
+pytest>=8.1
+pytest-django>=4.8
+pytest-cov>=5.0
+factory-boy>=3.3
+Faker>=24.9
+responses>=0.25                # mock HTTP calls
+celery[pytest]>=5.4
+
+# ── Code quality ──────────────────────────────────────────────────────
+black>=24.3
+ruff>=0.4
+pre-commit>=3.7
+mypy>=1.9
+django-stubs>=4.2

@@ -1,0 +1,39 @@
+{% load static %}<!doctype html>
+<html lang="en" class="h-full bg-gray-50">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Web Mail{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/output.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="h-full">
+
+  <header class="bg-white shadow-sm">
+    <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8 flex items-center justify-between">
+      <a href="/" class="text-xl font-bold text-indigo-600">Web Mail</a>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="mb-4 rounded-md p-4
+          {% if message.tags == 'error' %}bg-red-50 text-red-800
+          {% elif message.tags == 'success' %}bg-green-50 text-green-800
+          {% else %}bg-blue-50 text-blue-800{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="mt-auto border-t bg-white py-6 text-center text-sm text-gray-400">
+    &copy; {% now "Y" %} Web Mail. All rights reserved.
+  </footer>
+
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

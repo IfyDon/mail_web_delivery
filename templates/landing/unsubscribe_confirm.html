@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Unsubscribed — Web Mail{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-md">
+  <div class="rounded-2xl bg-white px-8 py-10 text-center shadow">
+
+    <span class="inline-flex items-center justify-center rounded-full bg-green-100 p-3">
+      <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+      </svg>
+    </span>
+
+    <h1 class="mt-4 text-2xl font-semibold text-gray-900">You're unsubscribed</h1>
+    <p class="mt-2 text-sm text-gray-500">
+      <strong class="font-medium text-gray-900">{{ email }}</strong> has been removed and will
+      no longer receive emails from this sender.
+    </p>
+
+    <p class="mt-6 text-xs text-gray-400">
+      Changed your mind?
+      <a href="{% url 'unsubscribe' %}" class="text-indigo-600 underline hover:text-indigo-500">
+        Manage preferences
+      </a>
+    </p>
+  </div>
+</div>
+{% endblock %}

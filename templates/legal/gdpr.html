@@ -1,0 +1,90 @@
+{% extends "landing/base.html" %}
+
+{% block title %}Cookie Policy — WebMail{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
+
+  <h1 class="text-4xl font-extrabold text-gray-900 mb-2">Cookie Policy</h1>
+  <p class="text-sm text-gray-400 mb-10">Last updated: June 1, 2025</p>
+
+  <div class="space-y-8 text-gray-700 text-sm leading-relaxed">
+
+    <section>
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">What are cookies?</h2>
+      <p>Cookies are small text files stored on your device when you visit a website.
+         They help us remember your preferences and improve your experience.</p>
+    </section>
+
+    <section>
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">Categories we use</h2>
+
+      <div class="overflow-hidden rounded-xl border border-gray-200 mt-4">
+        <table class="w-full text-xs">
+          <thead class="bg-gray-50 text-gray-500">
+            <tr>
+              <th class="px-4 py-3 text-left font-semibold">Category</th>
+              <th class="px-4 py-3 text-left font-semibold">Purpose</th>
+              <th class="px-4 py-3 text-left font-semibold">Can opt out?</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            <tr>
+              <td class="px-4 py-3 font-medium text-gray-900">Strictly Necessary</td>
+              <td class="px-4 py-3 text-gray-500">Session management, CSRF protection, authentication.</td>
+              <td class="px-4 py-3 text-red-500 font-medium">No — required for the service to function.</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-medium text-gray-900">Performance</td>
+              <td class="px-4 py-3 text-gray-500">Anonymised analytics on page load times and error rates to improve reliability.</td>
+              <td class="px-4 py-3 text-emerald-600 font-medium">Yes</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-medium text-gray-900">Functional</td>
+              <td class="px-4 py-3 text-gray-500">Remembering your preferences (theme, language, dashboard layout).</td>
+              <td class="px-4 py-3 text-emerald-600 font-medium">Yes</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-medium text-gray-900">Targeting</td>
+              <td class="px-4 py-3 text-gray-500">Measuring effectiveness of marketing campaigns (no third-party ad networks).</td>
+              <td class="px-4 py-3 text-emerald-600 font-medium">Yes</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">Managing your preferences</h2>
+      <p>You can update your cookie preferences at any time using the button below.
+         Your choice is stored in <code class="bg-gray-100 px-1 rounded">localStorage</code> under the key
+         <code class="bg-gray-100 px-1 rounded">wm_cookie_consent</code> and is never sent to our servers.</p>
+
+      <button
+        onclick="localStorage.removeItem('wm_cookie_consent'); location.reload();"
+        class="mt-4 rounded-lg border border-indigo-300 bg-indigo-50 px-5 py-2.5 text-sm font-medium text-indigo-700 hover:bg-indigo-100 transition-colors">
+        Reset cookie preferences
+      </button>
+    </section>
+
+    <section>
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">Browser controls</h2>
+      <p>You can also manage or delete cookies via your browser settings. Note that disabling
+         strictly necessary cookies will prevent login from working correctly.</p>
+    </section>
+
+    <section>
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">Contact</h2>
+      <p>Cookie questions:
+         <a href="mailto:privacy@webmail.io" class="text-indigo-600 underline">privacy@webmail.io</a>.
+      </p>
+    </section>
+
+  </div>
+
+  <div class="mt-12 flex gap-4 text-sm">
+    <a href="{% url 'terms' %}"   class="text-indigo-600 hover:underline">Terms of Service</a>
+    <a href="{% url 'privacy' %}" class="text-indigo-600 hover:underline">Privacy Policy</a>
+  </div>
+</div>
+{% endblock %}

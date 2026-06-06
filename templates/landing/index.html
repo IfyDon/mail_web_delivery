@@ -1,0 +1,292 @@
+{% extends "landing/base.html" %}
+{% load static web_extras %}
+
+{% block title %}WebMail — Transactional Email Infrastructure{% endblock %}
+
+{% block content %}
+
+{# ── Hero ─────────────────────────────────────────────────────────── #}
+<section class="relative overflow-hidden bg-gradient-to-br from-indigo-950 via-indigo-900 to-purple-950 text-white">
+  <div class="pointer-events-none absolute inset-0"
+       style="background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:48px 48px"></div>
+
+  <div class="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
+    <div class="lg:grid lg:grid-cols-5 lg:gap-16 lg:items-center">
+
+      {# Left 60%: headline + CTAs #}
+      <div class="lg:col-span-3 text-center lg:text-left mb-14 lg:mb-0">
+        <div class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-medium text-indigo-200 mb-8">
+          <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          99.9 % deliverability SLA — no shared IPs
+        </div>
+
+        <h1 class="text-5xl font-extrabold tracking-tight leading-tight sm:text-6xl lg:text-7xl">
+          Your transactional<br class="hidden sm:block" />
+          emails,<br class="hidden sm:block" />
+          <span class="text-indigo-300">delivered.</span>
+        </h1>
+
+        <p class="mt-6 text-lg text-indigo-200 leading-relaxed max-w-xl mx-auto lg:mx-0">
+          &lt; 1s average delivery time. 99.9% uptime. Zero shared-IP surprises.
+        </p>
+
+        <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+          <a href="/signup/"
+             class="rounded-xl bg-white px-8 py-3.5 text-sm font-semibold text-indigo-700 shadow-lg hover:bg-indigo-50 transition-colors">
+            Start sending free
+          </a>
+          <a href="/api/docs/"
+             class="rounded-xl border border-white/25 bg-white/10 px-8 py-3.5 text-sm font-semibold text-white hover:bg-white/20 transition-colors">
+            Read the docs →
+          </a>
+        </div>
+
+        <p class="mt-5 text-xs text-indigo-400">No credit card required · Free up to 1 000 emails / month</p>
+      </div>
+
+      {# Right 40%: code block #}
+      <div class="lg:col-span-2" x-data="heroCopy()">
+        <div class="rounded-2xl bg-gray-950 ring-1 ring-white/10 overflow-hidden shadow-2xl">
+          {# Header bar #}
+          <div class="flex items-center justify-between px-4 py-3 border-b border-white/10">
+            <div class="flex gap-1.5">
+              <span class="h-3 w-3 rounded-full bg-red-500/70"></span>
+              <span class="h-3 w-3 rounded-full bg-yellow-500/70"></span>
+              <span class="h-3 w-3 rounded-full bg-green-500/70"></span>
+            </div>
+            <button @click="copy()"
+                    class="text-xs text-gray-500 hover:text-gray-300 transition-colors flex items-center gap-1">
+              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+              </svg>
+              <span x-text="copied ? 'Copied!' : 'Copy'"></span>
+            </button>
+          </div>
+
+          {# Request #}
+          <pre class="p-5 text-xs leading-relaxed font-mono overflow-auto text-gray-300 m-0"><code>curl -X POST https://api.webmail.io/v1/send \
+  -H <span class="text-yellow-400">"Authorization: Bearer &lt;api_key&gt;"</span> \
+  -H <span class="text-yellow-400">"Content-Type: application/json"</span> \
+  -d <span class="text-green-400">'{
+    "to":        "user@example.com",
+    "from":      "you@yourdomain.com",
+    "subject":   "Welcome",
+    "html_body": "&lt;h1&gt;Hello!&lt;/h1&gt;"
+  }'</span></code></pre>
+
+          {# Divider #}
+          <div class="mx-5 border-t border-white/10 flex items-center gap-3">
+            <span class="py-2 text-xs text-gray-600 shrink-0">Response</span>
+            <div class="flex-1 border-t border-white/5"></div>
+            <span class="py-2 text-xs text-emerald-500 font-medium shrink-0">202 Accepted</span>
+          </div>
+
+          {# Response #}
+          <pre class="px-5 pb-5 pt-2 text-xs leading-relaxed font-mono overflow-auto m-0"><code><span class="text-gray-500">{</span>
+  <span class="text-indigo-300">"message_id"</span><span class="text-gray-500">:</span>   <span class="text-green-400">"550e8400-e29b-41d4-a716"</span><span class="text-gray-500">,</span>
+  <span class="text-indigo-300">"status"</span><span class="text-gray-500">:</span>       <span class="text-green-400">"queued"</span><span class="text-gray-500">,</span>
+  <span class="text-indigo-300">"submitted_at"</span><span class="text-gray-500">:</span> <span class="text-green-400">"2025-06-06T10:30:00Z"</span>
+<span class="text-gray-500">}</span></code></pre>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{# ── Stats Bar ────────────────────────────────────────────────────── #}
+<section class="bg-gray-50 border-b border-gray-100 py-12">
+  <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-3 divide-x divide-gray-200">
+      <div class="text-center px-6">
+        <p class="text-3xl font-extrabold text-gray-900">99.97%</p>
+        <p class="mt-1 text-sm text-gray-500">Delivery rate</p>
+      </div>
+      <div class="text-center px-6">
+        <p class="text-3xl font-extrabold text-gray-900">&lt; 800ms</p>
+        <p class="mt-1 text-sm text-gray-500">Avg. delivery time</p>
+      </div>
+      <div class="text-center px-6">
+        <p class="text-3xl font-extrabold text-gray-900">0.001%</p>
+        <p class="mt-1 text-sm text-gray-500">Spam complaint rate</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# ── Feature Highlights ───────────────────────────────────────────── #}
+<section id="features" class="py-24 bg-white overflow-hidden">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-20">
+      <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">
+        Everything you need for great deliverability
+      </h2>
+      <p class="mt-4 text-lg text-gray-500 max-w-2xl mx-auto">
+        From API to inbox — one platform, zero shared-IP surprises.
+      </p>
+    </div>
+
+    {# Feature 1: Suppression & Compliance — mockup left, heading right #}
+    <div class="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center mb-24">
+
+      {# Suppression table mockup #}
+      <div class="order-2 lg:order-1 mt-10 lg:mt-0">
+        <div class="rounded-xl border border-gray-200 overflow-hidden shadow-sm text-xs">
+          <div class="bg-gray-50 border-b border-gray-200 px-4 py-2 flex items-center justify-between">
+            <span class="font-semibold text-gray-700">Suppression list</span>
+            <span class="text-gray-400">3 addresses</span>
+          </div>
+          <table class="w-full">
+            <thead>
+              <tr class="border-b border-gray-100 text-gray-400 text-left">
+                <th class="px-4 py-2 font-medium">Email</th>
+                <th class="px-4 py-2 font-medium">Reason</th>
+                <th class="px-4 py-2 font-medium">Date</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-700">alice@example.com</td>
+                <td class="px-4 py-2"><span class="bg-red-100 text-red-700 border border-red-200 px-1.5 py-0.5 rounded text-xs">HardBounce</span></td>
+                <td class="px-4 py-2 text-gray-400">Jun 6, 2025</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-700">bob@corp.io</td>
+                <td class="px-4 py-2"><span class="bg-gray-100 text-gray-600 border border-gray-200 px-1.5 py-0.5 rounded text-xs">Unsubscribe</span></td>
+                <td class="px-4 py-2 text-gray-400">Jun 5, 2025</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-mono text-gray-700">spam@test.net</td>
+                <td class="px-4 py-2"><span class="bg-orange-100 text-orange-700 border border-orange-200 px-1.5 py-0.5 rounded text-xs">Complaint</span></td>
+                <td class="px-4 py-2 text-gray-400">Jun 4, 2025</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="bg-gray-950 text-gray-400 font-mono px-4 py-3 text-xs border-t border-gray-200">
+            <span class="text-gray-600"># Auto-injected header</span><br>
+            List-Unsubscribe: &lt;mailto:unsub@webmail.io?subject=<span class="text-indigo-300">&#123;&#123;id&#125;&#125;</span>&gt;
+          </div>
+        </div>
+      </div>
+
+      <div class="order-1 lg:order-2">
+        <p class="text-xs font-semibold text-indigo-600 uppercase tracking-widest mb-3">Compliance</p>
+        <h3 class="text-2xl font-bold text-gray-900 mb-4">Automatic suppression &amp; compliance</h3>
+        <p class="text-gray-500 leading-relaxed mb-6">
+          Hard bounces and complaints are suppressed instantly and permanently.
+          <code class="bg-gray-100 px-1 rounded">List-Unsubscribe</code> headers are injected automatically
+          on every send — keeping you out of the spam folder.
+        </p>
+        <ul class="space-y-2 text-sm text-gray-600">
+          <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✓</span> Auto-suppress on bounce or complaint</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✓</span> RFC 8058 one-click unsubscribe</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✓</span> GDPR data export on request</li>
+        </ul>
+      </div>
+    </div>
+
+    {# Feature 2: Real-time Tracking — heading left, timeline right #}
+    <div class="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
+      <div>
+        <p class="text-xs font-semibold text-indigo-600 uppercase tracking-widest mb-3">Event Tracking</p>
+        <h3 class="text-2xl font-bold text-gray-900 mb-4">Real-time event tracking</h3>
+        <p class="text-gray-500 leading-relaxed mb-6">
+          Every open, click, bounce, and complaint fires a webhook within seconds.
+          HMAC-signed payloads with 10-attempt exponential back-off ensure nothing is missed.
+        </p>
+        <ul class="space-y-2 text-sm text-gray-600">
+          <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✓</span> Sub-second webhook delivery</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✓</span> Open &amp; click pixel tracking</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✓</span> Full event timeline per message</li>
+        </ul>
+      </div>
+
+      {# Event timeline mockup #}
+      <div class="mt-10 lg:mt-0 flex justify-center">
+        <div class="w-full max-w-xs space-y-0">
+          {% for event in "Queued,Sent,Delivered,Opened"|split:"," %}
+          <div class="flex items-start gap-4 {% if not forloop.last %}pb-4{% endif %}">
+            <div class="flex flex-col items-center">
+              <div class="h-4 w-4 rounded-full border-2 border-emerald-500 bg-emerald-100 mt-0.5 shrink-0"></div>
+              {% if not forloop.last %}
+              <div class="w-0.5 bg-gray-200 flex-1 mt-1" style="min-height:2rem"></div>
+              {% endif %}
+            </div>
+            <div class="flex-1 min-w-0 pb-1">
+              <p class="text-sm font-semibold text-gray-900">{{ event }}</p>
+              <p class="text-xs text-gray-400 font-mono mt-0.5">
+                Jun 6, 10:30:0{{ forloop.counter0 }} AM
+                {% if event == "Delivered" %} · via SES{% endif %}
+                {% if event == "Opened" %} · Chrome / macOS{% endif %}
+              </p>
+            </div>
+            <span class="text-xs text-emerald-600 font-medium shrink-0">✓</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+{# ── Testimonials ─────────────────────────────────────────────────── #}
+{% include "landing/_testimonials.html" %}
+
+{# ── Code Integration Tabs ────────────────────────────────────────── #}
+{% include "landing/_code_tabs.html" %}
+
+{# ── Final CTA ────────────────────────────────────────────────────── #}
+<section class="bg-indigo-700 py-20 text-white text-center">
+  <div class="mx-auto max-w-2xl px-4 sm:px-6">
+    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
+      Ready to improve your deliverability?
+    </h2>
+    <p class="text-indigo-200 mb-8 text-lg">
+      Join thousands of developers who send millions of emails through WebMail every month.
+    </p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a href="/signup/"
+         class="rounded-xl bg-white px-8 py-3.5 text-sm font-semibold text-indigo-700 hover:bg-indigo-50 shadow transition-colors">
+        Start sending free
+      </a>
+      <a href="/api/docs/"
+         class="rounded-xl border border-indigo-400 px-8 py-3.5 text-sm font-semibold text-white hover:bg-indigo-600 transition-colors">
+        Read the docs →
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+function heroCopy() {
+  const code = `curl -X POST https://api.webmail.io/v1/send \\
+  -H "Authorization: Bearer <api_key>" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "to":        "user@example.com",
+    "from":      "you@yourdomain.com",
+    "subject":   "Welcome",
+    "html_body": "<h1>Hello!</h1>"
+  }'
+
+// Response:
+{
+  "message_id":   "550e8400-e29b-41d4-a716",
+  "status":       "queued",
+  "submitted_at": "2025-06-06T10:30:00Z"
+}`;
+  return {
+    copied: false,
+    copy() {
+      navigator.clipboard?.writeText(code).then(() => {
+        this.copied = true;
+        setTimeout(() => { this.copied = false; }, 2000);
+      });
+    },
+  };
+}
+</script>
+
+{% endblock %}
