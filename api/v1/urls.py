@@ -1,5 +1,7 @@
 """URL routing for API v1."""
 from django.urls import include, path
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from api.v1.views.messages import MessageDetailView, MessageListView, ResendMessageView
 from api.v1.views.send import BatchSendView, SendView
@@ -23,7 +25,29 @@ from api.v1.views.webhooks import (
     WebhookTestView,
 )
 
+@api_view(['GET'])
+def api_root(request):
+    """API v1 root endpoint."""
+    return Response({
+        'status': 'ok',
+        'version': 'v1',
+        'message': 'Web Mail API v1',
+        'endpoints': {
+            'auth': request.build_absolute_uri('/api/v1/auth/'),
+            'accounts': request.build_absolute_uri('/api/v1/accounts/'),
+            'domains': request.build_absolute_uri('/api/v1/domains/'),
+            'messages': request.build_absolute_uri('/api/v1/messages/'),
+            'send': request.build_absolute_uri('/api/v1/send/'),
+            'stats': request.build_absolute_uri('/api/v1/stats/'),
+            'webhooks': request.build_absolute_uri('/api/v1/webhooks/'),
+            'billing': request.build_absolute_uri('/api/v1/billing/'),
+        }
+    })
+
 urlpatterns = [
+    # Root endpoint
+    path("", api_root, name="api-root"),
+
     # Auth & account management
     path("auth/", include("apps.authentication.urls")),
     path("accounts/", include("apps.accounts.urls")),

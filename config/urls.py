@@ -1,10 +1,11 @@
 """
 Main URL configuration for Web Mail project.
 Routes:
-  /api/v1/        → REST API endpoints
-  /admin/         → Django admin
-  /tracking/      → Email tracking (opens/clicks)
-  /               → Marketing site and dashboard
+  /api/        → API root / versions
+  /api/v1/     → REST API endpoints
+  /admin/      → Django admin
+  /tracking/   → Email tracking (opens/clicks)
+  /            → Marketing site and dashboard
 """
 from django.contrib import admin
 from django.urls import path, include
@@ -14,10 +15,32 @@ from drf_spectacular.views import (
     SpectacularRedocView,
     SpectacularSwaggerView,
 )
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+@api_view(['GET'])
+def api_root(request):
+    """API root endpoint."""
+    return Response({
+        'status': 'ok',
+        'message': 'Web Mail API',
+        'versions': {
+            'v1': {
+                'status': 'active',
+                'url': request.build_absolute_uri('/api/v1/'),
+                'docs': request.build_absolute_uri('/api/docs/'),
+            }
+        },
+        'documentation': request.build_absolute_uri('/api/docs/'),
+        'schema': request.build_absolute_uri('/api/schema/'),
+    })
 
 urlpatterns = [
     # Admin
     path('admin/', admin.site.urls),
+
+    # API root
+    path('api/', api_root, name='api-root'),
 
     # API Documentation
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

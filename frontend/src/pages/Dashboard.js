@@ -49,6 +49,19 @@ const HEALTH_STYLES = {
   red:   { badge: 'bg-red-100 text-red-800',     label: 'Danger'  },
 };
 
+function statusBadge(status) {
+  const statusClasses = {
+    sent:      'bg-blue-100 text-blue-800',
+    delivered: 'bg-green-100 text-green-800',
+    opened:    'bg-purple-100 text-purple-800',
+    clicked:   'bg-indigo-100 text-indigo-800',
+    bounced:   'bg-orange-100 text-orange-800',
+    failed:    'bg-red-100 text-red-800',
+    complained: 'bg-red-100 text-red-800',
+  };
+  return statusClasses[status?.toLowerCase()] || 'bg-gray-100 text-gray-800';
+}
+
 function CustomTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   return (
