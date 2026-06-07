@@ -52,6 +52,9 @@ def _build_message(user, data: dict, domain) -> Message:
         except Template.DoesNotExist:
             pass
 
+    send_at = data.get("send_at")
+    is_scheduled = send_at is not None
+
     return Message(
         user=user,
         domain=domain,
@@ -64,7 +67,8 @@ def _build_message(user, data: dict, domain) -> Message:
         stream=data.get("stream", Message.STREAM_TRANSACTIONAL),
         track_opens=data.get("track_opens", True),
         track_clicks=data.get("track_clicks", True),
-        status=Message.STATUS_QUEUED,
+        scheduled_at=send_at if is_scheduled else None,
+        status=Message.STATUS_SCHEDULED if is_scheduled else Message.STATUS_QUEUED,
     )
 
 
@@ -109,11 +113,12 @@ class SendView(APIView):
 
         msg = _build_message(request.user, data, domain)
         msg.save()
-        queue_email(str(msg.pk))
+        if msg.status != Message.STATUS_SCHEDULED:
+            queue_email(str(msg.pk))
         increment_quota(request.user)
 
         return Response(
-            {"message_id": str(msg.pk), "status": "queued", "submitted_at": msg.created_at},
+            {"message_id": str(msg.pk), "status": msg.status, "submitted_at": msg.created_at},
             status=status.HTTP_202_ACCEPTED,
         )
 

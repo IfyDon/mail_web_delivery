@@ -20,6 +20,7 @@ class SendEmailSerializer(serializers.Serializer):
     )
     track_opens = serializers.BooleanField(default=True)
     track_clicks = serializers.BooleanField(default=True)
+    send_at = serializers.DateTimeField(required=False, allow_null=True, default=None)
 
     # Rename incoming "from" → "from_address" so it doesn't collide with the keyword
     def to_internal_value(self, data):

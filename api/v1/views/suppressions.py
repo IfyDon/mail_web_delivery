@@ -9,7 +9,7 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.suppressions.models import Bounce, Complaint, Unsubscribe
+from apps.suppressions.models import Bounce, Complaint, Suppression, Unsubscribe
 from apps.suppressions.serializers import (
     DeleteSuppressionSerializer,
     SuppressionAddSerializer,
@@ -72,6 +72,12 @@ class SuppressionListView(APIView):
             if not existing:
                 Complaint.objects.create(email=email, feedback_type=reason)
                 created = True
+        elif sup_type == "manual":
+            _, created = Suppression.objects.get_or_create(
+                user=request.user,
+                email=email,
+                defaults={"reason": Suppression.REASON_MANUAL},
+            )
         else:
             existing = Unsubscribe.objects.filter(email__iexact=email).first()
             if not existing:

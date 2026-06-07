@@ -10,6 +10,7 @@ urlpatterns = [
     # Landing pages
     path("", IndexView.as_view(), name="home"),
     path("features/", FeaturesView.as_view(), name="features"),
+    path("email-api/", EmailApiView.as_view(), name="email_api"),
     path("pricing/", PricingView.as_view(), name="pricing"),
 
     # Auth

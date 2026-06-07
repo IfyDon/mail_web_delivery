@@ -52,10 +52,12 @@ class Suppression(models.Model):
     REASON_BOUNCE = 'bounce'
     REASON_COMPLAINT = 'complaint'
     REASON_UNSUBSCRIBE = 'unsubscribe'
+    REASON_MANUAL = 'manual'
     REASON_CHOICES = [
         (REASON_BOUNCE, 'Bounce'),
         (REASON_COMPLAINT, 'Complaint'),
         (REASON_UNSUBSCRIBE, 'Unsubscribe'),
+        (REASON_MANUAL, 'Manual'),
     ]
 
     user = models.ForeignKey(

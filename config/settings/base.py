@@ -71,6 +71,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'core.middleware.api_key_middleware.APIKeyRateLimitMiddleware',
+    'core.middleware.ip_whitelist.IPWhitelistMiddleware',
+    'core.middleware.audit.AuditMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -206,13 +208,19 @@ CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutes
 CELERY_BEAT_SCHEDULE = {
     'aggregate-daily-stats': {
         'task': 'workers.tasks.aggregate_stats.aggregate_daily_stats',
-        # Runs at 01:00 UTC every night — rolls up the previous day's events.
         'schedule': crontab(hour=1, minute=0),
     },
     'reset-monthly-quotas': {
         'task': 'workers.tasks.reset_quota.reset_monthly_quotas',
-        # Runs at 00:05 UTC on the 1st of every month (free-tier safety net).
         'schedule': crontab(hour=0, minute=5, day_of_month=1),
+    },
+    'dispatch-scheduled-messages': {
+        'task': 'workers.tasks.dispatch_scheduled.dispatch_scheduled_messages',
+        'schedule': crontab(minute='*'),  # every minute
+    },
+    'decay-engagement-scores': {
+        'task': 'workers.tasks.decay_scores.decay_engagement_scores',
+        'schedule': crontab(hour=2, minute=0, day_of_month=1),  # 1st of month 02:00 UTC
     },
 }
 

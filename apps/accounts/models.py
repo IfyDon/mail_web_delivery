@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.crypto import get_random_string
 import hashlib
+import ipaddress
 
 
 class CustomUser(AbstractUser):
@@ -65,3 +66,59 @@ class Quota(models.Model):
 
     def __str__(self):
         return f"{self.user.email}: {self.emails_sent_this_month}/{self.monthly_limit}"
+
+
+class IPWhitelist(models.Model):
+    """Per-user IP allowlist. When entries exist, API requests from unlisted IPs are blocked."""
+
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='ip_whitelist')
+    ip_address = models.GenericIPAddressField(protocol='both', unpack_ipv4=True)
+    label = models.CharField(max_length=100, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'ip_address')
+        verbose_name = "IP Whitelist Entry"
+        verbose_name_plural = "IP Whitelist Entries"
+
+    def __str__(self):
+        return f"{self.user.email} — {self.ip_address}"
+
+    @staticmethod
+    def ip_matches(stored: str, client: str) -> bool:
+        """Compare IPs, normalising IPv4-mapped IPv6 addresses."""
+        try:
+            return ipaddress.ip_address(stored) == ipaddress.ip_address(client)
+        except ValueError:
+            return stored == client
+
+
+class AuditLog(models.Model):
+    """Immutable log of write operations performed by authenticated users."""
+
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='audit_logs',
+    )
+    action = models.CharField(max_length=200, db_index=True)
+    resource_type = models.CharField(max_length=100, blank=True)
+    resource_id = models.CharField(max_length=255, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(blank=True)
+    metadata = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', 'created_at']),
+            models.Index(fields=['action', 'created_at']),
+        ]
+        verbose_name = "Audit Log"
+        verbose_name_plural = "Audit Logs"
+
+    def __str__(self):
+        return f"[{self.created_at}] {self.user_id} — {self.action}"

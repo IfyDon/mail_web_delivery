@@ -6,21 +6,25 @@ from django.db import models
 
 class Message(models.Model):
     STATUS_QUEUED = 'queued'
+    STATUS_SCHEDULED = 'scheduled'
     STATUS_SENDING = 'sending'
     STATUS_SENT = 'sent'
     STATUS_DELIVERED = 'delivered'
     STATUS_FAILED = 'failed'
     STATUS_PERMANENTLY_FAILED = 'permanently_failed'
     STATUS_SUPPRESSED = 'suppressed'
+    STATUS_CANCELLED = 'cancelled'
 
     STATUS_CHOICES = [
         (STATUS_QUEUED, 'Queued'),
+        (STATUS_SCHEDULED, 'Scheduled'),
         (STATUS_SENDING, 'Sending'),
         (STATUS_SENT, 'Sent'),
         (STATUS_DELIVERED, 'Delivered'),
         (STATUS_FAILED, 'Failed'),
         (STATUS_PERMANENTLY_FAILED, 'Permanently Failed'),
         (STATUS_SUPPRESSED, 'Suppressed'),
+        (STATUS_CANCELLED, 'Cancelled'),
     ]
 
     STREAM_TRANSACTIONAL = 'transactional'
@@ -77,6 +81,9 @@ class Message(models.Model):
     # Populated after successful relay
     provider_message_id = models.CharField(max_length=255, blank=True)
 
+    # Scheduled send — None means dispatch immediately
+    scheduled_at = models.DateTimeField(null=True, blank=True, db_index=True)
+
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -85,6 +92,7 @@ class Message(models.Model):
         indexes = [
             models.Index(fields=['user', 'created_at']),
             models.Index(fields=['status', 'created_at']),
+            models.Index(fields=['status', 'scheduled_at']),
         ]
 
     def __str__(self):

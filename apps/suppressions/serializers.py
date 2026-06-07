@@ -29,7 +29,7 @@ class SuppressionAddSerializer(serializers.Serializer):
     """Add an email to the suppression list manually."""
 
     email = serializers.EmailField()
-    type = serializers.ChoiceField(choices=["bounce", "complaint", "unsubscribe"])
+    type = serializers.ChoiceField(choices=["bounce", "complaint", "unsubscribe", "manual"])
     reason = serializers.CharField(required=False, allow_blank=True, default="")
 
 

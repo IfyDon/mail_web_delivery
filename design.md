@@ -395,3 +395,258 @@ services:
 - GDPR: data export + account delete views in `web/views/account.py`
 - CAN-SPAM: `List-Unsubscribe` header + physical address in every email footer
 - Cookie consent via `django-cookie-consent`
+
+---
+
+## 14. SMTP Relay Architecture
+
+WebMail must accept SMTP connections so legacy applications can send through it without code changes.
+
+```
+Client App (SMTP)
+       │  port 587 (STARTTLS)
+       ▼
+┌──────────────────┐
+│  smtpd gateway   │  aiosmtpd or Postfix relay
+│  apps/smtp/      │  auth: API key as SMTP password
+└────────┬─────────┘
+         │  validates API key → domain → suppression
+         ▼
+services/email_service.py  (same send pipeline as REST API)
+         │
+         ▼
+send_email_task  →  SES / SMTP relay
+```
+
+**Key design decisions:**
+- SMTP AUTH LOGIN — API key used as the password; username ignored
+- STARTTLS required; plain-text SMTP blocked
+- Same pre-send checks (suppression, domain ownership) as the REST path
+- Message stored in `email_messages.Message` identically to API sends
+- `stream` defaults to `transactional`; override via `X-WebMail-Stream` header
+
+**New files:**
+- `apps/smtp/server.py` — `aiosmtpd`-based SMTP server, runs as a separate process/container
+- `apps/smtp/handler.py` — `SMTPHandler` class: validates auth, calls `email_service.queue_email()`
+- `docker-compose.yml` — new `smtp` service exposing port 587
+
+---
+
+## 15. Scheduled Send System
+
+```python
+# apps/email_messages/models.py — extension
+class Message(models.Model):
+    ...
+    scheduled_at    = DateTimeField(null=True, db_index=True)   # None = send immediately
+
+# workers/tasks/scheduled_send.py
+@app.task
+def dispatch_scheduled_messages():
+    """Runs every minute via Celery Beat."""
+    due = Message.objects.filter(
+        status='scheduled',
+        scheduled_at__lte=timezone.now()
+    ).select_related('user', 'domain', 'stream')
+    for msg in due:
+        send_email_task.delay(str(msg.id))
+```
+
+**API change** — `POST /api/v1/send` accepts optional `send_at` (ISO-8601):
+```json
+{ "to": "...", "send_at": "2026-07-01T09:00:00Z" }
+```
+Response: `202 Accepted` with `"status": "scheduled"`.
+
+**Cancel endpoint:** `DELETE /api/v1/messages/{id}/schedule/` — only allowed while `status='scheduled'`.
+
+---
+
+## 16. Real-time WebSocket Architecture
+
+```
+React Dashboard
+      │  ws://api/ws/stats/
+      ▼
+Django Channels (ASGI)
+      │
+      ▼  channel layer
+    Redis pub/sub
+      ▲
+      │  publish on every Event creation
+workers/tasks/send_email.py
+workers/tasks/webhook_dispatch.py
+```
+
+**Implementation:**
+- `django-channels` replaces Gunicorn with Daphne (ASGI) or adds `uvicorn` workers
+- `channels_redis` as channel layer backend
+- `StatsConsumer` in `web/consumers.py` — joins room scoped to `user_id`, pushes delta stats every 5 s or on event
+- React: `useWebSocket` hook wraps `WebSocket`; updates Recharts data without full re-fetch
+- Auth: JWT token passed as query param `?token=` on WebSocket handshake, validated in `StatsConsumer.connect()`
+
+**docker-compose.yml** — replace Gunicorn with Daphne:
+```yaml
+web:
+  command: daphne -b 0.0.0.0 -p 8000 config.asgi:application
+```
+
+---
+
+## 17. Advanced Analytics Pipeline
+
+### 17.1 Link Tagging (UTM Parameters)
+
+`services/tracking_service.py` — extend `inject_tracking()`:
+1. Parse every `<a href>` in HTML body
+2. Append `utm_source=webmail&utm_medium=email&utm_campaign=<stream>&utm_content=<message_id>` unless the URL already contains `utm_source`
+3. Store original URL in `ClickToken`; rewrite href to click-tracking URL
+
+### 17.2 Engagement Scoring
+
+```python
+# apps/analytics/models.py
+class ContactEngagement(models.Model):
+    user        = ForeignKey(User, db_index=True)
+    email       = EmailField(db_index=True)
+    score       = IntegerField(default=0)   # recalculated nightly
+    last_open   = DateTimeField(null=True)
+    last_click  = DateTimeField(null=True)
+    open_count  = IntegerField(default=0)
+    click_count = IntegerField(default=0)
+    class Meta:
+        unique_together = ('user', 'email')
+```
+
+Scoring weights (configurable via settings):
+- Open: +2 · Click: +5 · Bounce: −10 · Complaint: −50
+- Score decays 10% per month (Celery Beat monthly task)
+
+### 17.3 Geolocation & Device Tracking
+
+`tracking/views.py` — extend `OpenTrackingView` and `ClickTrackingView`:
+```python
+import geoip2.database
+
+reader = geoip2.database.Reader('GeoLite2-City.mmdb')
+
+def get_geo(ip):
+    try:
+        r = reader.city(ip)
+        return {'country': r.country.iso_code, 'city': r.city.name}
+    except Exception:
+        return {}
+```
+- `Event.metadata` gains: `country`, `city`, `device_type` (`desktop`/`mobile`/`tablet`), `browser`, `os`
+- `user-agents` library parses `User-Agent` header
+- MaxMind GeoLite2-City.mmdb downloaded at container build time
+
+---
+
+## 18. A/B Testing Framework
+
+```python
+# apps/templates/models.py — extension
+class ABTest(models.Model):
+    user        = ForeignKey(User)
+    name        = CharField(max_length=100)
+    stream      = ForeignKey('streams.Stream')
+    status      = CharField(choices=['draft','running','complete'])
+    winner      = ForeignKey('ABTestVariant', null=True)
+    sample_pct  = IntegerField(default=50)   # % of audience to test; remainder get winner
+    metric      = CharField(choices=['open_rate','click_rate'])
+    created_at  = DateTimeField(auto_now_add=True)
+
+class ABTestVariant(models.Model):
+    test        = ForeignKey(ABTest)
+    label       = CharField(max_length=50)   # 'A', 'B', 'C'
+    template    = ForeignKey('templates.Template')
+    subject     = CharField(max_length=998, blank=True)
+    sent        = IntegerField(default=0)
+    opens       = IntegerField(default=0)
+    clicks      = IntegerField(default=0)
+
+    @property
+    def open_rate(self):
+        return self.opens / self.sent if self.sent else 0
+```
+
+**Send flow:** `POST /api/v1/send` with `ab_test_id` — worker picks variant by round-robin, records `variant_id` on `Message`.
+
+**Winner selection:** Celery Beat task checks statistical significance (chi-squared p < 0.05) and sets `ABTest.winner`; subsequent sends use winner template only.
+
+---
+
+## 19. Dedicated IP Management
+
+```python
+# apps/accounts/models.py — extension
+class IPPool(models.Model):
+    user        = ForeignKey(User)
+    name        = CharField(max_length=100)
+    ips         = ArrayField(GenericIPAddressField())  # PostgreSQL ArrayField
+    stream      = OneToOneField('streams.Stream', null=True)
+    warming     = BooleanField(default=True)
+    created_at  = DateTimeField(auto_now_add=True)
+
+class WarmingSchedule(models.Model):
+    pool        = ForeignKey(IPPool)
+    day         = IntegerField()    # day number since pool created
+    max_volume  = IntegerField()    # daily send cap for this day
+```
+
+**Integration:** `send_email_task` selects outbound IP from the pool assigned to the message's stream. SES `ConfigurationSet` or SMTP `MAIL FROM` used to bind the IP.
+
+**Warming plan** (ISP-safe defaults):
+| Day | Max Daily Volume |
+|-----|-----------------|
+| 1–5 | 200 |
+| 6–10 | 1 000 |
+| 11–20 | 10 000 |
+| 21–30 | 50 000 |
+| 31+ | Unlimited |
+
+---
+
+## 20. Enterprise Security
+
+### 20.1 SSO / SAML 2.0
+
+- `django-allauth` SAML provider (added in allauth 0.63+)
+- `SAML_PROVIDERS` dict in `prod.py` — entity ID, SSO URL, x509 cert
+- `GET /sso/saml/login/` → IdP redirect → `POST /sso/saml/acs/` → create/link User
+- `TeamMember.sso_only = BooleanField` — forces SSO; password login rejected
+
+### 20.2 Audit Trail
+
+```python
+# apps/accounts/models.py
+class AuditLog(models.Model):
+    user        = ForeignKey(User, db_index=True)
+    actor       = ForeignKey(User, related_name='actor_logs')
+    action      = CharField(max_length=100)   # 'api_key.created', 'domain.deleted', etc.
+    resource_id = CharField(max_length=64, blank=True)
+    ip_address  = GenericIPAddressField(null=True)
+    user_agent  = CharField(max_length=300, blank=True)
+    metadata    = JSONField(default=dict)
+    created_at  = DateTimeField(auto_now_add=True, db_index=True)
+    class Meta:
+        indexes = [models.Index(fields=['user', 'created_at'])]
+```
+
+`core/middleware/audit.py` — `AuditMiddleware` wraps mutating API views and writes `AuditLog` records post-response.
+
+### 20.3 IP Whitelisting
+
+```python
+# core/middleware/ip_whitelist.py
+class IPWhitelistMiddleware:
+    def __call__(self, request):
+        if request.path.startswith('/api/'):
+            whitelist = cache.get(f'ip_whitelist:{request.user.id}')
+            if whitelist and get_client_ip(request) not in whitelist:
+                return JsonResponse({'error': 'IP not whitelisted'}, status=403)
+        return self.get_response(request)
+```
+
+`IPWhitelist` model: `user FK`, `cidr CharField` (supports ranges), `label`, `created_at`.

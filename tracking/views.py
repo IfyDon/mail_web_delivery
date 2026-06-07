@@ -18,6 +18,40 @@ def _client_ip(request) -> str:
     return request.META.get("REMOTE_ADDR", "")
 
 
+def _parse_geo(ip: str) -> dict:
+    """Return country/region/city for an IP using GeoIP2. Returns {} if unavailable."""
+    if not ip or ip in ("127.0.0.1", "::1"):
+        return {}
+    try:
+        from django.contrib.gis.geoip2 import GeoIP2
+        g = GeoIP2()
+        city = g.city(ip)
+        return {
+            "country": city.get("country_code"),
+            "region": city.get("region"),
+            "city": city.get("city"),
+        }
+    except Exception:  # noqa: BLE001 — library or DB not installed
+        return {}
+
+
+def _parse_device(ua_string: str) -> dict:
+    """Return browser/OS/device info from a User-Agent string. Returns {} if unavailable."""
+    if not ua_string:
+        return {}
+    try:
+        import user_agents  # pip install user-agents
+        ua = user_agents.parse(ua_string)
+        return {
+            "browser": ua.browser.family,
+            "os": ua.os.family,
+            "device": ua.device.family,
+            "is_mobile": ua.is_mobile,
+        }
+    except Exception:  # noqa: BLE001 — library not installed
+        return {}
+
+
 class OpenTrackingView(View):
     """Return a 1×1 transparent GIF and log an open event.
 
@@ -71,12 +105,16 @@ def _record_open(request, message_id: str) -> None:
     ).exists():
         return
 
+    ip = _client_ip(request)
+    ua_string = request.META.get("HTTP_USER_AGENT", "")
     Event.objects.create(
         message=msg,
         type=Event.TYPE_OPEN,
         metadata={
-            "ip": _client_ip(request),
-            "user_agent": request.META.get("HTTP_USER_AGENT", ""),
+            "ip": ip,
+            "user_agent": ua_string,
+            **_parse_geo(ip),
+            **_parse_device(ua_string),
         },
     )
 
@@ -90,12 +128,16 @@ def _record_click(request, message_id: str, url: str) -> None:
     except (Message.DoesNotExist, ValidationError):
         return
 
+    ip = _client_ip(request)
+    ua_string = request.META.get("HTTP_USER_AGENT", "")
     Event.objects.create(
         message=msg,
         type=Event.TYPE_CLICK,
         metadata={
             "url": url,
-            "ip": _client_ip(request),
-            "user_agent": request.META.get("HTTP_USER_AGENT", ""),
+            "ip": ip,
+            "user_agent": ua_string,
+            **_parse_geo(ip),
+            **_parse_device(ua_string),
         },
     )

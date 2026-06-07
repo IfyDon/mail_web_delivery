@@ -465,4 +465,311 @@
 
 ---
 
+## Phase 8 · Enterprise & Growth Features
+> Goal: Close the remaining gaps vs Mailgun/Postmark identified in the audit · **NOT STARTED**
+> Priority order: 8.1 → 8.3 → 8.4 → 8.8 → 8.9 → 8.2 → 8.5 → 8.6 → 8.7 → 8.10 → 8.11 → 8.12 → 8.13
+
+---
+
+### 8.1 · SMTP Relay Endpoint (US-29)
+> Audit gap: SMTP relay — NOT IMPLEMENTED · Effort: 3–5 days
+
+- [ ] Add `aiosmtpd>=1.4` to `requirements/base.txt`
+- [ ] Create `apps/smtp/` Django app; register in `INSTALLED_APPS`
+- [ ] `apps/smtp/server.py` — `aiosmtpd` controller bound to `0.0.0.0:587` with STARTTLS
+- [ ] `apps/smtp/handler.py` — `SMTPHandler`: parse `AUTH LOGIN`, validate API key via `APIKeyAuthentication`, reject with 535 on failure
+- [ ] Reuse `services/email_service.queue_email()` so the same send pipeline applies
+- [ ] `stream` defaults to `transactional`; read `X-WebMail-Stream` header to override
+- [ ] Add `smtp` service to `docker-compose.yml` (same image as `web`; command: `python -m apps.smtp.server`; port `587:587`)
+- [ ] Expose port 587 in `nginx/nginx.conf` as TCP passthrough (not HTTP proxy)
+- [ ] Integration test: connect via `smtplib`, send an email, verify `Message` record created in DB
+- [ ] Add `SMTP_HOST`, `SMTP_PORT`, `SMTP_TLS_CERT`, `SMTP_TLS_KEY` to `.env.example`
+
+**✅ Checkpoint: `telnet localhost 587` shows SMTP banner; SMTP send creates DB record identical to REST send**
+
+---
+
+### 8.2 · Scheduled Send (US-30)
+> Audit gap: Scheduled send — NOT IMPLEMENTED · Effort: 2 days
+
+- [ ] Add `scheduled_at = DateTimeField(null=True, db_index=True)` to `apps/email_messages/models.py`
+- [ ] Add `status='scheduled'` to `Message.status` choices
+- [ ] `makemigrations apps.email_messages` + `migrate`
+- [ ] Update `api/v1/views/send.py` — accept optional `send_at` field; if present set `status='scheduled'` and `scheduled_at`; skip immediate Celery enqueue
+- [ ] `workers/tasks/dispatch_scheduled.py` — `dispatch_scheduled_messages()` task: query `Message.objects.filter(status='scheduled', scheduled_at__lte=timezone.now())`, call `send_email_task.delay(msg.id)` for each
+- [ ] Register `dispatch_scheduled_messages` in `CELERY_BEAT_SCHEDULE` with `crontab(minute='*')` (every minute)
+- [ ] `DELETE /api/v1/messages/{id}/schedule/` view — sets `status='cancelled'`; only allowed while `status='scheduled'`
+- [ ] Update `api/v1/serializers/message.py` — include `scheduled_at` and `send_at` write field
+- [ ] Frontend `Messages.js` — show "Scheduled" badge with formatted `scheduled_at` time
+- [ ] Frontend send form — add datetime picker for "Send at" (optional)
+
+**✅ Checkpoint: POST with `send_at` 2 minutes in future → `status=scheduled` → message dispatched after 2 minutes**
+
+---
+
+### 8.3 · Real-time WebSocket Dashboard (US-31)
+> Audit gap: Real-time dashboard — PARTIAL (no WebSocket) · Effort: 3–4 days
+
+- [ ] Add `channels>=4.0`, `channels-redis>=4.1`, `daphne>=4.0` to `requirements/base.txt`
+- [ ] `config/asgi.py` — configure `ProtocolTypeRouter` with HTTP and WebSocket routes
+- [ ] `CHANNEL_LAYERS` in `base.py` — `channels_redis.core.RedisChannelLayer` using `REDIS_URL`
+- [ ] `web/consumers.py` — `StatsConsumer(AsyncWebsocketConsumer)`:
+  - `connect()`: validate JWT token from query param, join `stats_{user_id}` group
+  - `receive()`: handle client pings
+  - `stats_update()`: push delta stats JSON to client
+- [ ] `routing.py` — WebSocket URL pattern `ws/stats/`
+- [ ] `workers/tasks/send_email.py` + `workers/tasks/webhook_dispatch.py` — after writing `Event`, call `async_to_sync(channel_layer.group_send)('stats_{user_id}', {...})`
+- [ ] Replace Gunicorn with Daphne in `Dockerfile` and `docker-compose.yml` (`daphne -b 0.0.0.0 -p 8000 config.asgi:application`)
+- [ ] Frontend `hooks/useWebSocket.js` — connect to `ws://{host}/ws/stats/?token={jwt}`, auto-reconnect with exponential backoff, expose `lastMessage` state
+- [ ] `Dashboard.js` — consume `useWebSocket`; merge incoming delta into existing Recharts data; show live connection indicator
+- [ ] Fallback: if WebSocket fails to connect after 3 attempts, switch to 30-second polling
+
+**✅ Checkpoint: Open dashboard, send an email via API → metric card increments within 5 seconds without refresh**
+
+---
+
+### 8.4 · Advanced Analytics (US-32 · US-33 · US-34)
+> Audit gaps: Link tagging — NOT IMPLEMENTED · Engagement scoring — NOT IMPLEMENTED · Geolocation — NOT IMPLEMENTED · Effort: 5–6 days
+
+#### 8.4a Link Tagging / UTM Parameters
+- [ ] `services/tracking_service.py` — extend `inject_tracking()`: after rewriting click URLs, append UTM params to the click-tracking URL's destination; preserve any pre-existing `utm_source`
+- [ ] `Stream` model — add `utm_campaign = CharField(blank=True)` and `link_tagging_enabled = BooleanField(default=True)`
+- [ ] `POST /api/v1/send` — accept `tags.campaign` field to override `utm_campaign` per send
+- [ ] `makemigrations apps.streams` + `migrate`
+
+#### 8.4b Engagement Scoring
+- [ ] `apps/analytics/models.py` — add `ContactEngagement` model (fields: `user FK`, `email`, `score`, `last_open`, `last_click`, `open_count`, `click_count`)
+- [ ] `makemigrations apps.analytics` + `migrate`
+- [ ] `services/engagement_service.py` — `update_score(user, email, event_type)`: Open +2, Click +5, Bounce −10, Complaint −50
+- [ ] Call `update_score()` from `tracking/views.py` (open/click) and SES inbound handler (bounce/complaint)
+- [ ] `workers/tasks/decay_scores.py` — monthly Celery Beat task: multiply all scores by 0.90 (10% decay)
+- [ ] `GET /api/v1/contacts/{email}/engagement/` endpoint
+- [ ] Frontend: "Engagement" tab on Analytics page — table of top/bottom 20 contacts by score
+
+#### 8.4c Geolocation & Device Tracking
+- [ ] Add `geoip2>=4.8`, `user-agents>=2.2` to `requirements/base.txt`
+- [ ] Download GeoLite2-City.mmdb in `Dockerfile` (`RUN python -c "import geoip2; ..."` or curl from MaxMind)
+- [ ] `tracking/views.py` — `OpenTrackingView` and `ClickTrackingView`: parse `User-Agent` header, resolve client IP, call `geoip2.database.Reader`, store `country`, `city`, `device_type`, `browser`, `os` in `Event.metadata`
+- [ ] Frontend `MessageDetail.js` — display geo and device info per event in timeline
+- [ ] Analytics page — "Top countries" doughnut chart using `Event.metadata.country` aggregation
+
+**✅ Checkpoint: Open a tracked email → Event record has country, city, device_type, utm_* params in metadata; engagement score updated**
+
+---
+
+### 8.5 · A/B Template Testing (US-35)
+> Audit gap: A/B testing templates — NOT IMPLEMENTED · Effort: 3–4 days
+
+- [ ] `apps/templates/models.py` — add `ABTest` and `ABTestVariant` models (see design.md §18)
+- [ ] `makemigrations apps.templates` + `migrate`
+- [ ] `services/ab_test_service.py`:
+  - `assign_variant(ab_test_id) → ABTestVariant` — round-robin assignment
+  - `check_winner(ab_test_id)` — chi-squared significance test; sets `ABTest.winner` if p < 0.05
+- [ ] `workers/tasks/ab_test_check.py` — `check_all_running_tests()` Celery Beat task (runs hourly)
+- [ ] `POST /api/v1/send` — accept `ab_test_id`; worker calls `assign_variant()` and records `variant_id` on `Message`
+- [ ] REST endpoints: `GET/POST /api/v1/ab-tests/` · `GET/PATCH/DELETE /api/v1/ab-tests/{id}/` · `GET /api/v1/ab-tests/{id}/results/`
+- [ ] Frontend `ABTests.js` page at `/ab-tests` — create test form, results bar chart per variant, winner banner
+- [ ] Sidebar link to AB Tests page
+
+**✅ Checkpoint: Create A/B test with 2 variants → sends split across variants → winner auto-selected after significance reached**
+
+---
+
+### 8.6 · Visual Template Builder (US-36)
+> Audit gap: Drag-drop builder — NOT IMPLEMENTED · Effort: 5–7 days
+
+- [ ] Evaluate and install `react-email-editor` (Unlayer) or `grapesjs-preset-newsletter` (open source)
+- [ ] `TemplateBuilder.js` — wrapper around chosen library; mounted at `/templates/:id/builder`
+- [ ] "Edit in Builder" button on `TemplateEdit.js` navigates to builder view
+- [ ] On save: extract HTML from builder, POST to `PUT /api/v1/templates/{id}/` (overwrites `html_body`)
+- [ ] Store builder JSON schema in `Template.builder_json = JSONField(null=True)` for round-trip editing
+- [ ] `makemigrations apps.templates` + `migrate`
+- [ ] Mobile preview toggle (375 px iframe width) in builder toolbar
+- [ ] "Edit as HTML" escape hatch disables builder and falls back to CodeMirror editor
+
+**✅ Checkpoint: Build a template with heading + button + image blocks; saved HTML renders correctly in test email send**
+
+---
+
+### 8.7 · Domain Enhancements (US-46)
+> Audit gaps: Tracking domain — NOT IMPLEMENTED · Return path domain — NOT IMPLEMENTED · Domain reputation — NOT IMPLEMENTED · Effort: 3 days
+
+#### 8.7a Tracking Domains
+- [ ] `Domain` model — add `tracking_subdomain = CharField(blank=True)` and `tracking_verified = BooleanField(default=False)`
+- [ ] `makemigrations apps.domains` + `migrate`
+- [ ] UI: "Tracking domain" section on Domain detail page — input subdomain, display CNAME record to publish (`track.yourdomain.com → tracking.webmail.io`)
+- [ ] `POST /api/v1/domains/{id}/verify-tracking/` — resolve CNAME, set `tracking_verified=True`
+- [ ] `services/tracking_service.py` — use `domain.tracking_subdomain` when building open/click URLs if verified
+- [ ] Nginx config — accept requests from verified custom tracking domains (wildcard server_name or per-domain config)
+
+#### 8.7b Return Path Domain
+- [ ] `Domain` model — add `return_path = CharField(blank=True)` (e.g., `bounce.yourdomain.com`)
+- [ ] Display required MX + SPF records for return path in domain DNS panel
+- [ ] Pass return path to SES `ReturnPath` parameter in `integrations/ses/client.py`
+
+#### 8.7c Domain Reputation (Inbox Placement)
+- [ ] Integrate MXToolbox or Google Postmaster Tools API to fetch domain reputation score
+- [ ] `Domain` model — add `reputation_score = IntegerField(null=True)` + `reputation_updated_at`
+- [ ] Celery Beat task: refresh reputation score daily for all verified domains
+- [ ] Domain list UI — show reputation badge: green / amber / red
+
+**✅ Checkpoint: Set custom tracking domain → verified CNAME → click links use custom domain in sent email**
+
+---
+
+### 8.8 · Reports & Data Export (US-37 · US-38 · US-39)
+> Audit gaps: CSV export — NOT IMPLEMENTED · Suppression export — NOT IMPLEMENTED · Scheduled reports — NOT IMPLEMENTED · Effort: 3 days
+
+#### 8.8a CSV Analytics Export
+- [ ] `GET /api/v1/stats/export/?days=30&stream=transactional&format=csv` — streams CSV response for ranges ≤ 90 days
+- [ ] For ranges > 90 days: create async Celery task, email download link when ready (store in S3)
+- [ ] "Export CSV" button on Analytics page; show spinner for async exports
+
+#### 8.8b Suppression List Export
+- [ ] `GET /api/v1/suppressions/export/?reason=bounce&format=csv` — streams CSV
+- [ ] "Export" button on Suppressions dashboard page with optional reason filter
+
+#### 8.8c Scheduled Email Reports
+- [ ] `User` model — add `weekly_report_enabled = BooleanField(default=True)`
+- [ ] `makemigrations apps.authentication` + `migrate`
+- [ ] `workers/tasks/weekly_report.py` — `send_weekly_reports()`: runs every Monday 08:00 UTC via Celery Beat; queries `DailyStats` for last 7 days; renders `templates/email/weekly_report.html`; sends via `email_service`
+- [ ] Settings → Notifications toggle to enable/disable weekly reports
+- [ ] Unsubscribe link in report email sets `weekly_report_enabled=False` (separate from suppression list)
+
+**✅ Checkpoint: Export button downloads valid CSV; weekly report email received on Monday with correct stats**
+
+---
+
+### 8.9 · Enterprise Security (US-40 · US-41 · US-42 · US-43)
+> Audit gaps: IP whitelisting — NOT IMPLEMENTED · SSO/SAML — NOT IMPLEMENTED · Audit trail — NOT IMPLEMENTED · CCPA — NOT IMPLEMENTED · Effort: 6–8 days
+
+#### 8.9a IP Whitelisting (US-40)
+- [ ] `IPWhitelist` model in `apps/accounts/models.py`: `user FK`, `cidr CharField(max_length=50)`, `label`, `created_at`; max 50 per user
+- [ ] `makemigrations apps.accounts` + `migrate`
+- [ ] `core/middleware/ip_whitelist.py` — `IPWhitelistMiddleware`: on every `/api/` request, if user has whitelist entries check client IP against CIDRs using `ipaddress.ip_network`; return 403 if no match
+- [ ] Register middleware in `base.py` `MIDDLEWARE` list (after auth middleware)
+- [ ] `GET/POST/DELETE /api/v1/ip-whitelist/` endpoints
+- [ ] Frontend: Settings → Security → "IP Whitelist" panel (add/remove CIDR entries)
+
+#### 8.9b SSO / SAML 2.0 (US-41)
+- [ ] `django-allauth>=0.63.3` already planned (Phase 6.5A) — enable SAML provider
+- [ ] `SAMLConfiguration` model: `user FK (owner)`, `entity_id`, `sso_url`, `x509_cert`, `sso_only BooleanField`
+- [ ] `makemigrations apps.authentication` + `migrate`
+- [ ] `GET /sso/saml/metadata/` — serve SP metadata XML
+- [ ] `GET /sso/saml/login/` → redirect to IdP
+- [ ] `POST /sso/saml/acs/` — handle assertion, create/link `User`, issue session
+- [ ] Settings → Security → "SAML SSO" panel: upload IdP metadata XML or enter fields manually; toggle `sso_only`
+- [ ] Guard: if `sso_only=True`, reject password login and return redirect to SSO login
+
+#### 8.9c Audit Trail (US-42)
+- [ ] `AuditLog` model in `apps/accounts/models.py` (see design.md §20.2)
+- [ ] `makemigrations apps.accounts` + `migrate`
+- [ ] `core/middleware/audit.py` — `AuditMiddleware`: post-response hook on mutating API views (POST/PATCH/PUT/DELETE); write `AuditLog` record; skip read-only GET requests
+- [ ] Register `AuditMiddleware` in `MIDDLEWARE`
+- [ ] `GET /api/v1/audit-log/` — paginated, filterable by `action` and date range; owner/admin only
+- [ ] Frontend: Settings → Audit Log page — searchable, filterable table; export as CSV
+
+#### 8.9d GDPR / CCPA (US-43)
+- [ ] `User` model — add `ccpa_do_not_sell = BooleanField(default=False)`
+- [ ] `makemigrations apps.authentication` + `migrate`
+- [ ] `GET /account/export/` — async task: collect all user data (messages, events, suppressions, templates, domains, API keys, audit log); zip as JSON; upload to S3; email signed download URL (72h TTL)
+- [ ] `DELETE /account/` — confirm with password; soft-delete user, anonymise message records (`to_address`, `from_address` → `[deleted]`); purge `Event.metadata`; queue deletion task
+- [ ] Settings → Privacy → "Export my data" and "Delete account" buttons
+- [ ] Settings → Privacy → "Do Not Sell my data" CCPA toggle
+
+**✅ Checkpoint: IP whitelist blocks foreign IP · SAML login creates user session · AuditLog records API key creation · Data export email received within 10 minutes**
+
+---
+
+### 8.10 · Dedicated IP Management (US-44)
+> Audit gap: Dedicated IPs — NOT IMPLEMENTED · Effort: 5–7 days
+
+- [ ] `IPPool` model in `apps/accounts/models.py` (see design.md §19)
+- [ ] `WarmingSchedule` model with default volume caps (day 1–5: 200, 6–10: 1 000, 11–20: 10 000, 21–30: 50 000, 31+: unlimited)
+- [ ] `makemigrations apps.accounts` + `migrate`
+- [ ] `Stream` model — add `ip_pool = ForeignKey(IPPool, null=True)`
+- [ ] `integrations/ses/client.py` — pass `ConfigurationSetName` (SES concept) that maps to an IP pool; or use SMTP `MAIL FROM` binding
+- [ ] `workers/tasks/send_email.py` — look up `message.stream.ip_pool`; enforce daily volume cap via Redis counter; reject send with `status='warming_cap_exceeded'` if over limit
+- [ ] `workers/tasks/warming_check.py` — Celery Beat daily task: advance warming day counter; log progress
+- [ ] `GET /api/v1/ip-pools/` · `POST /api/v1/ip-pools/` · `GET /api/v1/ip-pools/{id}/` · `DELETE /api/v1/ip-pools/{id}/`
+- [ ] Frontend: Settings → Infrastructure → "IP Pools" page — list pools, assign to stream, show warming progress bar (day N/30, today's cap, sends so far)
+- [ ] Admin-only: IP provisioning requires manual SES dedicated IP setup; document in README
+
+**✅ Checkpoint: IP pool assigned to transactional stream; sends on day 1 blocked after 200 messages; warming day advances at midnight**
+
+---
+
+### 8.11 · Webhook Enhancements
+> Audit gaps: Batch event delivery — PARTIAL · Custom headers — NOT IMPLEMENTED · Effort: 2 days
+
+#### 8.11a Batch Event Delivery
+- [ ] `Webhook` model — add `batch_enabled = BooleanField(default=False)`, `batch_window_seconds = IntegerField(default=10)`
+- [ ] `makemigrations apps.webhooks` + `migrate`
+- [ ] `workers/tasks/webhook_dispatch.py` — if `batch_enabled`: collect events in Redis list for `batch_window_seconds`, then dispatch as `{"events": [...]}` array in a single POST
+- [ ] API: `PATCH /api/v1/webhooks/{id}/` — accept `batch_enabled` and `batch_window_seconds`
+
+#### 8.11b Custom Request Headers
+- [ ] `Webhook` model — add `custom_headers = JSONField(default=dict)` (max 10 key-value pairs)
+- [ ] `makemigrations apps.webhooks` + `migrate`
+- [ ] `workers/tasks/webhook_dispatch.py` — merge `custom_headers` into the outgoing `requests.post()` headers
+- [ ] Frontend `Webhooks.js` — "Custom headers" expandable section: key/value row editor
+
+**✅ Checkpoint: Batch webhook fires one request containing 5 events after 10-second window; custom Authorization header appears in dispatched request**
+
+---
+
+### 8.12 · UI Enhancements (US-45)
+> Audit gap: Dark mode — NOT IMPLEMENTED · Effort: 1–2 days
+
+- [ ] Add `darkMode: 'class'` to `tailwind.config.js`
+- [ ] `ThemeContext.js` — React context storing `theme` (`light`/`dark`); reads `localStorage.getItem('wm_theme')`; falls back to `window.matchMedia('(prefers-color-scheme: dark)').matches`
+- [ ] `useTheme()` hook — returns `{theme, toggleTheme}`; `toggleTheme` flips class on `<html>` element and persists to `localStorage`
+- [ ] `Layout.js` — wrap with `ThemeContext.Provider`; apply `dark` class to `<html>` on mount
+- [ ] Add `dark:` Tailwind variants to all pages, sidebar, header, charts, modals, tables
+- [ ] Dashboard header — sun/moon icon toggle button
+- [ ] Recharts charts — conditional dark fill colours via theme context
+
+**✅ Checkpoint: Toggle dark mode → all pages, charts, and modals switch; preference survives page refresh**
+
+---
+
+### 8.13 · QA & Performance Testing
+> Audit gaps: Performance testing — NOT IMPLEMENTED · Security audit — NOT IMPLEMENTED · E2E tests — PARTIAL · Effort: 3–4 days
+
+- [ ] **E2E tests** — `tests/e2e/` Playwright suite:
+  - `test_signup.py` — signup → verify email → login
+  - `test_send.py` — add domain → verify DNS → send email via API → verify appears in Messages
+  - `test_suppression.py` — bounce event → suppression created → next send returns `suppressed`
+  - `test_webhooks.py` — create webhook → trigger event → verify dispatch log
+- [ ] **Load testing** — `locust` or `k6` script: simulate 500 concurrent `/api/v1/send` requests; assert p99 < 500 ms; assert zero 5xx responses
+- [ ] Add `locust>=2.28` or `k6` to `requirements/dev.txt`
+- [ ] **Security audit checklist** — run `bandit -r .` (Python SAST), `safety check`, `npm audit`; resolve all HIGH findings; document in `SECURITY.md`
+- [ ] **Coverage reporting** — add `pytest-cov` to `requirements/dev.txt`; configure `[tool.pytest.ini_options] addopts = "--cov=. --cov-report=term-missing --cov-fail-under=70"` in `pyproject.toml`
+- [ ] **CI pipeline** — `.github/workflows/ci.yml`:
+  - Trigger: push to `main` + all PRs
+  - Jobs: `lint` (black + ruff + eslint), `test` (pytest + coverage), `security` (bandit + safety), `e2e` (Playwright headed on Ubuntu)
+  - Fail PR if coverage drops below 70% or any HIGH security finding
+
+**✅ Checkpoint: CI green on main; coverage ≥ 70%; load test shows p99 < 500 ms at 500 RPS; `bandit` reports zero HIGH findings**
+
+---
+
+## Ongoing / Cross-Cutting
+
+### Tests
+- [ ] `pytest` + `pytest-django` configured (already in `requirements/dev.txt`)
+- [ ] Unit tests for all `services/` and `core/utils/` functions
+- [ ] Integration tests for every API endpoint (auth required, correct status codes)
+- [ ] Celery task tests using `task.apply()` (sync mode)
+- [ ] E2E: Playwright test for signup → send email → see in dashboard
+- [ ] CI pipeline (GitHub Actions) — run tests + lint on every push to main/PR
+
+### Code Quality
+- [ ] `black` + `ruff` configured in `pyproject.toml` (already in `requirements/dev.txt`)
+- [ ] Pre-commit hooks installed (`pre-commit` already in dev.txt)
+- [ ] `eslint` + `prettier` configured for React codebase
+- [ ] All secrets via env vars — no hardcoded keys anywhere
+
+---
+
 > **Legend:**  ✅ Done  ·  👉 Current  ·  `[ ]` Not started  ·  `[x]` Complete

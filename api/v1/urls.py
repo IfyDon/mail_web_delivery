@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from api.v1.views.messages import MessageDetailView, MessageListView, ResendMessageView
+from api.v1.views.schedule import CancelScheduleView
 from api.v1.views.send import BatchSendView, SendView
 from api.v1.views.ses_inbound import SESInboundView
 from api.v1.views.billing import (
@@ -69,6 +70,7 @@ urlpatterns = [
     path("messages/", MessageListView.as_view(), name="message-list"),
     path("messages/<uuid:pk>/", MessageDetailView.as_view(), name="message-detail"),
     path("messages/<uuid:pk>/resend/", ResendMessageView.as_view(), name="message-resend"),
+    path("messages/<uuid:pk>/schedule/", CancelScheduleView.as_view(), name="message-cancel-schedule"),
 
     # Analytics
     path("stats/", StatsView.as_view(), name="stats"),

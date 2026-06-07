@@ -50,7 +50,7 @@
                @click.outside="prodOpen = false"
                class="absolute top-full left-0 mt-2 w-56 rounded-xl bg-white shadow-lg ring-1 ring-gray-100 py-2 z-50"
                style="display:none">
-            <a href="{% url 'features' %}#email-api"          class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Email API</a>
+            <a href="{% url 'email_api' %}"                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Email API</a>
             <a href="{% url 'features' %}#smtp-service"        class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">SMTP Service</a>
             <a href="{% url 'features' %}#message-streams"     class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Message Streams</a>
             <a href="{% url 'features' %}#transactional-email" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Transactional Email</a>
@@ -94,7 +94,7 @@
         </svg>
       </button>
       <div x-show="prodOpen" x-transition class="mt-2 pl-4 space-y-2 border-l-2 border-indigo-100" style="display:none">
-        <a href="{% url 'features' %}#email-api"          class="block text-sm text-gray-600 hover:text-indigo-600">Email API</a>
+        <a href="{% url 'email_api' %}"                    class="block text-sm text-gray-600 hover:text-indigo-600">Email API</a>
         <a href="{% url 'features' %}#smtp-service"        class="block text-sm text-gray-600 hover:text-indigo-600">SMTP Service</a>
         <a href="{% url 'features' %}#message-streams"     class="block text-sm text-gray-600 hover:text-indigo-600">Message Streams</a>
         <a href="{% url 'features' %}#transactional-email" class="block text-sm text-gray-600 hover:text-indigo-600">Transactional Email</a>
