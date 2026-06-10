@@ -38,6 +38,10 @@ class Domain(models.Model):
     # Verification Tokens
     verification_token = models.CharField(max_length=255, blank=True)
 
+    # DKIM rotation
+    dkim_rotation_pending = models.BooleanField(default=False)
+    dkim_rotated_at = models.DateTimeField(null=True, blank=True)
+
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

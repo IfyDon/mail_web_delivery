@@ -9,6 +9,7 @@ class CustomUser(AbstractUser):
     """Custom user model for Web Mail accounts."""
     email = models.EmailField(unique=True)
     is_verified = models.BooleanField(default=False)
+    sending_paused = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -116,6 +116,10 @@ PASSWORD_HASHERS = [
 # Base URL used for generating absolute links (unsubscribe, tracking pixels)
 BASE_URL = os.getenv('BASE_URL', 'http://localhost:8000')
 
+# GeoIP2 — path to MaxMind GeoLite2-City.mmdb (download via deploy/01_server_setup.sh)
+# Falls back gracefully to empty dict if file is missing (see tracking/views.py)
+GEOIP_PATH = os.getenv('GEOIP_PATH', str(BASE_DIR / 'geoip'))
+
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -231,6 +235,14 @@ CELERY_BEAT_SCHEDULE = {
     'retry-stuck-messages': {
         'task': 'workers.tasks.retry_stuck.retry_stuck_messages',
         'schedule': crontab(minute='*/15'),  # every 15 minutes
+    },
+    'check-bounce-rates': {
+        'task': 'workers.tasks.check_bounce_rate.check_bounce_rates',
+        'schedule': crontab(minute=0),  # every hour
+    },
+    'rotate-dkim-keys': {
+        'task': 'workers.tasks.rotate_dkim.rotate_dkim_keys',
+        'schedule': crontab(hour=4, minute=0),  # daily at 04:00 UTC
     },
 }
 

@@ -2,17 +2,26 @@ version: "3.9"
 
 x-common-env: &common-env
   DJANGO_SETTINGS_MODULE: config.settings.prod
-  DATABASE_URL: postgresql://web_mail_user:changeme_strong_password@db:5432/web_mail_db
+  DATABASE_URL: postgresql://web_mail_user:${DB_PASSWORD}@db:5432/web_mail_db
   REDIS_URL: redis://redis:6379/0
   CELERY_BROKER_URL: redis://redis:6379/0
   CELERY_RESULT_BACKEND: redis://redis:6379/1
+  REDIS_CACHE_URL: redis://redis:6379/2
   SECRET_KEY: ${SECRET_KEY}
+  SIGNING_KEY: ${SIGNING_KEY}
   STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
   STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
   STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
   FRONTEND_BASE_URL: ${FRONTEND_BASE_URL:-http://localhost:3000}
   BASE_URL: ${BASE_URL:-http://localhost:8000}
+  TRACKING_BASE_URL: ${TRACKING_BASE_URL:-http://localhost:8000}
   ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1}
+  PHYSICAL_ADDRESS: ${PHYSICAL_ADDRESS}
+  SENTRY_DSN: ${SENTRY_DSN:-}
+  LOG_FORMAT: ${LOG_FORMAT:-json}
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+  GEOIP_PATH: ${GEOIP_PATH:-/app/geoip}
+  MAXMIND_LICENSE_KEY: ${MAXMIND_LICENSE_KEY:-}
 
 services:
   db:
@@ -21,7 +30,7 @@ services:
     environment:
       POSTGRES_DB: web_mail_db
       POSTGRES_USER: web_mail_user
-      POSTGRES_PASSWORD: changeme_strong_password
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -43,6 +52,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        MAXMIND_LICENSE_KEY: ${MAXMIND_LICENSE_KEY:-}
     restart: unless-stopped
     environment:
       <<: *common-env
@@ -86,9 +97,13 @@ services:
   flower:
     image: mher/flower
     restart: unless-stopped
-    command: celery flower --broker=redis://redis:6379/0 --port=5555
+    command: >
+      celery flower
+      --broker=redis://redis:6379/0
+      --port=5555
+      --basic_auth=${FLOWER_USER:-admin}:${FLOWER_PASSWORD}
     ports:
-      - "5555:5555"
+      - "127.0.0.1:5555:5555"
     depends_on:
       - redis
 
@@ -101,6 +116,8 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - media_files:/app/media:ro
+      - certbot_webroot:/var/www/certbot:ro
+      - certbot_certs:/etc/letsencrypt:ro
     depends_on:
       - web
 
@@ -108,3 +125,5 @@ volumes:
   postgres_data:
   redis_data:
   media_files:
+  certbot_webroot:
+  certbot_certs:

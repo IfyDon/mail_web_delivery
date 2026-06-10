@@ -1,6 +1,5 @@
 """Inbound AWS SNS handler for SES bounce and complaint notifications."""
 
-import hashlib
 import json
 import logging
 import urllib.request
@@ -62,28 +61,35 @@ class SESInboundView(APIView):
 
     def _handle_bounce(self, message: dict) -> None:
         bounce = message.get("bounce", {})
-        if bounce.get("bounceType") != "Permanent":
-            return  # only suppress hard (permanent) bounces
+        bounce_type_raw = bounce.get("bounceType", "")
+        is_hard = bounce_type_raw == "Permanent"
+        internal_type = "hard" if is_hard else "soft"
 
         from apps.suppressions.models import Bounce as BounceRecord, Suppression
-        from apps.email_messages.models import Message
 
         for recipient in bounce.get("bouncedRecipients", []):
             email = recipient.get("emailAddress", "").lower().strip()
             if not email:
                 continue
 
-            # Store raw bounce record
             BounceRecord.objects.create(
                 email=email,
+                bounce_type=internal_type,
                 reason=recipient.get("diagnosticCode", ""),
                 smtp_code=recipient.get("status", ""),
                 raw=json.dumps(message),
             )
 
-            # Suppress for every user who has recently sent to this address
-            self._suppress_for_senders(email, Suppression.REASON_BOUNCE)
-            logger.info("ses_inbound: hard bounce suppressed %s", email)
+            if is_hard:
+                # Permanent bounces → suppress so we never send to this address again
+                self._suppress_for_senders(email, Suppression.REASON_BOUNCE)
+                logger.info("ses_inbound: hard bounce suppressed %s", email)
+            else:
+                # Transient/soft bounces → record for bounce-rate tracking only, do not suppress
+                logger.info(
+                    "ses_inbound: soft bounce recorded %s (subtype=%s)",
+                    email, bounce.get("bounceSubType", ""),
+                )
 
     def _handle_complaint(self, message: dict) -> None:
         from apps.suppressions.models import Complaint as ComplaintRecord, Suppression

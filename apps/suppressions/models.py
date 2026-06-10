@@ -6,7 +6,17 @@ import uuid
 # ── Raw event tables (append-only inbound records from ESP) ──────────────────
 
 class Bounce(models.Model):
+    BOUNCE_TYPE_HARD = 'hard'
+    BOUNCE_TYPE_SOFT = 'soft'
+    BOUNCE_TYPE_CHOICES = [
+        (BOUNCE_TYPE_HARD, 'Hard (Permanent)'),
+        (BOUNCE_TYPE_SOFT, 'Soft (Transient)'),
+    ]
+
     email = models.EmailField(db_index=True)
+    bounce_type = models.CharField(
+        max_length=10, choices=BOUNCE_TYPE_CHOICES, default=BOUNCE_TYPE_HARD, db_index=True
+    )
     reason = models.TextField(blank=True)
     smtp_code = models.CharField(max_length=50, blank=True)
     raw = models.TextField(blank=True)

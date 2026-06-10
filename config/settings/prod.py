@@ -25,13 +25,11 @@ SECURE_HSTS_SECONDS = 31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_SECURITY_POLICY = {
-    'default-src': ("'self'",),
-    'script-src': ("'self'", "'unsafe-inline'"),
-    'style-src': ("'self'", "'unsafe-inline'"),
-}
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# Email backend (SendGrid or AWS SES via django-anymail)
+# Email backend — SendGrid via django-anymail (add 'anymail' to INSTALLED_APPS inherited from base)
+# Switch to 'anymail.backends.amazon_ses.EmailBackend' for AWS SES.
+INSTALLED_APPS = INSTALLED_APPS + ['anymail']  # noqa: F405
 EMAIL_BACKEND = 'anymail.backends.sendgrid.EmailBackend'
 ANYMAIL = {
     'SENDGRID_API_KEY': os.getenv('SENDGRID_API_KEY', ''),
@@ -53,24 +51,5 @@ if sentry_dsn:
         send_default_pii=False,
     )
 
-# Logging for production
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
-        },
-    },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-        },
-    },
-    'root': {
-        'handlers': ['console'],
-        'level': 'INFO',
-    },
-}
+# Logging is inherited from base.py (JSON-structured via python-json-logger).
+# Override LOG_FORMAT / LOG_LEVEL / DJANGO_LOG_LEVEL via environment variables.

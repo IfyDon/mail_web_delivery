@@ -43,3 +43,7 @@ python-json-logger>=2.0        # structured JSON log output for ELK/Datadog
 
 # ── Billing ───────────────────────────────────────────────────────────
 stripe>=7.0                    # Stripe billing SDK
+
+# ── Geo & device tracking ───────────────────────────────────────────────────────────────────
+geoip2>=4.8                    # MaxMind GeoLite2 country/city lookups
+user-agents>=2.2               # parse User-Agent strings for browser/OS/device

@@ -32,6 +32,16 @@ def send_email_task(self, message_id: str) -> dict:
         logger.info('send_email_task: %s already %s, skipping', message_id, msg.status)
         return {'status': msg.status}
 
+    # Account-level sending pause (set by bounce-rate alerting when threshold exceeded)
+    if msg.user.sending_paused:
+        msg.status = Message.STATUS_FAILED
+        msg.save(update_fields=['status', 'updated_at'])
+        logger.warning(
+            'send_email_task: account %s sending paused — skipping %s',
+            msg.user_id, message_id,
+        )
+        return {'status': 'failed', 'reason': 'sending_paused'}
+
     # Per-user suppression check
     if check_suppression(msg.to_address, user=msg.user):
         msg.status = Message.STATUS_SUPPRESSED
