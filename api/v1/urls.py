@@ -7,6 +7,8 @@ from api.v1.views.messages import MessageDetailView, MessageListView, ResendMess
 from api.v1.views.schedule import CancelScheduleView
 from api.v1.views.send import BatchSendView, SendView
 from api.v1.views.ses_inbound import SESInboundView
+from api.v1.views.contacts import ContactEngagementView
+from api.v1.views.message_stream import message_stream_view
 from api.v1.views.billing import (
     BillingOverviewView,
     CheckoutSessionView,
@@ -16,7 +18,11 @@ from api.v1.views.billing import (
 from api.v1.views.stats import StatsView
 from api.v1.views.stats_export import StatsExportView
 from api.v1.views.stripe_webhook import StripeWebhookView
-from api.v1.views.suppressions import SuppressionDetailView, SuppressionListView
+from api.v1.views.suppressions import (
+    SuppressionDetailView,
+    SuppressionExportView,
+    SuppressionListView,
+)
 from api.v1.views.team import TeamDetailView, TeamListView
 from api.v1.views.webhooks import (
     WebhookDetailView,
@@ -67,14 +73,22 @@ urlpatterns = [
     path("send/batch", BatchSendView.as_view(), name="send-batch"),
 
     # Message history
+    path("messages/stream/", message_stream_view, name="message-stream"),
     path("messages/", MessageListView.as_view(), name="message-list"),
     path("messages/<uuid:pk>/", MessageDetailView.as_view(), name="message-detail"),
     path("messages/<uuid:pk>/resend/", ResendMessageView.as_view(), name="message-resend"),
-    path("messages/<uuid:pk>/schedule/", CancelScheduleView.as_view(), name="message-cancel-schedule"),
+    path(
+        "messages/<uuid:pk>/schedule/",
+        CancelScheduleView.as_view(),
+        name="message-cancel-schedule",
+    ),
 
     # Analytics
     path("stats/", StatsView.as_view(), name="stats"),
     path("stats/export/", StatsExportView.as_view(), name="stats-export"),
+
+    # Contacts / engagement
+    path("contacts/engagement/", ContactEngagementView.as_view(), name="contact-engagement"),
 
     # Webhooks (order: specific paths before generic <pk>/)
     path("webhooks/ses/", SESInboundView.as_view(), name="ses-inbound"),
@@ -85,7 +99,8 @@ urlpatterns = [
     path("webhooks/<int:pk>/logs/", WebhookLogsView.as_view(), name="webhook-logs"),
     path("webhooks/<int:pk>/retry/", WebhookRetryView.as_view(), name="webhook-retry"),
 
-    # Suppression list
+    # Suppression list (export before list so the literal path wins)
+    path("suppressions/export/", SuppressionExportView.as_view(), name="suppression-export"),
     path("suppressions/", SuppressionListView.as_view(), name="suppression-list"),
     path("suppressions/<str:email>/", SuppressionDetailView.as_view(), name="suppression-detail"),
 

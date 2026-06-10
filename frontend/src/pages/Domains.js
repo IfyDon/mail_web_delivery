@@ -4,6 +4,7 @@ import { listDomains, createDomain, verifyDomain, deleteDomain } from '../api/do
 import DnsRecordDisplay from '../components/domains/DnsRecordDisplay';
 import { statusBadge } from '../utils/formatters';
 import EmptyState from '../components/common/EmptyState';
+import { parseDomainError } from '../utils/apiError';
 
 const STATUS_HELP = {
   pending:  'Publish the DNS records below, then click Verify.',
@@ -31,8 +32,7 @@ export default function Domains() {
       setName('');
       setAddError('');
     },
-    onError: (err) =>
-      setAddError(err.response?.data?.name?.[0] || 'Failed to add domain.'),
+    onError: (err) => setAddError(parseDomainError(err)),
   });
 
   const verifyMutation = useMutation({
@@ -102,7 +102,7 @@ export default function Domains() {
                 <div className="flex items-center justify-between px-4 py-3">
                   <div className="flex items-center gap-3 min-w-0">
                     <span className="font-mono text-sm text-gray-800 truncate">
-                      {d.name}
+                      {d.domain}
                     </span>
                     <span
                       className={`inline-flex shrink-0 px-2 py-0.5 rounded-full text-xs font-medium ${statusBadge(
@@ -131,7 +131,7 @@ export default function Domains() {
                     </button>
                     <button
                       onClick={() => {
-                        if (window.confirm(`Remove domain "${d.name}"?`)) {
+                        if (window.confirm(`Remove domain "${d.domain}"?`)) {
                           deleteMutation.mutate(d.id);
                         }
                       }}

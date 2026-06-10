@@ -39,6 +39,7 @@ requests>=2.31
 whitenoise>=6.6                # static files in production
 gunicorn>=21.2                 # WSGI server
 Jinja2>=3.1                    # template rendering in template_service.py
+python-json-logger>=2.0        # structured JSON log output for ELK/Datadog
 
 # ── Billing ───────────────────────────────────────────────────────────
 stripe>=7.0                    # Stripe billing SDK

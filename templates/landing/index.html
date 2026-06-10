@@ -1,59 +1,186 @@
 {% extends "landing/base.html" %}
-{% load static web_extras %}
+{% load static %}
 
 {% block title %}WebMail — Transactional Email Infrastructure{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* ── Keyframe animations ─────────────────────────────── */
+  @keyframes gradient-shift {
+    0%,100% { background-position: 0% 50%; }
+    50%      { background-position: 100% 50%; }
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50%      { transform: translateY(-14px); }
+  }
+  @keyframes blob {
+    0%,100% { transform: translate(0,0) scale(1);    border-radius: 60% 40% 30% 70%/60% 30% 70% 40%; }
+    33%      { transform: translate(24px,-28px) scale(1.05); border-radius: 30% 60% 70% 40%/50% 60% 30% 60%; }
+    66%      { transform: translate(-18px,14px) scale(.96); border-radius: 50% 40% 55% 35%/40% 55% 60% 50%; }
+  }
+  @keyframes fade-up {
+    from { opacity:0; transform:translateY(28px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes glow-pulse {
+    0%,100% { box-shadow: 0 0 40px rgba(99,102,241,.25), 0 30px 60px rgba(0,0,0,.55); }
+    50%      { box-shadow: 0 0 80px rgba(139,92,246,.4),  0 30px 60px rgba(0,0,0,.55); }
+  }
+  @keyframes count-in {
+    from { opacity:0; transform:translateY(10px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes slide-right {
+    from { transform:scaleX(0); }
+    to   { transform:scaleX(1); }
+  }
+
+  /* ── Hero ───────────────────────────────────────────── */
+  .hero-bg {
+    background: linear-gradient(135deg, #0f0c29, #1e1b4b, #312e81, #4c1d95, #1e1b4b, #0f0c29);
+    background-size: 400% 400%;
+    animation: gradient-shift 14s ease infinite;
+  }
+  .hero-orb-1 { animation: blob 16s ease-in-out infinite; }
+  .hero-orb-2 { animation: blob 20s ease-in-out infinite reverse; }
+
+  /* ── Entrance animations ────────────────────────────── */
+  .fade-up  { animation: fade-up .7s cubic-bezier(.22,.68,0,1.1) both; }
+  .d-1 { animation-delay:.08s; }
+  .d-2 { animation-delay:.18s; }
+  .d-3 { animation-delay:.28s; }
+  .d-4 { animation-delay:.38s; }
+  .d-5 { animation-delay:.48s; }
+  .d-6 { animation-delay:.56s; }
+
+  /* ── Code block ─────────────────────────────────────── */
+  .code-float { animation: float 6s ease-in-out infinite; }
+  .code-glow  { animation: glow-pulse 4.5s ease-in-out infinite; }
+
+  /* ── Scroll reveal ──────────────────────────────────── */
+  .reveal {
+    opacity:0; transform:translateY(32px);
+    transition: opacity .65s ease, transform .65s ease;
+  }
+  .reveal.in { opacity:1; transform:translateY(0); }
+  .rv-d1 { transition-delay:.05s; }
+  .rv-d2 { transition-delay:.15s; }
+  .rv-d3 { transition-delay:.25s; }
+  .rv-d4 { transition-delay:.35s; }
+
+  /* ── Card hover lift ────────────────────────────────── */
+  .card-hover {
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  }
+  .card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--c-shadow);
+    border-color: var(--c-stat-unit) !important;
+  }
+
+  /* ── Stats bar ──────────────────────────────────────── */
+  .stat-num {
+    animation: count-in .5s ease both;
+    color: var(--c-stat);
+  }
+
+  /* ── Gradient headline span ─────────────────────────── */
+  .grad-text {
+    background: linear-gradient(135deg, #c7d2fe 0%, #e9d5ff 50%, #fce7f3 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+</style>
+{% endblock %}
 
 {% block content %}
 
 {# ── Hero ─────────────────────────────────────────────────────────── #}
-<section class="relative overflow-hidden bg-gradient-to-br from-indigo-950 via-indigo-900 to-purple-950 text-white">
+<section class="relative overflow-hidden hero-bg text-white">
+
+  {# Grid overlay #}
   <div class="pointer-events-none absolute inset-0"
        style="background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:48px 48px"></div>
+
+  {# Floating orbs #}
+  <div class="hero-orb-1 pointer-events-none absolute -top-40 -left-28 h-[520px] w-[520px] opacity-30"
+       style="background:radial-gradient(circle,#818cf8 0%,#6366f1 40%,transparent 70%);filter:blur(64px)"></div>
+  <div class="hero-orb-2 pointer-events-none absolute -bottom-36 right-8 h-[420px] w-[420px] opacity-25"
+       style="background:radial-gradient(circle,#a78bfa 0%,#7c3aed 40%,transparent 70%);filter:blur(56px)"></div>
+  <div class="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[700px] w-[700px] opacity-10"
+       style="background:radial-gradient(circle,#4f46e5 0%,transparent 65%);filter:blur(100px)"></div>
 
   <div class="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
     <div class="lg:grid lg:grid-cols-5 lg:gap-16 lg:items-center">
 
-      {# Left 60%: headline + CTAs #}
+      {# Left 60% #}
       <div class="lg:col-span-3 text-center lg:text-left mb-14 lg:mb-0">
-        <div class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-medium text-indigo-200 mb-8">
-          <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          99.9 % deliverability SLA — no shared IPs
+
+        {# Badge #}
+        <div class="fade-up d-1 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-medium text-indigo-200 mb-8 backdrop-blur-sm">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative h-2 w-2 rounded-full bg-emerald-400"></span>
+          </span>
+          99.9% deliverability SLA — no shared IPs
         </div>
 
-        <h1 class="text-5xl font-extrabold tracking-tight leading-tight sm:text-6xl lg:text-7xl">
+        {# Headline #}
+        <h1 class="fade-up d-2 text-5xl font-extrabold tracking-tight leading-tight sm:text-6xl lg:text-7xl">
           Your transactional<br class="hidden sm:block" />
           emails,<br class="hidden sm:block" />
-          <span class="text-indigo-300">delivered.</span>
+          <span class="grad-text">delivered.</span>
         </h1>
 
-        <p class="mt-6 text-lg text-indigo-200 leading-relaxed max-w-xl mx-auto lg:mx-0">
+        {# Subtext #}
+        <p class="fade-up d-3 mt-6 text-lg text-indigo-200/90 leading-relaxed max-w-xl mx-auto lg:mx-0">
           &lt; 1s average delivery time. 99.9% uptime. Zero shared-IP surprises.
         </p>
 
-        <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+        {# CTAs #}
+        <div class="fade-up d-4 mt-10 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
           <a href="/signup/"
-             class="rounded-xl bg-white px-8 py-3.5 text-sm font-semibold text-indigo-700 shadow-lg hover:bg-indigo-50 transition-colors">
+             class="group relative overflow-hidden rounded-xl bg-white px-8 py-3.5 text-sm font-semibold text-indigo-700 shadow-lg hover:shadow-indigo-200/50 hover:-translate-y-0.5 transition-all duration-200">
             Start sending free
+            <span class="absolute inset-0 bg-gradient-to-r from-indigo-50 to-purple-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></span>
           </a>
           <a href="/api/docs/"
-             class="rounded-xl border border-white/25 bg-white/10 px-8 py-3.5 text-sm font-semibold text-white hover:bg-white/20 transition-colors">
+             class="rounded-xl border border-white/25 bg-white/10 px-8 py-3.5 text-sm font-semibold text-white hover:bg-white/20 hover:-translate-y-0.5 transition-all duration-200 backdrop-blur-sm">
             Read the docs →
           </a>
         </div>
 
-        <p class="mt-5 text-xs text-indigo-400">No credit card required · Free up to 1 000 emails / month</p>
+        <p class="fade-up d-5 mt-5 text-xs text-indigo-400/80">No credit card required · Free up to 1,000 emails / month</p>
+
+        {# Trust pills #}
+        <div class="fade-up d-6 mt-8 flex flex-wrap gap-5 justify-center lg:justify-start">
+          <span class="flex items-center gap-1.5 text-xs text-indigo-300">
+            <svg class="h-4 w-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            SOC 2 Type II
+          </span>
+          <span class="flex items-center gap-1.5 text-xs text-indigo-300">
+            <svg class="h-4 w-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            GDPR compliant
+          </span>
+          <span class="flex items-center gap-1.5 text-xs text-indigo-300">
+            <svg class="h-4 w-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+            99.9% uptime SLA
+          </span>
+        </div>
       </div>
 
       {# Right 40%: code block #}
-      <div class="lg:col-span-2" x-data="heroCopy()">
-        <div class="rounded-2xl bg-gray-950 ring-1 ring-white/10 overflow-hidden shadow-2xl">
+      <div class="lg:col-span-2 fade-up d-3" x-data="heroCopy()">
+        <div class="code-float code-glow rounded-2xl bg-gray-950 ring-1 ring-white/10 overflow-hidden">
           {# Header bar #}
-          <div class="flex items-center justify-between px-4 py-3 border-b border-white/10">
+          <div class="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-gray-900/50">
             <div class="flex gap-1.5">
-              <span class="h-3 w-3 rounded-full bg-red-500/70"></span>
-              <span class="h-3 w-3 rounded-full bg-yellow-500/70"></span>
-              <span class="h-3 w-3 rounded-full bg-green-500/70"></span>
+              <span class="h-3 w-3 rounded-full bg-red-500/80"></span>
+              <span class="h-3 w-3 rounded-full bg-yellow-500/80"></span>
+              <span class="h-3 w-3 rounded-full bg-green-500/80"></span>
             </div>
+            <span class="text-xs text-gray-500 font-mono">POST /api/v1/send</span>
             <button @click="copy()"
                     class="text-xs text-gray-500 hover:text-gray-300 transition-colors flex items-center gap-1">
               <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,7 +206,7 @@
           <div class="mx-5 border-t border-white/10 flex items-center gap-3">
             <span class="py-2 text-xs text-gray-600 shrink-0">Response</span>
             <div class="flex-1 border-t border-white/5"></div>
-            <span class="py-2 text-xs text-emerald-500 font-medium shrink-0">202 Accepted</span>
+            <span class="py-2 text-xs text-emerald-400 font-semibold shrink-0">202 Accepted</span>
           </div>
 
           {# Response #}
@@ -96,138 +223,197 @@
 </section>
 
 {# ── Stats Bar ────────────────────────────────────────────────────── #}
-<section class="bg-gray-50 border-b border-gray-100 py-12">
-  <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-    <div class="grid grid-cols-3 divide-x divide-gray-200">
-      <div class="text-center px-6">
-        <p class="text-3xl font-extrabold text-gray-900">99.97%</p>
-        <p class="mt-1 text-sm text-gray-500">Delivery rate</p>
+<section class="t-s2 border-b t-divide py-14"
+         x-data="statsBar()" x-init="init($el)">
+  <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-3" style="border-top:none">
+      <div class="text-center px-6 border-r t-divide">
+        <p class="text-4xl font-extrabold stat-num t-stat">99.97<span class="t-stat-unit text-2xl font-bold">%</span></p>
+        <p class="mt-2 text-sm font-medium t-stat-label">Delivery rate</p>
+      </div>
+      <div class="text-center px-6 border-r t-divide">
+        <p class="text-4xl font-extrabold stat-num t-stat">&lt; 800<span class="t-stat-unit text-2xl font-bold">ms</span></p>
+        <p class="mt-2 text-sm font-medium t-stat-label">Avg. delivery time</p>
       </div>
       <div class="text-center px-6">
-        <p class="text-3xl font-extrabold text-gray-900">&lt; 800ms</p>
-        <p class="mt-1 text-sm text-gray-500">Avg. delivery time</p>
-      </div>
-      <div class="text-center px-6">
-        <p class="text-3xl font-extrabold text-gray-900">0.001%</p>
-        <p class="mt-1 text-sm text-gray-500">Spam complaint rate</p>
+        <p class="text-4xl font-extrabold stat-num t-stat">0.001<span class="t-stat-unit text-2xl font-bold">%</span></p>
+        <p class="mt-2 text-sm font-medium t-stat-label">Spam complaint rate</p>
       </div>
     </div>
   </div>
 </section>
 
 {# ── Feature Highlights ───────────────────────────────────────────── #}
-<section id="features" class="py-24 bg-white overflow-hidden">
+<section id="features" class="py-24 t-s3 overflow-hidden">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-    <div class="text-center mb-20">
-      <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">
+    <div class="text-center mb-20 reveal" data-reveal>
+      <span class="inline-block rounded-full px-3 py-1 text-xs font-semibold mb-4 uppercase tracking-widest t-label border" style="border-color:var(--c-pill-bord)">Why WebMail</span>
+      <h2 class="text-3xl font-bold tracking-tight sm:text-4xl t-head">
         Everything you need for great deliverability
       </h2>
-      <p class="mt-4 text-lg text-gray-500 max-w-2xl mx-auto">
+      <p class="mt-4 text-lg t-muted max-w-2xl mx-auto">
         From API to inbox — one platform, zero shared-IP surprises.
       </p>
     </div>
 
-    {# Feature 1: Suppression & Compliance — mockup left, heading right #}
+    {# Feature 1: Suppression #}
     <div class="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center mb-24">
-
-      {# Suppression table mockup #}
-      <div class="order-2 lg:order-1 mt-10 lg:mt-0">
-        <div class="rounded-xl border border-gray-200 overflow-hidden shadow-sm text-xs">
-          <div class="bg-gray-50 border-b border-gray-200 px-4 py-2 flex items-center justify-between">
-            <span class="font-semibold text-gray-700">Suppression list</span>
-            <span class="text-gray-400">3 addresses</span>
+      <div class="order-2 lg:order-1 mt-10 lg:mt-0 reveal rv-d2" data-reveal>
+        <div class="rounded-2xl border overflow-hidden shadow-xl text-xs t-card" style="border-color:var(--c-border)">
+          <div class="border-b px-4 py-2.5 flex items-center justify-between t-card" style="border-color:var(--c-border)">
+            <span class="font-semibold text-xs t-head">Suppression list</span>
+            <span class="text-xs t-muted">3 addresses</span>
           </div>
           <table class="w-full">
             <thead>
-              <tr class="border-b border-gray-100 text-gray-400 text-left">
-                <th class="px-4 py-2 font-medium">Email</th>
-                <th class="px-4 py-2 font-medium">Reason</th>
-                <th class="px-4 py-2 font-medium">Date</th>
+              <tr class="border-b t-divide text-left t-muted">
+                <th class="px-4 py-2.5 font-medium">Email</th>
+                <th class="px-4 py-2.5 font-medium">Reason</th>
+                <th class="px-4 py-2.5 font-medium">Date</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-50">
-              <tr>
-                <td class="px-4 py-2 font-mono text-gray-700">alice@example.com</td>
-                <td class="px-4 py-2"><span class="bg-red-100 text-red-700 border border-red-200 px-1.5 py-0.5 rounded text-xs">HardBounce</span></td>
-                <td class="px-4 py-2 text-gray-400">Jun 6, 2025</td>
+            <tbody class="divide-y t-divide">
+              <tr class="transition-colors">
+                <td class="px-4 py-2.5 font-mono t-body">alice@example.com</td>
+                <td class="px-4 py-2.5"><span class="bg-red-100 text-red-700 border border-red-200 px-2 py-0.5 rounded-full text-xs font-medium">Hard Bounce</span></td>
+                <td class="px-4 py-2.5 t-muted">Jun 6, 2025</td>
               </tr>
-              <tr>
-                <td class="px-4 py-2 font-mono text-gray-700">bob@corp.io</td>
-                <td class="px-4 py-2"><span class="bg-gray-100 text-gray-600 border border-gray-200 px-1.5 py-0.5 rounded text-xs">Unsubscribe</span></td>
-                <td class="px-4 py-2 text-gray-400">Jun 5, 2025</td>
+              <tr class="transition-colors">
+                <td class="px-4 py-2.5 font-mono t-body">bob@corp.io</td>
+                <td class="px-4 py-2.5"><span class="bg-gray-100 text-gray-700 border border-gray-200 px-2 py-0.5 rounded-full text-xs font-medium">Unsubscribe</span></td>
+                <td class="px-4 py-2.5 t-muted">Jun 5, 2025</td>
               </tr>
-              <tr>
-                <td class="px-4 py-2 font-mono text-gray-700">spam@test.net</td>
-                <td class="px-4 py-2"><span class="bg-orange-100 text-orange-700 border border-orange-200 px-1.5 py-0.5 rounded text-xs">Complaint</span></td>
-                <td class="px-4 py-2 text-gray-400">Jun 4, 2025</td>
+              <tr class="transition-colors">
+                <td class="px-4 py-2.5 font-mono t-body">spam@test.net</td>
+                <td class="px-4 py-2.5"><span class="bg-orange-100 text-orange-700 border border-orange-200 px-2 py-0.5 rounded-full text-xs font-medium">Complaint</span></td>
+                <td class="px-4 py-2.5 t-muted">Jun 4, 2025</td>
               </tr>
             </tbody>
           </table>
-          <div class="bg-gray-950 text-gray-400 font-mono px-4 py-3 text-xs border-t border-gray-200">
-            <span class="text-gray-600"># Auto-injected header</span><br>
-            List-Unsubscribe: &lt;mailto:unsub@webmail.io?subject=<span class="text-indigo-300">&#123;&#123;id&#125;&#125;</span>&gt;
+          <div class="t-code-bg text-gray-300 font-mono px-4 py-3 text-xs border-t t-divide">
+            <span class="text-gray-500"># Auto-injected on every send</span><br>
+            List-Unsubscribe: &lt;mailto:unsub@webmail.io?subject=<span class="text-teal-400">&#123;&#123;id&#125;&#125;</span>&gt;
           </div>
         </div>
       </div>
 
-      <div class="order-1 lg:order-2">
-        <p class="text-xs font-semibold text-indigo-600 uppercase tracking-widest mb-3">Compliance</p>
-        <h3 class="text-2xl font-bold text-gray-900 mb-4">Automatic suppression &amp; compliance</h3>
-        <p class="text-gray-500 leading-relaxed mb-6">
+      <div class="order-1 lg:order-2 reveal rv-d1" data-reveal>
+        <span class="inline-block rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-widest mb-4 t-label border" style="border-color:var(--c-pill-bord)">Compliance</span>
+        <h3 class="text-2xl font-bold t-head mb-4">Automatic suppression &amp; compliance</h3>
+        <p class="t-body leading-relaxed mb-6">
           Hard bounces and complaints are suppressed instantly and permanently.
-          <code class="bg-gray-100 px-1 rounded">List-Unsubscribe</code> headers are injected automatically
+          <code class="t-code-bg px-1.5 py-0.5 rounded text-teal-400 text-sm">List-Unsubscribe</code> headers are injected automatically
           on every send — keeping you out of the spam folder.
         </p>
-        <ul class="space-y-2 text-sm text-gray-600">
-          <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✓</span> Auto-suppress on bounce or complaint</li>
-          <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✓</span> RFC 8058 one-click unsubscribe</li>
-          <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✓</span> GDPR data export on request</li>
+        <ul class="space-y-3 text-sm t-body">
+          <li class="flex items-center gap-3"><span class="flex h-5 w-5 items-center justify-center rounded-full t-check font-bold text-xs shrink-0">✓</span>Auto-suppress on bounce or complaint</li>
+          <li class="flex items-center gap-3"><span class="flex h-5 w-5 items-center justify-center rounded-full t-check font-bold text-xs shrink-0">✓</span>RFC 8058 one-click unsubscribe</li>
+          <li class="flex items-center gap-3"><span class="flex h-5 w-5 items-center justify-center rounded-full t-check font-bold text-xs shrink-0">✓</span>GDPR data export on request</li>
         </ul>
       </div>
     </div>
 
-    {# Feature 2: Real-time Tracking — heading left, timeline right #}
+    {# Feature 2: Real-time Tracking #}
     <div class="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
-      <div>
-        <p class="text-xs font-semibold text-indigo-600 uppercase tracking-widest mb-3">Event Tracking</p>
-        <h3 class="text-2xl font-bold text-gray-900 mb-4">Real-time event tracking</h3>
-        <p class="text-gray-500 leading-relaxed mb-6">
+      <div class="reveal rv-d1" data-reveal>
+        <span class="inline-block rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-widest mb-4 t-label border" style="border-color:var(--c-pill-bord)">Event Tracking</span>
+        <h3 class="text-2xl font-bold t-head mb-4">Real-time event tracking</h3>
+        <p class="t-body leading-relaxed mb-6">
           Every open, click, bounce, and complaint fires a webhook within seconds.
           HMAC-signed payloads with 10-attempt exponential back-off ensure nothing is missed.
         </p>
-        <ul class="space-y-2 text-sm text-gray-600">
-          <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✓</span> Sub-second webhook delivery</li>
-          <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✓</span> Open &amp; click pixel tracking</li>
-          <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✓</span> Full event timeline per message</li>
+        <ul class="space-y-3 text-sm t-body">
+          <li class="flex items-center gap-3"><span class="flex h-5 w-5 items-center justify-center rounded-full t-check font-bold text-xs shrink-0">✓</span>Sub-second webhook delivery</li>
+          <li class="flex items-center gap-3"><span class="flex h-5 w-5 items-center justify-center rounded-full t-check font-bold text-xs shrink-0">✓</span>Open &amp; click pixel tracking</li>
+          <li class="flex items-center gap-3"><span class="flex h-5 w-5 items-center justify-center rounded-full t-check font-bold text-xs shrink-0">✓</span>Full event timeline per message</li>
         </ul>
       </div>
 
-      {# Event timeline mockup #}
-      <div class="mt-10 lg:mt-0 flex justify-center">
-        <div class="w-full max-w-xs space-y-0">
-          {% for event in "Queued,Sent,Delivered,Opened"|split:"," %}
-          <div class="flex items-start gap-4 {% if not forloop.last %}pb-4{% endif %}">
-            <div class="flex flex-col items-center">
-              <div class="h-4 w-4 rounded-full border-2 border-emerald-500 bg-emerald-100 mt-0.5 shrink-0"></div>
-              {% if not forloop.last %}
-              <div class="w-0.5 bg-gray-200 flex-1 mt-1" style="min-height:2rem"></div>
-              {% endif %}
+      {# Event timeline mockup — hardcoded (no |split filter) #}
+      <div class="mt-10 lg:mt-0 reveal rv-d2" data-reveal>
+        <div class="rounded-2xl border shadow-xl p-6 t-card" style="border-color:var(--c-border)">
+          <p class="text-xs font-semibold t-muted uppercase tracking-widest mb-5">Message timeline</p>
+          <div class="space-y-0">
+            <div class="flex items-start gap-4 pb-5">
+              <div class="flex flex-col items-center">
+                <div class="h-4 w-4 rounded-full border-2 border-emerald-400 bg-emerald-100 mt-0.5 shrink-0 flex items-center justify-center">
+                  <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                </div>
+                <div class="w-px bg-gradient-to-b from-emerald-400 to-transparent flex-1 mt-1" style="min-height:2rem"></div>
+              </div>
+              <div class="flex-1 min-w-0 pb-1 flex items-center justify-between">
+                <div><p class="text-sm font-semibold t-head">Queued</p><p class="text-xs t-muted font-mono mt-0.5">Jun 6, 10:30:00 AM</p></div>
+                <span class="flex h-5 w-5 items-center justify-center rounded-full t-check text-xs shrink-0">✓</span>
+              </div>
             </div>
-            <div class="flex-1 min-w-0 pb-1">
-              <p class="text-sm font-semibold text-gray-900">{{ event }}</p>
-              <p class="text-xs text-gray-400 font-mono mt-0.5">
-                Jun 6, 10:30:0{{ forloop.counter0 }} AM
-                {% if event == "Delivered" %} · via SES{% endif %}
-                {% if event == "Opened" %} · Chrome / macOS{% endif %}
-              </p>
+            <div class="flex items-start gap-4 pb-5">
+              <div class="flex flex-col items-center">
+                <div class="h-4 w-4 rounded-full border-2 border-emerald-400 bg-emerald-100 mt-0.5 shrink-0 flex items-center justify-center">
+                  <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                </div>
+                <div class="w-px bg-gradient-to-b from-emerald-400 to-transparent flex-1 mt-1" style="min-height:2rem"></div>
+              </div>
+              <div class="flex-1 min-w-0 pb-1 flex items-center justify-between">
+                <div><p class="text-sm font-semibold t-head">Sent</p><p class="text-xs t-muted font-mono mt-0.5">Jun 6, 10:30:01 AM</p></div>
+                <span class="flex h-5 w-5 items-center justify-center rounded-full t-check text-xs shrink-0">✓</span>
+              </div>
             </div>
-            <span class="text-xs text-emerald-600 font-medium shrink-0">✓</span>
+            <div class="flex items-start gap-4 pb-5">
+              <div class="flex flex-col items-center">
+                <div class="h-4 w-4 rounded-full border-2 border-emerald-400 bg-emerald-100 mt-0.5 shrink-0 flex items-center justify-center">
+                  <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                </div>
+                <div class="w-px bg-gradient-to-b from-emerald-400 to-transparent flex-1 mt-1" style="min-height:2rem"></div>
+              </div>
+              <div class="flex-1 min-w-0 pb-1 flex items-center justify-between">
+                <div><p class="text-sm font-semibold t-head">Delivered</p><p class="text-xs t-muted font-mono mt-0.5">Jun 6, 10:30:02 AM · via SES relay</p></div>
+                <span class="flex h-5 w-5 items-center justify-center rounded-full t-check text-xs shrink-0">✓</span>
+              </div>
+            </div>
+            <div class="flex items-start gap-4">
+              <div class="flex flex-col items-center">
+                <div class="h-4 w-4 rounded-full border-2 border-emerald-400 bg-emerald-100 mt-0.5 shrink-0 flex items-center justify-center">
+                  <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                </div>
+              </div>
+              <div class="flex-1 min-w-0 pb-1 flex items-center justify-between">
+                <div><p class="text-sm font-semibold t-head">Opened</p><p class="text-xs t-muted font-mono mt-0.5">Jun 6, 10:30:03 AM · Chrome / macOS</p></div>
+                <span class="flex h-5 w-5 items-center justify-center rounded-full t-check text-xs shrink-0">✓</span>
+              </div>
+            </div>
           </div>
-          {% endfor %}
         </div>
       </div>
     </div>
 
+  </div>
+</section>
+
+{# ── How it works ─────────────────────────────────────────────────── #}
+<section class="py-24 t-s2">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16 reveal" data-reveal>
+      <span class="inline-block rounded-full px-3 py-1 text-xs font-semibold mb-4 uppercase tracking-widest t-label border" style="border-color:var(--c-pill-bord)">Quick Start</span>
+      <h2 class="text-3xl font-bold t-head">Up and sending in 3 steps</h2>
+      <p class="mt-3 t-muted max-w-lg mx-auto">No DevOps experience needed. Integration takes minutes, not days.</p>
+    </div>
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+      <div class="reveal rv-d1 relative rounded-2xl border p-8 hover:-translate-y-1 transition-all duration-200 t-card card-hover" data-reveal style="border-color:var(--c-border)">
+        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-600 text-white font-extrabold text-base mb-5 shadow-lg">1</div>
+        <h3 class="text-lg font-bold t-head mb-2">Create an account</h3>
+        <p class="text-sm t-muted leading-relaxed">Sign up free — no credit card needed. Your first 1,000 emails every month are on us.</p>
+      </div>
+      <div class="reveal rv-d2 relative rounded-2xl border p-8 hover:-translate-y-1 transition-all duration-200 t-card card-hover" data-reveal style="border-color:var(--c-border)">
+        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-600 text-white font-extrabold text-base mb-5 shadow-lg">2</div>
+        <h3 class="text-lg font-bold t-head mb-2">Verify your domain</h3>
+        <p class="text-sm t-muted leading-relaxed">Add DNS records for SPF, DKIM, and DMARC. Our wizard walks you through it in minutes.</p>
+      </div>
+      <div class="reveal rv-d3 relative rounded-2xl border p-8 hover:-translate-y-1 transition-all duration-200 t-card card-hover" data-reveal style="border-color:var(--c-border)">
+        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-600 text-white font-extrabold text-base mb-5 shadow-lg">3</div>
+        <h3 class="text-lg font-bold t-head mb-2">Send via API or SMTP</h3>
+        <p class="text-sm t-muted leading-relaxed">One POST request — or swap your SMTP credentials. Start tracking opens and clicks immediately.</p>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -238,24 +424,30 @@
 {% include "landing/_code_tabs.html" %}
 
 {# ── Final CTA ────────────────────────────────────────────────────── #}
-<section class="bg-indigo-700 py-20 text-white text-center">
-  <div class="mx-auto max-w-2xl px-4 sm:px-6">
+<section class="relative overflow-hidden py-24 text-white text-center"
+         style="background:linear-gradient(135deg,#1e1b4b,#312e81,#4c1d95); background-size:400% 400%; animation:gradient-shift 12s ease infinite;">
+  <div class="pointer-events-none absolute inset-0"
+       style="background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:40px 40px"></div>
+  <div class="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-64 w-64 rounded-full opacity-20"
+       style="background:radial-gradient(circle,#818cf8,transparent 70%);filter:blur(40px)"></div>
+  <div class="relative mx-auto max-w-2xl px-4 sm:px-6">
     <h2 class="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
       Ready to improve your deliverability?
     </h2>
-    <p class="text-indigo-200 mb-8 text-lg">
+    <p class="text-indigo-200/90 mb-10 text-lg leading-relaxed">
       Join thousands of developers who send millions of emails through WebMail every month.
     </p>
     <div class="flex flex-col sm:flex-row gap-4 justify-center">
       <a href="/signup/"
-         class="rounded-xl bg-white px-8 py-3.5 text-sm font-semibold text-indigo-700 hover:bg-indigo-50 shadow transition-colors">
+         class="rounded-xl bg-white px-8 py-3.5 text-sm font-semibold text-indigo-700 hover:bg-indigo-50 hover:-translate-y-0.5 shadow-lg transition-all duration-200">
         Start sending free
       </a>
       <a href="/api/docs/"
-         class="rounded-xl border border-indigo-400 px-8 py-3.5 text-sm font-semibold text-white hover:bg-indigo-600 transition-colors">
+         class="rounded-xl border border-white/30 bg-white/10 px-8 py-3.5 text-sm font-semibold text-white hover:bg-white/20 hover:-translate-y-0.5 transition-all duration-200 backdrop-blur-sm">
         Read the docs →
       </a>
     </div>
+    <p class="mt-6 text-xs text-indigo-400/80">No credit card required · Cancel anytime</p>
   </div>
 </section>
 
@@ -269,14 +461,7 @@ function heroCopy() {
     "from":      "you@yourdomain.com",
     "subject":   "Welcome",
     "html_body": "<h1>Hello!</h1>"
-  }'
-
-// Response:
-{
-  "message_id":   "550e8400-e29b-41d4-a716",
-  "status":       "queued",
-  "submitted_at": "2025-06-06T10:30:00Z"
-}`;
+  }'`;
   return {
     copied: false,
     copy() {
@@ -287,6 +472,33 @@ function heroCopy() {
     },
   };
 }
+
+function statsBar() {
+  return {
+    init(el) {
+      const io = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting) {
+          el.querySelectorAll('.stat-num').forEach((n, i) => {
+            n.style.animationDelay = (i * 0.12) + 's';
+            n.style.animationFillMode = 'both';
+          });
+          io.disconnect();
+        }
+      }, { threshold: 0.4 });
+      io.observe(el);
+    },
+  };
+}
+
+/* Scroll reveal */
+(function () {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el));
+})();
 </script>
 
 {% endblock %}

@@ -1,0 +1,189 @@
+{% extends "landing/base.html" %}
+
+{% block extra_head %}
+<style>
+  /* ── Keyframes ─────────────────────────────────────── */
+  @keyframes gradient-shift {
+    0%,100% { background-position: 0% 50%; }
+    50%      { background-position: 100% 50%; }
+  }
+  @keyframes fade-up {
+    from { opacity:0; transform:translateY(24px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes icon-pop {
+    0%   { transform:scale(0.6) rotate(-6deg); opacity:0; }
+    60%  { transform:scale(1.1) rotate(2deg);  opacity:1; }
+    100% { transform:scale(1)   rotate(0deg);  opacity:1; }
+  }
+  @keyframes blob {
+    0%,100% { transform:translate(0,0) scale(1);    border-radius:60% 40% 30% 70%/60% 30% 70% 40%; }
+    33%      { transform:translate(18px,-22px) scale(1.04); border-radius:30% 60% 70% 40%/50% 60% 30% 60%; }
+    66%      { transform:translate(-12px,12px) scale(.97); border-radius:50% 40% 55% 35%/40% 55% 60% 50%; }
+  }
+
+  .feature-hero-bg {
+    background-size: 300% 300%;
+    animation: gradient-shift 12s ease infinite;
+  }
+  .hero-orb-a { animation: blob 16s ease-in-out infinite; }
+  .hero-orb-b { animation: blob 20s ease-in-out infinite reverse; }
+
+  .fade-up  { animation: fade-up .65s cubic-bezier(.22,.68,0,1.1) both; }
+  .icon-pop { animation: icon-pop .6s cubic-bezier(.22,.68,0,1.2) both; }
+  .d-1 { animation-delay:.1s; }
+  .d-2 { animation-delay:.2s; }
+  .d-3 { animation-delay:.3s; }
+  .d-4 { animation-delay:.4s; }
+
+  /* ── Scroll reveal ──────────────────────────────────── */
+  .reveal {
+    opacity:0; transform:translateY(28px);
+    transition: opacity .6s ease, transform .6s ease;
+  }
+  .reveal.in { opacity:1; transform:translateY(0); }
+  .rv-d1 { transition-delay:.08s; }
+  .rv-d2 { transition-delay:.16s; }
+  .rv-d3 { transition-delay:.24s; }
+  .rv-d4 { transition-delay:.32s; }
+
+  /* ── Feature body cards ─────────────────────────────── */
+  .feat-card {
+    background: var(--c-bg-card);
+    border: 1px solid var(--c-border);
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease, background .25s ease;
+  }
+  .feat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--c-shadow);
+    border-color: var(--c-stat-unit);
+  }
+
+  /* ── Section headings ───────────────────────────────── */
+  .section-divider {
+    display: flex; align-items: center; gap: 1rem; margin-bottom: 3rem;
+  }
+  .section-divider::after {
+    content: ''; flex: 1; height: 1px;
+    background: linear-gradient(to right, var(--c-divide, #e5e7eb), transparent);
+    transition: background .25s ease;
+  }
+
+  /* ── Feature body — dark gray text (overrides Tailwind gray utilities) ── */
+  .feat-body h1, .feat-body h2,
+  .feat-body h3, .feat-body h4 { color: #111827; }  /* gray-900 */
+  .feat-body p                  { color: #374151; }  /* gray-700 */
+  .feat-body li                 { color: #4b5563; }  /* gray-600 */
+
+  /* Dark theme overrides */
+  [data-theme="dark"] .feat-body h1,
+  [data-theme="dark"] .feat-body h2,
+  [data-theme="dark"] .feat-body h3,
+  [data-theme="dark"] .feat-body h4 { color: #f1f5f9; }  /* slate-100 */
+  [data-theme="dark"] .feat-body p   { color: #cbd5e1; }  /* slate-300 */
+  [data-theme="dark"] .feat-body li  { color: #94a3b8; }  /* slate-400 */
+</style>
+{% endblock %}
+
+{% block content %}
+
+{# ── Hero ─────────────────────────────────────────────────────────── #}
+<div class="relative overflow-hidden py-24 text-white {% block hero_gradient %}bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-800{% endblock %} feature-hero-bg">
+
+  {# Grid overlay #}
+  <div class="pointer-events-none absolute inset-0"
+       style="background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:44px 44px"></div>
+
+  {# Floating orbs #}
+  <div class="hero-orb-a pointer-events-none absolute -top-32 -left-24 h-80 w-80 opacity-25"
+       style="background:radial-gradient(circle,rgba(255,255,255,.3) 0%,transparent 70%);filter:blur(48px)"></div>
+  <div class="hero-orb-b pointer-events-none absolute -bottom-24 right-0 h-64 w-64 opacity-20"
+       style="background:radial-gradient(circle,rgba(255,255,255,.25) 0%,transparent 70%);filter:blur(40px)"></div>
+
+  <div class="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+
+    {# Icon #}
+    <div class="icon-pop d-1 flex justify-center mb-8">
+      <div class="rounded-2xl bg-white/15 p-5 ring-2 ring-white/25 backdrop-blur-sm shadow-xl">
+        {% block hero_icon %}{% endblock %}
+      </div>
+    </div>
+
+    {# Headline #}
+    <h1 class="fade-up d-2 text-4xl font-extrabold tracking-tight sm:text-5xl mb-5 leading-tight text-white">
+      {% block hero_headline %}{% endblock %}
+    </h1>
+
+    {# Subtext — white/80 works on ANY background colour #}
+    <p class="fade-up d-3 text-base sm:text-lg max-w-2xl mx-auto mb-10 leading-relaxed text-white/80">
+      {% block hero_subtext %}{% endblock %}
+    </p>
+
+    {# CTAs #}
+    <div class="fade-up d-4 flex flex-col sm:flex-row gap-4 justify-center">
+      <a href="/signup/" class="rounded-xl bg-white px-8 py-3.5 text-sm font-bold text-gray-900 hover:bg-gray-50 hover:-translate-y-0.5 shadow-lg transition-all duration-200 inline-block">
+        Start free trial
+      </a>
+      <a href="{% url 'pricing' %}" class="rounded-xl border border-white/30 bg-white/10 px-8 py-3.5 text-sm font-semibold text-white hover:bg-white/20 hover:-translate-y-0.5 transition-all duration-200 inline-block backdrop-blur-sm">
+        View pricing →
+      </a>
+    </div>
+
+    {# Trust pills #}
+    <div class="fade-up d-4 mt-10 flex flex-wrap justify-center gap-6 text-sm text-white/70">
+      {% block hero_pills %}
+      <span class="flex items-center gap-1.5">
+        <svg class="h-4 w-4 text-emerald-300" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        No credit card required
+      </span>
+      <span class="flex items-center gap-1.5">
+        <svg class="h-4 w-4 text-emerald-300" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        99.9% uptime SLA
+      </span>
+      <span class="flex items-center gap-1.5">
+        <svg class="h-4 w-4 text-emerald-300" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        Free tier included
+      </span>
+      {% endblock %}
+    </div>
+  </div>
+</div>
+
+{# ── Feature body ──────────────────────────────────────────────────── #}
+<div class="feat-body" style="background:var(--c-bg-body)">
+  {% block feature_body %}{% endblock %}
+</div>
+
+{# ── CTA banner — dark/neutral, looks great on every feature page ── #}
+<section class="relative overflow-hidden bg-gray-950 py-20 text-white">
+  <div class="pointer-events-none absolute inset-0"
+       style="background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:40px 40px"></div>
+  <div class="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 h-48 w-96 opacity-30"
+       style="background:radial-gradient(ellipse,#4f46e5,transparent 70%);filter:blur(40px)"></div>
+  <div class="relative mx-auto max-w-3xl px-4 text-center">
+    <h2 class="text-3xl font-bold mb-4 text-white">{% block cta_headline %}Ready to get started?{% endblock %}</h2>
+    <p class="text-gray-400 mb-10 text-lg leading-relaxed">{% block cta_subtext %}Try WebMail free — no credit card required. Upgrade when you're ready.{% endblock %}</p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a href="/signup/" class="rounded-xl bg-indigo-600 px-8 py-3.5 text-sm font-bold text-white hover:bg-indigo-500 hover:-translate-y-0.5 shadow-lg shadow-indigo-900/40 transition-all duration-200 inline-block">
+        Start free trial
+      </a>
+      <a href="{% url 'pricing' %}" class="rounded-xl border border-gray-700 bg-gray-800 px-8 py-3.5 text-sm font-semibold text-gray-200 hover:bg-gray-700 hover:-translate-y-0.5 transition-all duration-200 inline-block">
+        See pricing plans →
+      </a>
+    </div>
+    <p class="mt-6 text-xs text-gray-600">No credit card required · Cancel anytime</p>
+  </div>
+</section>
+
+<script>
+(function () {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el));
+})();
+</script>
+
+{% endblock %}

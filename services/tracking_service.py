@@ -68,18 +68,33 @@ def tag_utm_links(
     return _HREF_RE.sub(_add_utm, html)
 
 
-def inject_tracking(html: str, message_id: str) -> str:
+def inject_tracking(
+    html: str,
+    message_id: str,
+    utm_campaign: str = "",
+    utm_source: str = "webmail",
+    utm_medium: str = "email",
+) -> str:
     """Rewrite http/https hrefs to click-tracking URLs and inject open-tracking pixel.
 
+    UTM parameters are appended to every href before the click-tracking wrapper
+    is applied, so analytics tools see them on the final destination URL.
     Called from send_email_task after template rendering, before relay dispatch.
-    Only modifies HTML when tracking is meaningful (non-empty body).
     """
     if not html:
         return html
 
     mid = str(message_id)
 
-    # Rewrite every href="http(s)://..." to a click-tracking redirect URL
+    # 1. Stamp UTM params on every plain href (before wrapping in click-tracker)
+    html = tag_utm_links(
+        html,
+        source=utm_source,
+        medium=utm_medium,
+        campaign=utm_campaign,
+    )
+
+    # 2. Rewrite every href="http(s)://..." to a click-tracking redirect URL
     def _rewrite_href(match: re.Match) -> str:
         original = match.group(1)
         return f'href="{get_click_url(mid, original)}"'

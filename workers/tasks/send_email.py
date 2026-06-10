@@ -52,10 +52,10 @@ def send_email_task(self, message_id: str) -> dict:
             logger.exception('send_email_task: template render failed for %s', message_id)
             return _handle_retry(self, msg, exc)
 
-    # Inject open pixel + rewrite click links
+    # Inject open pixel + rewrite click links (UTM campaign = stream name)
     if html and (msg.track_opens or msg.track_clicks):
         from services.tracking_service import inject_tracking
-        html = inject_tracking(html, str(msg.pk))
+        html = inject_tracking(html, str(msg.pk), utm_campaign=msg.stream or "")
 
     # Build real one-click unsubscribe URL
     base_url = getattr(settings, 'BASE_URL', 'http://localhost:8000')
@@ -69,6 +69,22 @@ def send_email_task(self, message_id: str) -> dict:
         'List-Unsubscribe': make_list_unsubscribe_header(msg.from_address, unsubscribe_url),
         'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
     }
+
+    # CAN-SPAM §5(a)(6): every commercial email must include a valid physical address.
+    physical_address = getattr(settings, 'PHYSICAL_ADDRESS', '')
+    if physical_address:
+        footer_html = (
+            f'<div style="font-size:11px;color:#888;margin-top:24px;text-align:center">'
+            f'{physical_address} &nbsp;·&nbsp; '
+            f'<a href="{unsubscribe_url}" style="color:#888">Unsubscribe</a>'
+            f'</div>'
+        )
+        footer_text = f'\n\n--\n{physical_address}\nUnsubscribe: {unsubscribe_url}\n'
+        if html:
+            html = html + footer_html
+        if text:
+            text = text + footer_text
+
     payload = {'html': html, 'text': text}
 
     msg.status = Message.STATUS_SENDING
@@ -107,16 +123,33 @@ def send_email_task(self, message_id: str) -> dict:
 
 
 def _relay(headers: dict, payload: dict) -> dict:
-    """Try SES; fall back to SMTP if SES is unconfigured."""
+    """Try SES → SMTP → Django email backend (dev console fallback)."""
     from integrations.ses.client import SESClient
     from integrations.smtp.client import SMTPClient
 
     try:
         return SESClient().send_email(headers, payload)
     except RuntimeError:
-        pass  # SES not configured — use SMTP fallback
+        pass  # SES not configured
 
-    return SMTPClient().send_email(headers, payload)
+    try:
+        return SMTPClient().send_email(headers, payload)
+    except Exception:
+        pass  # SMTP not configured (e.g. local dev)
+
+    # Final fallback: Django's configured EMAIL_BACKEND (console in dev)
+    from django.core.mail import EmailMultiAlternatives
+    mail = EmailMultiAlternatives(
+        subject=headers.get('Subject', ''),
+        body=payload.get('text', '') or payload.get('html', ''),
+        from_email=headers.get('From', ''),
+        to=[headers.get('To', '')],
+        headers={k: v for k, v in headers.items() if k not in ('Subject', 'From', 'To')},
+    )
+    if payload.get('html'):
+        mail.attach_alternative(payload['html'], 'text/html')
+    mail.send()
+    return {'MessageId': 'dev-console', 'provider': 'django'}
 
 
 def _handle_retry(self, msg, exc: Exception) -> dict:

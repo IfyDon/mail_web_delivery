@@ -1,7 +1,7 @@
 """Admin registration for suppression models."""
 from django.contrib import admin
 
-from .models import Bounce, Complaint, Unsubscribe
+from .models import Bounce, Complaint, Suppression, Unsubscribe
 
 
 @admin.register(Bounce)
@@ -31,4 +31,14 @@ class UnsubscribeAdmin(admin.ModelAdmin):
     list_display = ["email", "source", "created_at"]
     search_fields = ["email"]
     readonly_fields = ["token", "created_at"]
+    ordering = ["-created_at"]
+
+
+@admin.register(Suppression)
+class SuppressionAdmin(admin.ModelAdmin):
+    list_display = ["email", "user", "reason", "created_at"]
+    list_filter = ["reason"]
+    search_fields = ["email", "user__email"]
+    raw_id_fields = ["user"]
+    readonly_fields = ["created_at"]
     ordering = ["-created_at"]

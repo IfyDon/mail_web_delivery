@@ -2,9 +2,12 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './hooks/useAuth';
+import { ThemeProvider } from './hooks/useTheme';
 import PrivateRoute from './components/common/PrivateRoute';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import Domains from './pages/Domains';
 import Templates from './pages/Templates';
@@ -17,6 +20,7 @@ import Billing from './pages/Billing';
 import Settings from './pages/Settings';
 import TemplateEdit from './pages/TemplateEdit';
 import MessageDetail from './pages/MessageDetail';
+import Contacts from './pages/Contacts';
 import Streams from './pages/Streams';
 import Team from './pages/Team';
 
@@ -28,12 +32,15 @@ const queryClient = new QueryClient({
 
 export default function App() {
   return (
+    <ThemeProvider>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route element={<PrivateRoute />}>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<Dashboard />} />
@@ -42,6 +49,7 @@ export default function App() {
               <Route path="/templates/:id" element={<TemplateEdit />} />
               <Route path="/messages" element={<Messages />} />
               <Route path="/messages/:id" element={<MessageDetail />} />
+              <Route path="/contacts" element={<Contacts />} />
               <Route path="/streams" element={<Streams />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/webhooks" element={<Webhooks />} />
@@ -56,5 +64,6 @@ export default function App() {
         </BrowserRouter>
       </AuthProvider>
     </QueryClientProvider>
+    </ThemeProvider>
   );
 }

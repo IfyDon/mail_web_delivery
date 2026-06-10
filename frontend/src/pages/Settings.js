@@ -139,14 +139,20 @@ function ChangePasswordForm() {
     if (next !== confirm) { setStatus({ ok: false, msg: 'New passwords do not match.' }); return; }
     setLoading(true);
     try {
-      await client.post('/auth/password/change/', {
+      const res = await client.post('/auth/password/change/', {
         current_password: current,
         new_password: next,
       });
+      if (res.data?.token) {
+        localStorage.setItem('api_key', res.data.token);
+      }
       setStatus({ ok: true, msg: 'Password updated.' });
       setCurrent(''); setNext(''); setConfirm('');
     } catch (err) {
-      setStatus({ ok: false, msg: err.response?.data?.detail || 'Failed to update password.' });
+      const data = err?.response?.data;
+      const msg = Array.isArray(data?.errors) ? data.errors[0]?.message
+        : data?.detail || 'Failed to update password.';
+      setStatus({ ok: false, msg });
     } finally {
       setLoading(false);
     }

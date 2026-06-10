@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { listApiKeys, createApiKey, revokeApiKey } from '../api/auth';
 import { formatDateTime } from '../utils/formatters';
+import { parseApiError } from '../utils/apiError';
 
 function CopyButton({ text }) {
   const [copied, setCopied] = useState(false);
@@ -57,8 +58,7 @@ export default function ApiKeys() {
       setName('');
       setError('');
     },
-    onError: (err) =>
-      setError(err.response?.data?.name?.[0] || 'Failed to create key.'),
+    onError: (err) => setError(parseApiError(err, 'Failed to create key.')),
   });
 
   const revokeMutation = useMutation({

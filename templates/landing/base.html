@@ -5,31 +5,162 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}WebMail — Transactional Email Infrastructure{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'css/output.css' %}">
+
+  {# ── Anti-FOUC: apply saved theme before anything paints ── #}
+  <script>
+    (function(){
+      var t = localStorage.getItem('wm_theme') ||
+              (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+
+  {# ── Theme CSS variables ──────────────────────────────── #}
+  <style>
+    /* Light — green/blue blend */
+    :root, [data-theme="light"] {
+      --c-bg-body:    linear-gradient(135deg,#ecfdf5 0%,#eff6ff 100%);
+      --c-bg-s1:      linear-gradient(135deg,#ecfdf5 0%,#eff6ff 100%);
+      --c-bg-s2:      linear-gradient(135deg,#f0f9ff 0%,#f0fdf4 100%);
+      --c-bg-s3:      linear-gradient(135deg,#ecfdf5 0%,#e0f2fe 100%);
+      --c-bg-card:    #ffffff;
+      --c-bg-code:    #1e293b;
+      --c-border:     #d1fae5;
+      --c-divide:     #d1fae5;
+      --c-head:       #0f172a;
+      --c-body:       #334155;
+      --c-muted:      #64748b;
+      --c-label-bg:   rgba(13,148,136,.12);
+      --c-label-text: #0d9488;
+      --c-stat:       #0f172a;
+      --c-stat-unit:  #0d9488;
+      --c-stat-label: #64748b;
+      --c-pill-bg:    rgba(13,148,136,.1);
+      --c-pill-text:  #0d9488;
+      --c-pill-bord:  rgba(13,148,136,.25);
+      --c-check-bg:   rgba(16,185,129,.15);
+      --c-check:      #059669;
+      --c-tag-bg:     #ffffff;
+      --c-tag-bord:   #d1fae5;
+      --c-tag-text:   #0d9488;
+      --c-nav-bg:     rgba(255,255,255,.95);
+      --c-shadow:     0 4px 24px rgba(13,148,136,.08);
+    }
+    /* Dark */
+    [data-theme="dark"] {
+      --c-bg-body:    linear-gradient(135deg,#0f172a 0%,#1e293b 100%);
+      --c-bg-s1:      #0f172a;
+      --c-bg-s2:      #1e293b;
+      --c-bg-s3:      #0f172a;
+      --c-bg-card:    #1e293b;
+      --c-bg-code:    #0f172a;
+      --c-border:     rgba(255,255,255,.08);
+      --c-divide:     rgba(255,255,255,.08);
+      --c-head:       #f1f5f9;
+      --c-body:       #cbd5e1;
+      --c-muted:      #64748b;
+      --c-label-bg:   rgba(94,234,212,.1);
+      --c-label-text: #5eead4;
+      --c-stat:       #e0e7ff;
+      --c-stat-unit:  #818cf8;
+      --c-stat-label: #64748b;
+      --c-pill-bg:    rgba(99,102,241,.15);
+      --c-pill-text:  #a5b4fc;
+      --c-pill-bord:  rgba(99,102,241,.3);
+      --c-check-bg:   rgba(52,211,153,.15);
+      --c-check:      #34d399;
+      --c-tag-bg:     rgba(255,255,255,.05);
+      --c-tag-bord:   rgba(255,255,255,.1);
+      --c-tag-text:   #94a3b8;
+      --c-nav-bg:     rgba(15,23,42,.95);
+      --c-shadow:     0 4px 24px rgba(0,0,0,.4);
+    }
+
+    /* Apply to body */
+    body {
+      background: var(--c-bg-body);
+      color: var(--c-body);
+      transition: background .25s ease, color .2s ease;
+    }
+
+    /* Nav theming */
+    nav.site-nav {
+      background: var(--c-nav-bg) !important;
+      border-color: var(--c-border) !important;
+    }
+
+    /* Themed sections — override Tailwind via data-theme */
+    .t-s1  { background: var(--c-bg-s1); }
+    .t-s2  { background: var(--c-bg-s2); }
+    .t-s3  { background: var(--c-bg-s3); }
+    .t-card { background: var(--c-bg-card); border-color: var(--c-border); }
+    .t-head { color: var(--c-head); }
+    .t-body { color: var(--c-body); }
+    .t-muted { color: var(--c-muted); }
+    .t-stat  { color: var(--c-stat); }
+    .t-stat-unit { color: var(--c-stat-unit); }
+    .t-stat-label { color: var(--c-stat-label); }
+    .t-divide { border-color: var(--c-divide); }
+    .t-pill { background: var(--c-pill-bg); color: var(--c-pill-text); border-color: var(--c-pill-bord); }
+    .t-label { background: var(--c-label-bg); color: var(--c-label-text); }
+    .t-check { background: var(--c-check-bg); color: var(--c-check); }
+    .t-code-bg { background: var(--c-bg-code); }
+
+    /* Smooth theme transition */
+    .t-s1, .t-s2, .t-s3, .t-card, .t-head, .t-body, .t-muted, .t-stat, .t-stat-label {
+      transition: background .25s ease, color .2s ease, border-color .2s ease;
+    }
+
+    /* Theme toggle button */
+    .theme-btn {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .35rem .75rem; border-radius: .5rem; font-size: .75rem; font-weight: 600;
+      cursor: pointer; border: 1px solid var(--c-border);
+      background: var(--c-bg-card); color: var(--c-body);
+      transition: all .2s ease;
+    }
+    .theme-btn:hover { opacity: .8; transform: scale(1.04); }
+  </style>
+
+  {# ── Alpine global theme store (must be before alpine.js) ── #}
+  <script>
+    document.addEventListener('alpine:init', () => {
+      Alpine.store('theme', {
+        dark: document.documentElement.getAttribute('data-theme') === 'dark',
+        toggle() {
+          this.dark = !this.dark;
+          var t = this.dark ? 'dark' : 'light';
+          document.documentElement.setAttribute('data-theme', t);
+          try { localStorage.setItem('wm_theme', t); } catch (_) {}
+        }
+      });
+    });
+  </script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <script>document.addEventListener('DOMContentLoaded', () => hljs.highlightAll());</script>
   {% block extra_head %}{% endblock %}
 </head>
-<body class="antialiased text-gray-900 bg-white">
+<body class="antialiased">
 
 {# ── Navigation ──────────────────────────────────────────────────── #}
-<nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100"
+<nav class="site-nav sticky top-0 z-50 backdrop-blur-sm border-b"
      x-data="{ open: false }">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <div class="flex h-16 items-center justify-between">
 
       <a href="{% url 'home' %}" class="flex items-center gap-2 shrink-0">
-        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600">
+        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-600">
           <svg class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
           </svg>
         </span>
-        <span class="text-lg font-bold tracking-tight">WebMail</span>
+        <span class="text-lg font-bold tracking-tight t-head">WebMail</span>
       </a>
 
-      <div class="hidden md:flex items-center gap-7 text-sm font-medium text-gray-600">
+      <div class="hidden md:flex items-center gap-7 text-sm font-medium" style="color:var(--c-body)">
         <div class="relative" x-data="{ prodOpen: false }" @mouseenter="prodOpen = true" @mouseleave="prodOpen = false" @keydown.escape.window="prodOpen = false">
           <button type="button"
                   class="flex items-center gap-1 hover:text-indigo-600 transition-colors"
@@ -48,18 +179,16 @@
                x-transition:leave-start="opacity-100 translate-y-0"
                x-transition:leave-end="opacity-0 translate-y-1"
                @click.outside="prodOpen = false"
-               class="absolute top-full left-0 mt-2 w-56 rounded-xl bg-white shadow-lg ring-1 ring-gray-100 py-2 z-50"
-               style="display:none">
-            <a href="{% url 'email_api' %}"                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Email API</a>
-            <a href="{% url 'features' %}#smtp-service"        class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">SMTP Service</a>
-            <a href="{% url 'features' %}#message-streams"     class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Message Streams</a>
-            <a href="{% url 'features' %}#transactional-email" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Transactional Email</a>
-            <a href="{% url 'features' %}#email-delivery"      class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Email Delivery</a>
-            <a href="{% url 'features' %}#email-templates"     class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Email Templates</a>
-            <a href="{% url 'features' %}#inbound-email"       class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Inbound Email</a>
-            <a href="{% url 'features' %}#analytics"           class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Analytics &amp; Retention</a>
-            <a href="{% url 'features' %}#integrations"        class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Integrations</a>
-            <a href="{% url 'features' %}#bulk-api"            class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Bulk API</a>
+               class="absolute top-full left-0 mt-2 w-56 rounded-xl shadow-lg py-2 z-50 t-card"
+               style="display:none; border: 1px solid var(--c-border)">
+            <a href="{% url 'email_api' %}"              class="block px-4 py-2 text-sm t-body hover:text-teal-600 transition-colors">Email API</a>
+            <a href="{% url 'feature_transactional' %}"  class="block px-4 py-2 text-sm t-body hover:text-teal-600 transition-colors">Transactional Email</a>
+            <a href="{% url 'feature_delivery' %}"       class="block px-4 py-2 text-sm t-body hover:text-teal-600 transition-colors">Email Delivery</a>
+            <a href="{% url 'feature_templates' %}"      class="block px-4 py-2 text-sm t-body hover:text-teal-600 transition-colors">Email Templates</a>
+            <a href="{% url 'feature_inbound' %}"        class="block px-4 py-2 text-sm t-body hover:text-teal-600 transition-colors">Inbound Email</a>
+            <a href="{% url 'feature_analytics' %}"      class="block px-4 py-2 text-sm t-body hover:text-teal-600 transition-colors">Analytics &amp; Retention</a>
+            <a href="{% url 'feature_integrations' %}"   class="block px-4 py-2 text-sm t-body hover:text-teal-600 transition-colors">Integrations</a>
+            <a href="{% url 'feature_bulk_api' %}"       class="block px-4 py-2 text-sm t-body hover:text-teal-600 transition-colors">Bulk API</a>
           </div>
         </div>
         <a href="{% url 'pricing' %}"  class="hover:text-indigo-600 transition-colors">Pricing</a>
@@ -67,10 +196,29 @@
       </div>
 
       <div class="hidden md:flex items-center gap-3">
-        <a href="/login/"  class="text-sm font-medium text-gray-700 hover:text-indigo-600 transition-colors px-3 py-1.5">
+        {# Theme toggle #}
+        <button x-data @click="$store.theme.toggle()"
+                :title="$store.theme.dark ? 'Switch to light mode' : 'Switch to dark mode'"
+                class="theme-btn">
+          <span x-show="$store.theme.dark">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 3v1m0 16v1m8.66-9H21M3 12H2m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 6a6 6 0 100 12A6 6 0 0012 6z"/>
+            </svg>
+          </span>
+          <span x-show="!$store.theme.dark">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+            </svg>
+          </span>
+          <span x-text="$store.theme.dark ? 'Light' : 'Dark'" class="text-xs font-semibold"></span>
+        </button>
+
+        <a href="/login/"  class="text-sm font-medium hover:text-teal-600 transition-colors px-3 py-1.5 t-body">
           Sign in
         </a>
-        <a href="/signup/" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors shadow-sm">
+        <a href="/signup/" class="rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700 transition-colors shadow-sm">
           Start free trial
         </a>
       </div>
@@ -84,7 +232,7 @@
     </div>
   </div>
 
-  <div x-show="open" x-transition class="md:hidden border-t border-gray-100 bg-white px-4 py-4 space-y-3">
+  <div x-show="open" x-transition class="md:hidden border-t px-4 py-4 space-y-3 t-s1" style="border-color:var(--c-divide)">
     <div x-data="{ prodOpen: false }">
       <button type="button" @click="prodOpen = !prodOpen"
               class="flex items-center justify-between w-full text-sm font-medium text-gray-700 hover:text-indigo-600">
@@ -94,24 +242,37 @@
         </svg>
       </button>
       <div x-show="prodOpen" x-transition class="mt-2 pl-4 space-y-2 border-l-2 border-indigo-100" style="display:none">
-        <a href="{% url 'email_api' %}"                    class="block text-sm text-gray-600 hover:text-indigo-600">Email API</a>
-        <a href="{% url 'features' %}#smtp-service"        class="block text-sm text-gray-600 hover:text-indigo-600">SMTP Service</a>
-        <a href="{% url 'features' %}#message-streams"     class="block text-sm text-gray-600 hover:text-indigo-600">Message Streams</a>
-        <a href="{% url 'features' %}#transactional-email" class="block text-sm text-gray-600 hover:text-indigo-600">Transactional Email</a>
-        <a href="{% url 'features' %}#email-delivery"      class="block text-sm text-gray-600 hover:text-indigo-600">Email Delivery</a>
-        <a href="{% url 'features' %}#email-templates"     class="block text-sm text-gray-600 hover:text-indigo-600">Email Templates</a>
-        <a href="{% url 'features' %}#inbound-email"       class="block text-sm text-gray-600 hover:text-indigo-600">Inbound Email</a>
-        <a href="{% url 'features' %}#analytics"           class="block text-sm text-gray-600 hover:text-indigo-600">Analytics &amp; Retention</a>
-        <a href="{% url 'features' %}#integrations"        class="block text-sm text-gray-600 hover:text-indigo-600">Integrations</a>
-        <a href="{% url 'features' %}#bulk-api"            class="block text-sm text-gray-600 hover:text-indigo-600">Bulk API</a>
+        <a href="{% url 'email_api' %}"             class="block text-sm text-gray-600 hover:text-indigo-600">Email API</a>
+        <a href="{% url 'feature_transactional' %}" class="block text-sm text-gray-600 hover:text-indigo-600">Transactional Email</a>
+        <a href="{% url 'feature_delivery' %}"      class="block text-sm text-gray-600 hover:text-indigo-600">Email Delivery</a>
+        <a href="{% url 'feature_templates' %}"     class="block text-sm text-gray-600 hover:text-indigo-600">Email Templates</a>
+        <a href="{% url 'feature_inbound' %}"       class="block text-sm text-gray-600 hover:text-indigo-600">Inbound Email</a>
+        <a href="{% url 'feature_analytics' %}"     class="block text-sm text-gray-600 hover:text-indigo-600">Analytics &amp; Retention</a>
+        <a href="{% url 'feature_integrations' %}"  class="block text-sm text-gray-600 hover:text-indigo-600">Integrations</a>
+        <a href="{% url 'feature_bulk_api' %}"      class="block text-sm text-gray-600 hover:text-indigo-600">Bulk API</a>
       </div>
     </div>
     <a href="{% url 'pricing' %}"  class="block text-sm font-medium text-gray-700 hover:text-indigo-600">Pricing</a>
     <a href="/api/docs/"           class="block text-sm font-medium text-gray-700 hover:text-indigo-600">API docs</a>
-    <a href="/login/"              class="block text-sm font-medium text-gray-700 hover:text-indigo-600">Sign in</a>
-    <a href="/signup/"             class="block rounded-lg bg-indigo-600 px-4 py-2 text-center text-sm font-semibold text-white">
+    <a href="/login/"              class="block text-sm font-medium t-body hover:text-teal-600">Sign in</a>
+    <a href="/signup/"             class="block rounded-lg bg-teal-600 px-4 py-2 text-center text-sm font-semibold text-white">
       Start free trial
     </a>
+    <button x-data @click="$store.theme.toggle()" class="theme-btn w-full justify-center">
+      <span x-show="$store.theme.dark">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 3v1m0 16v1m8.66-9H21M3 12H2m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 6a6 6 0 100 12A6 6 0 0012 6z"/>
+        </svg>
+      </span>
+      <span x-show="!$store.theme.dark">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+        </svg>
+      </span>
+      <span x-text="$store.theme.dark ? 'Switch to light mode' : 'Switch to dark mode'"></span>
+    </button>
   </div>
 </nav>
 

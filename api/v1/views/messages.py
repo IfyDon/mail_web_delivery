@@ -42,7 +42,6 @@ _DATE_TO_PARAM = OpenApiParameter(
 )
 class MessageListView(ListAPIView):
     serializer_class = MessageListSerializer
-    pagination_class = None  # uses DRF default (PAGE_SIZE=50 from settings)
 
     def get_queryset(self):
         qs = Message.objects.filter(user=self.request.user).select_related("domain")

@@ -20,8 +20,9 @@ class DomainViewSet(viewsets.ModelViewSet):
         return Domain.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        """Automatically set the user to authenticated user."""
-        serializer.save(user=self.request.user)
+        """Save domain and immediately generate DKIM key pair."""
+        domain = serializer.save(user=self.request.user)
+        domain.generate_dkim_keys()
 
     @action(detail=True, methods=['post'])
     def verify(self, request, pk=None):

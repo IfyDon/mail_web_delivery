@@ -1,0 +1,102 @@
+{% extends "landing/feature_layout.html" %}
+{% block title %}Email Delivery — WebMail{% endblock %}
+{% block hero_gradient %}bg-gradient-to-br from-emerald-600 via-teal-700 to-cyan-800{% endblock %}
+
+{% block hero_icon %}
+<svg class="h-12 w-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+</svg>
+{% endblock %}
+{% block hero_headline %}Deliverability infrastructure<br class="hidden sm:block"> you can trust{% endblock %}
+{% block hero_subtext %}DKIM signing, SPF alignment, DMARC enforcement, and automatic suppression lists — so your sender reputation stays pristine at any send volume.{% endblock %}
+
+{% block feature_body %}
+
+<section class="py-20 border-b t-divide">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="lg:grid lg:grid-cols-2 lg:gap-16 items-center">
+      <div>
+        <span class="inline-block rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 mb-4">Deliverability</span>
+        <h2 class="text-3xl font-bold tracking-tight text-gray-900 mb-4">Your reputation, fully protected</h2>
+        <p class="text-gray-500 text-lg mb-6 leading-relaxed">We handle the hard parts — DKIM signing, SPF alignment, and DMARC enforcement — so every message passes authentication at every major provider.</p>
+        <ul class="space-y-3 text-sm text-gray-600">
+          <li class="flex items-start gap-3"><svg class="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>DNS verification wizard for SPF, DKIM and DMARC</li>
+          <li class="flex items-start gap-3"><svg class="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Automatic hard-bounce suppression list</li>
+          <li class="flex items-start gap-3"><svg class="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>RFC-compliant List-Unsubscribe headers</li>
+          <li class="flex items-start gap-3"><svg class="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>One-click unsubscribe flow built-in</li>
+          <li class="flex items-start gap-3"><svg class="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Complaint feedback loop processing</li>
+          <li class="flex items-start gap-3"><svg class="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Dedicated vs shared IP pool options</li>
+        </ul>
+      </div>
+      <div class="mt-10 lg:mt-0 rounded-2xl t-card border t-divide p-8">
+        <div class="space-y-5">
+          <div>
+            <div class="flex items-center justify-between mb-1.5 text-sm"><span class="text-gray-700 font-medium">SPF Record</span><span class="font-semibold text-xs text-emerald-600">Verified</span></div>
+            <div class="h-2 rounded-full bg-gray-200"><div class="h-2 rounded-full bg-emerald-500" style="width:100%"></div></div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-1.5 text-sm"><span class="text-gray-700 font-medium">DKIM Signature</span><span class="font-semibold text-xs text-emerald-600">Verified</span></div>
+            <div class="h-2 rounded-full bg-gray-200"><div class="h-2 rounded-full bg-emerald-500" style="width:100%"></div></div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-1.5 text-sm"><span class="text-gray-700 font-medium">DMARC Policy</span><span class="font-semibold text-xs text-emerald-600">Verified</span></div>
+            <div class="h-2 rounded-full bg-gray-200"><div class="h-2 rounded-full bg-emerald-500" style="width:100%"></div></div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-1.5 text-sm"><span class="text-gray-700 font-medium">Bounce Rate</span><span class="font-semibold text-xs text-indigo-600">0.4%</span></div>
+            <div class="h-2 rounded-full bg-gray-200"><div class="h-2 rounded-full bg-indigo-500" style="width:4%"></div></div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-1.5 text-sm"><span class="text-gray-700 font-medium">Complaint Rate</span><span class="font-semibold text-xs text-violet-600">0.01%</span></div>
+            <div class="h-2 rounded-full bg-gray-200"><div class="h-2 rounded-full bg-violet-500" style="width:1%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-20 t-s2 border-b t-divide">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-14 reveal" data-reveal>
+      <h2 class="text-3xl font-bold text-gray-900">Suppression lists, automatic and manual</h2>
+      <p class="mt-3 text-gray-500 max-w-xl mx-auto">Hard bounces, spam complaints, and unsubscribes tracked automatically. Add your own via the dashboard or API.</p>
+    </div>
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="rounded-2xl t-card p-6 shadow-sm feat-card">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 mb-4"><svg class="h-5 w-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></div>
+        <h3 class="font-semibold text-gray-900 mb-1">Hard Bounces</h3>
+        <p class="text-sm text-gray-500">Automatically suppressed after the first hard bounce to protect your IP reputation.</p>
+      </div>
+      <div class="rounded-2xl t-card p-6 shadow-sm feat-card">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 mb-4"><svg class="h-5 w-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg></div>
+        <h3 class="font-semibold text-gray-900 mb-1">Spam Complaints</h3>
+        <p class="text-sm text-gray-500">ISP complaint feedback loops processed within seconds of receipt.</p>
+      </div>
+      <div class="rounded-2xl t-card p-6 shadow-sm feat-card">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 mb-4"><svg class="h-5 w-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16H5a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8"/></svg></div>
+        <h3 class="font-semibold text-gray-900 mb-1">Unsubscribes</h3>
+        <p class="text-sm text-gray-500">One-click RFC 8058 unsubscribe handled automatically for every message.</p>
+      </div>
+      <div class="rounded-2xl t-card p-6 shadow-sm feat-card">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 mb-4"><svg class="h-5 w-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg></div>
+        <h3 class="font-semibold text-gray-900 mb-1">Manual Suppression</h3>
+        <p class="text-sm text-gray-500">Block any address manually via the dashboard or <code class="t-code-bg px-1 rounded text-xs text-teal-500">DELETE /api/v1/suppressions/</code>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-20">
+  <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 gap-8 sm:grid-cols-3 text-center">
+      <div><p class="text-5xl font-extrabold text-emerald-600 mb-2">99.97%</p><p class="text-gray-500">Delivery rate</p></div>
+      <div><p class="text-5xl font-extrabold text-emerald-600 mb-2">&lt;0.1%</p><p class="text-gray-500">Bounce rate</p></div>
+      <div><p class="text-5xl font-extrabold text-emerald-600 mb-2">3</p><p class="text-gray-500">Auth checks (SPF, DKIM, DMARC)</p></div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+{% block cta_headline %}Start with rock-solid deliverability{% endblock %}
+{% block cta_subtext %}Add your domain, verify DNS records, and start sending with full authentication in under 5 minutes.{% endblock %}

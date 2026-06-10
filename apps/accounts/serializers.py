@@ -18,8 +18,8 @@ class APIKeyCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = APIKey
-        fields = ['name', 'rate_limit', 'key']
-        read_only_fields = ['key']
+        fields = ['id', 'name', 'prefix', 'rate_limit', 'is_active', 'created_at', 'key']
+        read_only_fields = ['id', 'prefix', 'is_active', 'created_at', 'key']
 
     def create(self, validated_data):
         user = self.context['request'].user

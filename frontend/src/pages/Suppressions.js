@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { listSuppressions, deleteSuppression, createSuppression } from '../api/suppressions';
+import { listSuppressions, deleteSuppression, createSuppression, exportSuppressionsCsv } from '../api/suppressions';
 import { formatDate } from '../utils/formatters';
 
 const REASON_STYLES = {
@@ -19,6 +19,22 @@ export default function Suppressions() {
   const [newEmail, setNewEmail]         = useState('');
   const [newReason, setNewReason]       = useState('manual');
   const [addError, setAddError]         = useState('');
+  const [exporting, setExporting]       = useState(false);
+
+  function handleExport() {
+    setExporting(true);
+    exportSuppressionsCsv(reasonFilter ? { type: reasonFilter } : {})
+      .then((res) => {
+        const url = URL.createObjectURL(new Blob([res.data], { type: 'text/csv' }));
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'suppressions.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+      })
+      .catch(() => {})
+      .finally(() => setExporting(false));
+  }
 
   const { data, isLoading } = useQuery({
     queryKey: ['suppressions', page, reasonFilter, emailSearch],
@@ -74,12 +90,21 @@ export default function Suppressions() {
             </span>
           )}
         </div>
-        <button
-          onClick={() => { setShowAddModal(true); setAddError(''); }}
-          className="bg-indigo-600 text-white text-xs font-medium px-3 py-1.5 rounded-md hover:bg-indigo-700"
-        >
-          + Add manually
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExport}
+            disabled={exporting}
+            className="border border-gray-300 text-gray-700 text-xs font-medium px-3 py-1.5 rounded-md hover:bg-gray-50 disabled:opacity-40"
+          >
+            {exporting ? 'Exporting…' : 'Export CSV'}
+          </button>
+          <button
+            onClick={() => { setShowAddModal(true); setAddError(''); }}
+            className="bg-indigo-600 text-white text-xs font-medium px-3 py-1.5 rounded-md hover:bg-indigo-700"
+          >
+            + Add manually
+          </button>
+        </div>
       </div>
 
       {/* Filters */}

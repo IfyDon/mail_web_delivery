@@ -1,0 +1,82 @@
+{% extends "landing/feature_layout.html" %}
+{% block title %}Transactional Email — WebMail{% endblock %}
+{% block hero_gradient %}bg-gradient-to-br from-indigo-600 via-indigo-700 to-blue-800{% endblock %}
+
+{% block hero_icon %}
+<svg class="h-12 w-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+</svg>
+{% endblock %}
+{% block hero_headline %}Transactional email<br class="hidden sm:block"> that reaches the inbox{% endblock %}
+{% block hero_subtext %}Send password resets, order confirmations, receipts, and alerts with guaranteed delivery. Sub-second dispatch, full event tracking, and automatic retries.{% endblock %}
+
+{% block feature_body %}
+
+<section class="py-20 border-b t-divide">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="lg:grid lg:grid-cols-2 lg:gap-16 items-center">
+      <div>
+        <span class="inline-block rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700 mb-4">What it is</span>
+        <h2 class="text-3xl font-bold tracking-tight text-gray-900 mb-4">Triggered by user actions — delivered in milliseconds</h2>
+        <p class="text-gray-500 text-lg mb-6 leading-relaxed">Transactional emails are time-sensitive. WebMail prioritises them on a dedicated IP pool, separate from promotional traffic, so they always land first.</p>
+        <ul class="space-y-3 text-sm text-gray-600">
+          {% for item in items %}
+          <li class="flex items-start gap-3">
+            <svg class="h-5 w-5 text-indigo-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            {{ item }}
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="mt-10 lg:mt-0 rounded-2xl bg-gray-950 p-6 font-mono text-sm overflow-auto">
+        <div class="text-gray-400 text-xs mb-4">POST /api/v1/send</div>
+        <pre class="text-green-400 leading-relaxed">{
+  "from": "noreply@yourapp.com",
+  "to": "user@example.com",
+  "subject": "Your password reset link",
+  "html": "&lt;p&gt;Click &lt;a href='...'&gt;here&lt;/a&gt;
+           to reset your password.&lt;/p&gt;",
+  "stream": "transactional",
+  "track_opens": false
+}</pre>
+        <div class="mt-4 text-emerald-400 text-xs">&#10003; 201 Queued — delivered in 340ms</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-20 t-s2 border-b t-divide">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-14 reveal" data-reveal>
+      <h2 class="text-3xl font-bold text-gray-900">Everything you need for reliable delivery</h2>
+      <p class="mt-3 text-gray-500 max-w-xl mx-auto">Built-in features that protect your sender reputation and ensure every message lands.</p>
+    </div>
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {% for card in cards %}
+      <div class="rounded-2xl t-card p-6 shadow-sm feat-card">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 mb-4">
+          <svg class="h-5 w-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ card.icon }}"/>
+          </svg>
+        </div>
+        <h3 class="font-semibold text-gray-900 mb-2">{{ card.title }}</h3>
+        <p class="text-sm text-gray-500">{{ card.body }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="py-20">
+  <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 gap-8 sm:grid-cols-3 text-center">
+      <div><p class="text-5xl font-extrabold text-indigo-600 mb-2">&lt; 1s</p><p class="text-gray-500">Average delivery time</p></div>
+      <div><p class="text-5xl font-extrabold text-indigo-600 mb-2">99.97%</p><p class="text-gray-500">Transactional delivery rate</p></div>
+      <div><p class="text-5xl font-extrabold text-indigo-600 mb-2">5&times;</p><p class="text-gray-500">Automatic retry attempts</p></div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+{% block cta_headline %}Start sending transactional email today{% endblock %}
+{% block cta_subtext %}Integrate in minutes. Scale to millions. No infrastructure to manage.{% endblock %}

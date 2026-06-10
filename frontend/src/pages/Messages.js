@@ -1,9 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { listMessages } from '../api/messages';
 import { formatDateTime } from '../utils/formatters';
 import EmptyState from '../components/common/EmptyState';
+import ComposeForm from '../components/messages/ComposeForm';
+import { useMessageStream } from '../hooks/useMessageStream';
 
 const STATUSES = [
   'queued', 'sent', 'delivered', 'failed', 'permanently_failed', 'suppressed',
@@ -32,6 +34,9 @@ function StatusBadge({ status }) {
 export default function Messages() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [composing, setComposing] = useState(false);
+
+  useMessageStream();
 
   const status   = searchParams.get('status')    ?? '';
   const domain   = searchParams.get('domain')    ?? '';
@@ -83,8 +88,26 @@ export default function Messages() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold text-gray-900">Messages</h1>
-        <span className="text-sm text-gray-400">{total.toLocaleString()} total</span>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-gray-400">{total.toLocaleString()} total</span>
+          <button
+            onClick={() => setComposing((v) => !v)}
+            className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {composing ? 'Cancel' : '+ Compose'}
+          </button>
+        </div>
       </div>
+
+      {composing && (
+        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <h2 className="text-base font-semibold text-gray-900 mb-4">Compose Email</h2>
+          <ComposeForm
+            onSuccess={() => setComposing(false)}
+            onCancel={() => setComposing(false)}
+          />
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-wrap gap-2 items-end">

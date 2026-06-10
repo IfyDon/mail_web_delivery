@@ -1,0 +1,103 @@
+{% extends "landing/feature_layout.html" %}
+{% block title %}Inbound Email — WebMail{% endblock %}
+{% block hero_gradient %}bg-gradient-to-br from-cyan-600 via-teal-700 to-green-800{% endblock %}
+
+{% block hero_icon %}
+<svg class="h-12 w-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+</svg>
+{% endblock %}
+{% block hero_headline %}Receive and parse emails<br class="hidden sm:block"> as HTTP webhooks{% endblock %}
+{% block hero_subtext %}Turn any inbound email into a structured HTTP POST. Parse headers, body, and attachments — then trigger any workflow from your own code.{% endblock %}
+
+{% block feature_body %}
+
+<section class="py-20 border-b t-divide">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="lg:grid lg:grid-cols-2 lg:gap-16 items-center">
+      <div>
+        <span class="inline-block rounded-full bg-cyan-100 px-3 py-1 text-xs font-semibold text-cyan-700 mb-4">Inbound Processing</span>
+        <h2 class="text-3xl font-bold tracking-tight text-gray-900 mb-4">Email arrives. Your webhook fires.</h2>
+        <p class="text-gray-500 text-lg mb-6 leading-relaxed">Point an MX record at WebMail and every inbound message is parsed and POSTed to your endpoint as clean JSON — with attachments as base64 or S3 URLs.</p>
+        <ul class="space-y-3 text-sm text-gray-600">
+          <li class="flex items-start gap-3"><svg class="h-5 w-5 text-cyan-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Raw message JSON delivered to your URL</li>
+          <li class="flex items-start gap-3"><svg class="h-5 w-5 text-cyan-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Parsed To, From, Subject, HTML, and plain-text body</li>
+          <li class="flex items-start gap-3"><svg class="h-5 w-5 text-cyan-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Attachments as base64 or forwarded to S3</li>
+          <li class="flex items-start gap-3"><svg class="h-5 w-5 text-cyan-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Custom catch-all or per-address routing</li>
+          <li class="flex items-start gap-3"><svg class="h-5 w-5 text-cyan-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Spam and virus filtering before delivery</li>
+          <li class="flex items-start gap-3"><svg class="h-5 w-5 text-cyan-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Webhook retry on non-2xx response</li>
+        </ul>
+      </div>
+      <div class="mt-10 lg:mt-0 rounded-2xl bg-gray-950 p-6 font-mono text-sm overflow-auto">
+        <div class="text-gray-400 text-xs mb-4">Inbound webhook payload — POST to your endpoint</div>
+        <pre class="text-green-400 leading-relaxed">{
+  "from": "customer@example.com",
+  "to": "support@yourapp.com",
+  "subject": "Order #4421 question",
+  "text_body": "Hi, I'd like to know when...",
+  "html_body": "&lt;p&gt;Hi, I'd like to know...&lt;/p&gt;",
+  "attachments": [
+    { "name": "invoice.pdf", "content_type": "application/pdf",
+      "content": "JVBERi0xLjMK..." }
+  ]
+}</pre>
+        <div class="mt-4 text-emerald-400 text-xs">&#10003; Delivered to your endpoint in &lt;200ms</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-20 t-s2 border-b t-divide">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-14 reveal" data-reveal>
+      <h2 class="text-3xl font-bold text-gray-900">Use cases you can build today</h2>
+      <p class="mt-3 text-gray-500 max-w-xl mx-auto">Any workflow that involves receiving email becomes a simple HTTP handler.</p>
+    </div>
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="rounded-2xl t-card p-6 shadow-sm feat-card">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-100 mb-4"><svg class="h-5 w-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg></div>
+        <h3 class="font-semibold text-gray-900 mb-2">Support Ticket Creation</h3>
+        <p class="text-sm text-gray-500">Email to support@ automatically creates a ticket in your helpdesk system.</p>
+      </div>
+      <div class="rounded-2xl t-card p-6 shadow-sm feat-card">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-100 mb-4"><svg class="h-5 w-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+        <h3 class="font-semibold text-gray-900 mb-2">Invoice Parsing</h3>
+        <p class="text-sm text-gray-500">Forward supplier invoices to a mailbox; extract PDF attachments and record in your ERP.</p>
+      </div>
+      <div class="rounded-2xl t-card p-6 shadow-sm feat-card">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-100 mb-4"><svg class="h-5 w-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg></div>
+        <h3 class="font-semibold text-gray-900 mb-2">Email-to-Comment</h3>
+        <p class="text-sm text-gray-500">Reply to a notification email to post a comment on a post or task — no UI needed.</p>
+      </div>
+      <div class="rounded-2xl t-card p-6 shadow-sm feat-card">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-100 mb-4"><svg class="h-5 w-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg></div>
+        <h3 class="font-semibold text-gray-900 mb-2">Lead Capture</h3>
+        <p class="text-sm text-gray-500">Every email to sales@ becomes a lead record in your CRM with full message history.</p>
+      </div>
+      <div class="rounded-2xl t-card p-6 shadow-sm feat-card">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-100 mb-4"><svg class="h-5 w-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div>
+        <h3 class="font-semibold text-gray-900 mb-2">Asset Ingestion</h3>
+        <p class="text-sm text-gray-500">Designers email images; they're extracted and stored to your media library automatically.</p>
+      </div>
+      <div class="rounded-2xl t-card p-6 shadow-sm feat-card">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-100 mb-4"><svg class="h-5 w-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg></div>
+        <h3 class="font-semibold text-gray-900 mb-2">Auto-responders</h3>
+        <p class="text-sm text-gray-500">Parse the inbound message and trigger a transactional reply — all from your own code.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-20">
+  <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 gap-8 sm:grid-cols-3 text-center">
+      <div><p class="text-5xl font-extrabold text-cyan-600 mb-2">&lt;200ms</p><p class="text-gray-500">Average webhook delivery</p></div>
+      <div><p class="text-5xl font-extrabold text-cyan-600 mb-2">&#8734;</p><p class="text-gray-500">Addresses per domain</p></div>
+      <div><p class="text-5xl font-extrabold text-cyan-600 mb-2">5</p><p class="text-gray-500">Webhook retry attempts</p></div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+{% block cta_headline %}Start receiving email as webhooks{% endblock %}
+{% block cta_subtext %}Add an MX record, configure your endpoint URL, and you're done — emails become HTTP requests instantly.{% endblock %}

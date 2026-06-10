@@ -1,3 +1,55 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── Light theme (green/blue blend) ────────────────────── */
+:root {
+  --bg-page:     linear-gradient(135deg, #ecfdf5 0%, #eff6ff 100%);
+  --bg-sidebar:  #ffffff;
+  --bg-header:   #ffffff;
+  --bg-card:     #ffffff;
+  --bg-input:    #f9fafb;
+  --border:      #d1fae5;
+  --border-soft: #e5e7eb;
+  --text-head:   #0f172a;
+  --text-body:   #374151;
+  --text-muted:  #6b7280;
+  --text-nav:    #374151;
+  --nav-active-bg:   #0d9488;
+  --nav-active-text: #ffffff;
+  --nav-hover-bg:    #ecfdf5;
+  --nav-hover-text:  #0d9488;
+  --sidebar-label:   #94a3b8;
+  --sidebar-divider: #e5e7eb;
+  --shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+
+/* ── Dark theme ─────────────────────────────────────────── */
+html.dark {
+  --bg-page:     linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  --bg-sidebar:  #0f172a;
+  --bg-header:   #1e293b;
+  --bg-card:     #1e293b;
+  --bg-input:    #0f172a;
+  --border:      rgba(255,255,255,.08);
+  --border-soft: rgba(255,255,255,.06);
+  --text-head:   #f1f5f9;
+  --text-body:   #cbd5e1;
+  --text-muted:  #64748b;
+  --text-nav:    #cbd5e1;
+  --nav-active-bg:   #6366f1;
+  --nav-active-text: #ffffff;
+  --nav-hover-bg:    rgba(99,102,241,.12);
+  --nav-hover-text:  #a5b4fc;
+  --sidebar-label:   #475569;
+  --sidebar-divider: rgba(255,255,255,.06);
+  --shadow: 0 1px 3px rgba(0,0,0,.4);
+}
+
+/* ── Apply variables to layout shells ───────────────────── */
+body {
+  background: var(--bg-page);
+  color: var(--text-body);
+  min-height: 100vh;
+  transition: background .25s ease, color .25s ease;
+}

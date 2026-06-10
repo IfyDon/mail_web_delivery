@@ -18,6 +18,9 @@ from drf_spectacular.views import (
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from web.views.health import health, readiness
+from web.views.metrics import metrics
+
 @api_view(['GET'])
 def api_root(request):
     """API root endpoint."""
@@ -49,6 +52,13 @@ urlpatterns = [
 
     # Versioned API
     path('api/v1/', include('api.v1.urls')),
+
+    # Health / readiness probes (no auth — for container orchestration)
+    path('health/', health, name='health'),
+    path('readiness/', readiness, name='readiness'),
+
+    # Prometheus-format metrics (bearer-token protected via METRICS_TOKEN)
+    path('metrics/', metrics, name='metrics'),
 
     # Email tracking (lightweight endpoints)
     path('tracking/', include('tracking.urls')),

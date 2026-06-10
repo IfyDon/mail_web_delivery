@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createDomain } from '../../api/domains';
+import { parseDomainError } from '../../utils/apiError';
 
 export default function AddDomainForm() {
   const qc = useQueryClient();
@@ -14,8 +15,7 @@ export default function AddDomainForm() {
       setName('');
       setError('');
     },
-    onError: (err) =>
-      setError(err.response?.data?.name?.[0] || 'Failed to add domain.'),
+    onError: (err) => setError(parseDomainError(err)),
   });
 
   return (

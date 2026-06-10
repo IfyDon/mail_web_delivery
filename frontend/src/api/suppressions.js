@@ -8,3 +8,6 @@ export const createSuppression = (data) =>
 
 export const deleteSuppression = (email) =>
   client.delete(`/suppressions/${encodeURIComponent(email)}/`);
+
+export const exportSuppressionsCsv = (params = {}) =>
+  client.get('/suppressions/export/', { params, responseType: 'blob' });

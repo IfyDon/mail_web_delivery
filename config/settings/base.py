@@ -70,9 +70,11 @@ MIDDLEWARE = [
     'django_otp.middleware.OTPMiddleware',  # For 2FA
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'core.middleware.request_id_middleware.RequestIDMiddleware',
     'core.middleware.api_key_middleware.APIKeyRateLimitMiddleware',
     'core.middleware.ip_whitelist.IPWhitelistMiddleware',
     'core.middleware.audit.AuditMiddleware',
+    'core.middleware.security_headers_middleware.SecurityHeadersMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -222,6 +224,30 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'workers.tasks.decay_scores.decay_engagement_scores',
         'schedule': crontab(hour=2, minute=0, day_of_month=1),  # 1st of month 02:00 UTC
     },
+    'cleanup-old-events': {
+        'task': 'workers.tasks.cleanup.cleanup_old_events',
+        'schedule': crontab(hour=3, minute=30),  # nightly 03:30 UTC
+    },
+    'retry-stuck-messages': {
+        'task': 'workers.tasks.retry_stuck.retry_stuck_messages',
+        'schedule': crontab(minute='*/15'),  # every 15 minutes
+    },
+}
+
+# ── Redis cache ───────────────────────────────────────────────────────────────
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': os.getenv('REDIS_CACHE_URL', 'redis://localhost:6379/2'),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'SOCKET_CONNECT_TIMEOUT': 5,
+            'SOCKET_TIMEOUT': 5,
+            'IGNORE_EXCEPTIONS': True,  # degrade gracefully if Redis is down
+        },
+        'KEY_PREFIX': 'webmail',
+        'TIMEOUT': 300,  # 5-minute default TTL
+    }
 }
 
 # ── Stripe ────────────────────────────────────────────────────────────────────
@@ -235,27 +261,52 @@ FRONTEND_BASE_URL = os.getenv('FRONTEND_BASE_URL', 'http://localhost:3000')
 # Public base URL used to build tracking pixel / click-redirect links
 TRACKING_BASE_URL = os.getenv('TRACKING_BASE_URL', 'http://localhost:8000')
 
+# CAN-SPAM §5(a)(6): physical mailing address appended to every outgoing email footer.
+PHYSICAL_ADDRESS = os.getenv('PHYSICAL_ADDRESS', '')
+
 # Email configuration (for Django notifications, not transactional emails)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-# Logging
+# Logging — JSON-structured output for ELK / Datadog / CloudWatch parsing.
+# Falls back to plain text if python-json-logger is not installed.
+_USE_JSON_LOGS = os.getenv('LOG_FORMAT', 'json').lower() == 'json'
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
+        'json': {
+            '()': 'pythonjsonlogger.jsonlogger.JsonFormatter'
+                  if _USE_JSON_LOGS else 'logging.Formatter',
+            'format': '%(asctime)s %(levelname)s %(name)s %(message)s',
         },
+        'plain': {
+            'format': '%(levelname)s %(asctime)s %(name)s %(message)s',
+        },
+    },
+    'filters': {
+        'require_debug_false': {'()': 'django.utils.log.RequireDebugFalse'},
     },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
+            'formatter': 'json' if _USE_JSON_LOGS else 'plain',
         },
     },
     'root': {
         'handlers': ['console'],
-        'level': 'INFO',
+        'level': os.getenv('LOG_LEVEL', 'INFO'),
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'WARNING'),
+            'propagate': False,
+        },
+        'celery': {
+            'handlers': ['console'],
+            'level': os.getenv('CELERY_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
     },
 }

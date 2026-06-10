@@ -1,0 +1,114 @@
+{% extends "landing/feature_layout.html" %}
+{% block title %}Integrations — WebMail{% endblock %}
+{% block hero_gradient %}bg-gradient-to-br from-slate-700 via-gray-800 to-zinc-900{% endblock %}
+
+{% block hero_icon %}
+<svg class="h-12 w-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"/>
+</svg>
+{% endblock %}
+{% block hero_headline %}Connect WebMail to your<br class="hidden sm:block"> existing stack{% endblock %}
+{% block hero_subtext %}Official SDKs for every major language, native SMTP support, webhook relay, and direct integrations with the platforms you already use.{% endblock %}
+
+{% block feature_body %}
+
+<section class="py-20 border-b t-divide">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-14 reveal" data-reveal>
+      <h2 class="text-3xl font-bold text-gray-900">Every language. Every framework.</h2>
+      <p class="mt-3 text-gray-500 max-w-xl mx-auto">Drop in an official client library and be sending in under five minutes.</p>
+    </div>
+    <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+      <div class="rounded-2xl t-card border p-5 shadow-sm text-center feat-card">
+        <div class="text-3xl mb-2">🐍</div>
+        <p class="text-sm font-semibold text-gray-800">Python</p>
+        <p class="text-xs text-gray-400 mt-1">pip install webmail</p>
+      </div>
+      <div class="rounded-2xl t-card border p-5 shadow-sm text-center feat-card">
+        <div class="text-3xl mb-2">🟨</div>
+        <p class="text-sm font-semibold text-gray-800">Node.js</p>
+        <p class="text-xs text-gray-400 mt-1">npm install webmail</p>
+      </div>
+      <div class="rounded-2xl t-card border p-5 shadow-sm text-center feat-card">
+        <div class="text-3xl mb-2">💎</div>
+        <p class="text-sm font-semibold text-gray-800">Ruby</p>
+        <p class="text-xs text-gray-400 mt-1">gem install webmail</p>
+      </div>
+      <div class="rounded-2xl t-card border p-5 shadow-sm text-center feat-card">
+        <div class="text-3xl mb-2">☕</div>
+        <p class="text-sm font-semibold text-gray-800">Java</p>
+        <p class="text-xs text-gray-400 mt-1">Maven / Gradle</p>
+      </div>
+      <div class="rounded-2xl t-card border p-5 shadow-sm text-center feat-card">
+        <div class="text-3xl mb-2">🐘</div>
+        <p class="text-sm font-semibold text-gray-800">PHP</p>
+        <p class="text-xs text-gray-400 mt-1">composer require</p>
+      </div>
+      <div class="rounded-2xl t-card border p-5 shadow-sm text-center feat-card">
+        <div class="text-3xl mb-2">🦫</div>
+        <p class="text-sm font-semibold text-gray-800">Go</p>
+        <p class="text-xs text-gray-400 mt-1">go get webmail</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-20 t-s2 border-b t-divide">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="lg:grid lg:grid-cols-2 lg:gap-16 items-start">
+      <div>
+        <span class="inline-block rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 mb-4">SMTP</span>
+        <h2 class="text-3xl font-bold tracking-tight text-gray-900 mb-4">Zero code change — just swap your SMTP credentials</h2>
+        <p class="text-gray-500 text-lg mb-6 leading-relaxed">Point any SMTP client at our servers and gain full analytics, webhooks, and deliverability features without touching your application code.</p>
+        <ul class="space-y-3 text-sm text-gray-600">
+          <li class="flex items-start gap-3"><svg class="h-5 w-5 text-slate-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>STARTTLS and TLS on port 587 and 465</li>
+          <li class="flex items-start gap-3"><svg class="h-5 w-5 text-slate-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Works with Django, Rails, Laravel, Nodemailer, Swiftmailer</li>
+          <li class="flex items-start gap-3"><svg class="h-5 w-5 text-slate-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>API key used as SMTP password</li>
+          <li class="flex items-start gap-3"><svg class="h-5 w-5 text-slate-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>All events still tracked in your dashboard</li>
+        </ul>
+      </div>
+      <div class="mt-10 lg:mt-0 rounded-2xl bg-gray-950 p-6 font-mono text-sm overflow-auto">
+        <div class="text-gray-400 text-xs mb-4">Django settings.py — SMTP integration</div>
+        <pre class="text-green-400 leading-relaxed">EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.webmail.io'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'SMTP'
+EMAIL_HOST_PASSWORD = 'your-api-key-here'
+DEFAULT_FROM_EMAIL = 'noreply@yourapp.com'</pre>
+        <div class="mt-4 text-emerald-400 text-xs">&#10003; That's it — all emails now routed via WebMail</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-20">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-14 reveal" data-reveal>
+      <h2 class="text-3xl font-bold text-gray-900">Platform integrations</h2>
+      <p class="mt-3 text-gray-500 max-w-xl mx-auto">Native connections to the tools in your workflow — no middleware needed.</p>
+    </div>
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="rounded-2xl t-card border p-6 shadow-sm flex items-start gap-4 feat-card">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl t-s2 shrink-0"><span class="text-lg">🔔</span></div>
+        <div><h3 class="font-semibold text-gray-900 mb-1">Slack</h3><p class="text-sm text-gray-500">Get bounce and complaint alerts posted to your ops channel.</p></div>
+      </div>
+      <div class="rounded-2xl t-card border p-6 shadow-sm flex items-start gap-4 feat-card">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl t-s2 shrink-0"><span class="text-lg">📊</span></div>
+        <div><h3 class="font-semibold text-gray-900 mb-1">Segment</h3><p class="text-sm text-gray-500">Email events flow into Segment as track calls for unified analytics.</p></div>
+      </div>
+      <div class="rounded-2xl t-card border p-6 shadow-sm flex items-start gap-4 feat-card">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl t-s2 shrink-0"><span class="text-lg">🔀</span></div>
+        <div><h3 class="font-semibold text-gray-900 mb-1">Zapier</h3><p class="text-sm text-gray-500">Trigger Zaps on delivered, opened, bounced — connect to 5,000+ apps.</p></div>
+      </div>
+      <div class="rounded-2xl t-card border p-6 shadow-sm flex items-start gap-4 feat-card">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl t-s2 shrink-0"><span class="text-lg">🔗</span></div>
+        <div><h3 class="font-semibold text-gray-900 mb-1">Webhooks</h3><p class="text-sm text-gray-500">POST any email event to your own endpoint — build any integration you need.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+{% block cta_headline %}Integrate in under 5 minutes{% endblock %}
+{% block cta_subtext %}Pick your language, grab an API key, and your first email is sending. No infrastructure, no ops burden.{% endblock %}
