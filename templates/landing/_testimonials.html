@@ -87,13 +87,4 @@
   </div>
 </section>
 
-<script>
-function testimonials() {
-  return {
-    active: 0,
-    total: 3,
-    next() { this.active = (this.active + 1) % this.total; },
-    prev() { this.active = (this.active - 1 + this.total) % this.total; },
-  };
-}
-</script>
+{# testimonials() is defined in static/js/landing-index.js #}

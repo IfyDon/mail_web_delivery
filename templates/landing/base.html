@@ -6,14 +6,8 @@
   <title>{% block title %}WebMail — Transactional Email Infrastructure{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'css/output.css' %}">
 
-  {# ── Anti-FOUC: apply saved theme before anything paints ── #}
-  <script>
-    (function(){
-      var t = localStorage.getItem('wm_theme') ||
-              (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-      document.documentElement.setAttribute('data-theme', t);
-    })();
-  </script>
+  {# ── Anti-FOUC + Alpine store init — external file bypasses CSP inline block ── #}
+  <script src="{% static 'js/theme-init.js' %}"></script>
 
   {# ── Theme CSS variables ──────────────────────────────── #}
   <style>
@@ -122,31 +116,13 @@
     .theme-btn:hover { opacity: .8; transform: scale(1.04); }
   </style>
 
-  {# ── Alpine global theme store (must be before alpine.js) ── #}
-  <script>
-    document.addEventListener('alpine:init', () => {
-      Alpine.store('theme', {
-        dark: document.documentElement.getAttribute('data-theme') === 'dark',
-        toggle() {
-          this.dark = !this.dark;
-          var t = this.dark ? 'dark' : 'light';
-          document.documentElement.setAttribute('data-theme', t);
-          try { localStorage.setItem('wm_theme', t); } catch (_) {}
-        }
-      });
-    });
-  </script>
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-  <script>document.addEventListener('DOMContentLoaded', () => hljs.highlightAll());</script>
+  <link rel="stylesheet" href="{% static 'css/highlight-github-dark.min.css' %}">
   {% block extra_head %}{% endblock %}
 </head>
 <body class="antialiased">
 
 {# ── Navigation ──────────────────────────────────────────────────── #}
-<nav class="site-nav sticky top-0 z-50 backdrop-blur-sm border-b"
-     x-data="{ open: false }">
+<nav class="site-nav sticky top-0 z-50 backdrop-blur-sm border-b" id="site-nav">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <div class="flex h-16 items-center justify-between">
 
@@ -161,24 +137,17 @@
       </a>
 
       <div class="hidden md:flex items-center gap-7 text-sm font-medium" style="color:var(--c-body)">
-        <div class="relative" x-data="{ prodOpen: false }" @mouseenter="prodOpen = true" @mouseleave="prodOpen = false" @keydown.escape.window="prodOpen = false">
-          <button type="button"
+        {# Product dropdown — vanilla JS, no Alpine #}
+        <div class="relative" id="prod-wrap">
+          <button type="button" id="prod-btn"
                   class="flex items-center gap-1 hover:text-indigo-600 transition-colors"
-                  @click="prodOpen = !prodOpen"
-                  :aria-expanded="prodOpen.toString()">
+                  aria-expanded="false" aria-haspopup="true">
             Product
-            <svg class="h-3.5 w-3.5 transition-transform duration-200" :class="{ 'rotate-180': prodOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg id="prod-chevron" class="h-3.5 w-3.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
             </svg>
           </button>
-          <div x-show="prodOpen"
-               x-transition:enter="transition ease-out duration-150"
-               x-transition:enter-start="opacity-0 translate-y-1"
-               x-transition:enter-end="opacity-100 translate-y-0"
-               x-transition:leave="transition ease-in duration-100"
-               x-transition:leave-start="opacity-100 translate-y-0"
-               x-transition:leave-end="opacity-0 translate-y-1"
-               @click.outside="prodOpen = false"
+          <div id="prod-menu"
                class="absolute top-full left-0 mt-2 w-56 rounded-xl shadow-lg py-2 z-50 t-card"
                style="display:none; border: 1px solid var(--c-border)">
             <a href="{% url 'email_api' %}"              class="block px-4 py-2 text-sm t-body hover:text-teal-600 transition-colors">Email API</a>
@@ -196,52 +165,46 @@
       </div>
 
       <div class="hidden md:flex items-center gap-3">
-        {# Theme toggle #}
-        <button x-data @click="$store.theme.toggle()"
-                :title="$store.theme.dark ? 'Switch to light mode' : 'Switch to dark mode'"
-                class="theme-btn">
-          <span x-show="$store.theme.dark">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 3v1m0 16v1m8.66-9H21M3 12H2m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 6a6 6 0 100 12A6 6 0 0012 6z"/>
-            </svg>
-          </span>
-          <span x-show="!$store.theme.dark">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-            </svg>
-          </span>
-          <span x-text="$store.theme.dark ? 'Light' : 'Dark'" class="text-xs font-semibold"></span>
+        {# Theme toggle — vanilla JS #}
+        <button id="theme-btn" type="button" class="theme-btn" title="Toggle theme">
+          <svg id="theme-icon-sun" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 3v1m0 16v1m8.66-9H21M3 12H2m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 6a6 6 0 100 12A6 6 0 0012 6z"/>
+          </svg>
+          <svg id="theme-icon-moon" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+          </svg>
+          <span id="theme-label" class="text-xs font-semibold">Dark</span>
         </button>
 
-        <a href="/login/"  class="text-sm font-medium hover:text-teal-600 transition-colors px-3 py-1.5 t-body">
-          Sign in
-        </a>
+        <a href="/login/"  class="text-sm font-medium hover:text-teal-600 transition-colors px-3 py-1.5 t-body">Sign in</a>
         <a href="/signup/" class="rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700 transition-colors shadow-sm">
           Start free trial
         </a>
       </div>
 
-      <button @click="open = !open" class="md:hidden rounded-md p-2 text-gray-500 hover:bg-gray-100 transition-colors">
+      {# Mobile hamburger #}
+      <button type="button" id="mobile-btn" class="md:hidden rounded-md p-2 text-gray-500 hover:bg-gray-100 transition-colors" aria-label="Toggle menu">
         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path x-show="!open" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-          <path x-show="open"  stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          <path id="icon-hamburger" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          <path id="icon-close" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" style="display:none"/>
         </svg>
       </button>
     </div>
   </div>
 
-  <div x-show="open" x-transition class="md:hidden border-t px-4 py-4 space-y-3 t-s1" style="border-color:var(--c-divide)">
-    <div x-data="{ prodOpen: false }">
-      <button type="button" @click="prodOpen = !prodOpen"
+  {# Mobile menu #}
+  <div id="mobile-menu" class="md:hidden border-t px-4 py-4 space-y-3 t-s1" style="display:none; border-color:var(--c-divide)">
+    <div>
+      <button type="button" id="mob-prod-btn"
               class="flex items-center justify-between w-full text-sm font-medium text-gray-700 hover:text-indigo-600">
         Product
-        <svg class="h-4 w-4 transition-transform duration-200" :class="{ 'rotate-180': prodOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg id="mob-prod-chevron" class="h-4 w-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
         </svg>
       </button>
-      <div x-show="prodOpen" x-transition class="mt-2 pl-4 space-y-2 border-l-2 border-indigo-100" style="display:none">
+      <div id="mob-prod-menu" class="mt-2 pl-4 space-y-2 border-l-2 border-indigo-100" style="display:none">
         <a href="{% url 'email_api' %}"             class="block text-sm text-gray-600 hover:text-indigo-600">Email API</a>
         <a href="{% url 'feature_transactional' %}" class="block text-sm text-gray-600 hover:text-indigo-600">Transactional Email</a>
         <a href="{% url 'feature_delivery' %}"      class="block text-sm text-gray-600 hover:text-indigo-600">Email Delivery</a>
@@ -255,26 +218,23 @@
     <a href="{% url 'pricing' %}"  class="block text-sm font-medium text-gray-700 hover:text-indigo-600">Pricing</a>
     <a href="/api/docs/"           class="block text-sm font-medium text-gray-700 hover:text-indigo-600">API docs</a>
     <a href="/login/"              class="block text-sm font-medium t-body hover:text-teal-600">Sign in</a>
-    <a href="/signup/"             class="block rounded-lg bg-teal-600 px-4 py-2 text-center text-sm font-semibold text-white">
-      Start free trial
-    </a>
-    <button x-data @click="$store.theme.toggle()" class="theme-btn w-full justify-center">
-      <span x-show="$store.theme.dark">
-        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M12 3v1m0 16v1m8.66-9H21M3 12H2m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 6a6 6 0 100 12A6 6 0 0012 6z"/>
-        </svg>
-      </span>
-      <span x-show="!$store.theme.dark">
-        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-        </svg>
-      </span>
-      <span x-text="$store.theme.dark ? 'Switch to light mode' : 'Switch to dark mode'"></span>
+    <a href="/signup/"             class="block rounded-lg bg-teal-600 px-4 py-2 text-center text-sm font-semibold text-white">Start free trial</a>
+    <button type="button" id="mob-theme-btn" class="theme-btn w-full justify-center">
+      <svg id="mob-theme-icon-sun" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 3v1m0 16v1m8.66-9H21M3 12H2m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 6a6 6 0 100 12A6 6 0 0012 6z"/>
+      </svg>
+      <svg id="mob-theme-icon-moon" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+      </svg>
+      <span id="mob-theme-label" class="text-xs font-semibold">Dark</span>
     </button>
   </div>
 </nav>
+
+{# ── Nav JS — external file, safe under CSP script-src 'self' ── #}
+<script src="{% static 'js/nav.js' %}"></script>
 
 {# ── Page content ────────────────────────────────────────────────── #}
 {% block content %}{% endblock %}
@@ -399,36 +359,11 @@
   </div>
 </div>
 
-<script>
-function cookieBanner() {
-  return {
-    visible: false,
-    prefs: { performance: true, functional: true, targeting: false },
-    init() {
-      try { if (!localStorage.getItem('wm_cookie_consent')) this.visible = true; }
-      catch (_) { this.visible = true; }
-    },
-    acceptAll() {
-      this.prefs = { performance: true, functional: true, targeting: true };
-      this._persist();
-    },
-    reject() {
-      this.prefs = { performance: false, functional: false, targeting: false };
-      this._persist();
-    },
-    save() { this._persist(); },
-    _persist() {
-      try {
-        localStorage.setItem('wm_cookie_consent', JSON.stringify({
-          ts: Date.now(), strictly_necessary: true, ...this.prefs,
-        }));
-      } catch (_) {}
-      this.visible = false;
-    },
-  };
-}
-</script>
-
 {% block extra_scripts %}{% endblock %}
+
+{# Alpine and highlight load last; cookie-banner must precede alpine so cookieBanner() is defined #}
+<script src="{% static 'js/highlight.min.js' %}"></script>
+<script src="{% static 'js/cookie-banner.js' %}"></script>
+<script src="{% static 'js/alpine.min.js' %}"></script>
 </body>
 </html>

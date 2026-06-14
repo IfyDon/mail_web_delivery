@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import Layout from '../components/common/Layout';
 import { listContactEngagement } from '../api/contacts';
 
 const SCORE_LABEL = (score) => {
@@ -31,8 +30,7 @@ export default function Contacts() {
   const totalPages = Math.max(1, Math.ceil(count / pageSize));
 
   return (
-    <Layout>
-      <div className="p-6 max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold" style={{ color: 'var(--text-head)' }}>
@@ -127,7 +125,6 @@ export default function Contacts() {
             </button>
           </div>
         )}
-      </div>
-    </Layout>
+    </div>
   );
 }

@@ -1,10 +1,13 @@
 """
 Development settings – override base.py for local development.
 """
-from .base import *
+from .base import *  # noqa: F401, F403
 
 DEBUG = True
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*']
+
+# Windows does not support POSIX semaphores used by the default prefork pool.
+CELERY_WORKER_POOL = 'solo'
 
 # Development database (SQLite)
 DATABASES = {
@@ -21,10 +24,27 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 CORS_ALLOWED_ORIGINS = ['http://localhost:3000', 'http://127.0.0.1:3000']
 CORS_ALLOW_CREDENTIALS = True
 
-# Django Debug Toolbar
-INSTALLED_APPS += ['debug_toolbar']
-MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
+# Django Debug Toolbar.
+# Its overlay has z-index:100000000 and captures every click on whatever
+# HTML page it renders on, which breaks interactive UI (nav dropdowns, theme
+# toggle, Swagger "Try it out", etc). So keep it OFF the landing site AND the
+# API doc UIs (Swagger/ReDoc/schema), which are also HTML pages. It still
+# renders on /admin/ and the toolbar's own /__debug__/ panels.
+INSTALLED_APPS += ['debug_toolbar']  # noqa: F821
+MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']  # noqa: F821
 INTERNAL_IPS = ['127.0.0.1', 'localhost']
+
+
+def _show_debug_toolbar(request):
+    # The doc UIs live under /api/ but must stay overlay-free.
+    if request.path.startswith(('/api/docs', '/api/redoc', '/api/schema')):
+        return False
+    return request.path.startswith(('/admin/', '/__debug__/'))
+
+
+DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TOOLBAR_CALLBACK': _show_debug_toolbar,
+}
 
 # Logging for development
 LOGGING = {

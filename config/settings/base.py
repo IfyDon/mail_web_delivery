@@ -21,6 +21,10 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 # Application definition
 INSTALLED_APPS = [
+    # whitenoise.runserver_nostatic must precede django.contrib.staticfiles
+    # so it can intercept the runserver static-file handler.
+    'whitenoise.runserver_nostatic',
+
     # Django built-ins
     'django.contrib.admin',
     'django.contrib.auth',
@@ -35,12 +39,12 @@ INSTALLED_APPS = [
     'rest_framework_api_key',
     'corsheaders',
     'drf_spectacular',
+    'drf_spectacular_sidecar',
     'django_filters',
     'django_otp',
     'django_otp.plugins.otp_totp',
     'django_otp.plugins.otp_static',
     'django_celery_beat',
-    'whitenoise.runserver_nostatic',
 
     # Local apps
     'apps.accounts',
@@ -195,6 +199,15 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'Email delivery service API',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    # Allow unauthenticated access to /api/docs/, /api/redoc/, /api/schema/
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.AllowAny'],
+    'SERVE_AUTHENTICATION': [],
+    # Serve Swagger UI / ReDoc assets from the local sidecar package
+    # instead of loading from an external CDN (which renders a blank page
+    # when the CDN is unreachable).
+    'SWAGGER_UI_DIST': 'SIDECAR',
+    'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
+    'REDOC_DIST': 'SIDECAR',
 }
 
 # CORS

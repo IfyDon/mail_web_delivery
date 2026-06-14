@@ -2,6 +2,9 @@
 from django.conf import settings
 
 
+_DOCS_PATHS = ('/api/docs', '/api/redoc', '/api/schema')
+
+
 class SecurityHeadersMiddleware:
     """Add CSP, X-Content-Type-Options, Referrer-Policy, and Permissions-Policy
     to every response. Values are read from settings so they can be tightened
@@ -13,18 +16,21 @@ class SecurityHeadersMiddleware:
 
         # Build CSP once at startup — override via settings.CSP_DIRECTIVES
         self._csp = self._build_csp()
+        # Swagger UI's webpack bundle requires 'unsafe-eval'; apply only to docs paths.
+        self._docs_csp = self._build_csp(extra_script_src="'unsafe-eval'")
 
     def __call__(self, request):
         response = self.get_response(request)
-        self._apply(response)
+        self._apply(request, response)
         return response
 
     # ── Header assembly ───────────────────────────────────────────────────────
 
-    def _apply(self, response) -> None:
+    def _apply(self, request, response) -> None:
         # Skip if already set (e.g. DRF streaming responses or tests)
         if "Content-Security-Policy" not in response:
-            response["Content-Security-Policy"] = self._csp
+            is_docs = request.path.startswith(_DOCS_PATHS)
+            response["Content-Security-Policy"] = self._docs_csp if is_docs else self._csp
 
         response.setdefault("X-Content-Type-Options", "nosniff")
         response.setdefault("X-Frame-Options", "DENY")
@@ -42,7 +48,7 @@ class SecurityHeadersMiddleware:
             )
 
     @staticmethod
-    def _build_csp() -> str:
+    def _build_csp(extra_script_src: str = "") -> str:
         """Assemble the Content-Security-Policy header value.
 
         Falls back to a sensible production default when settings.CSP_DIRECTIVES
@@ -55,7 +61,10 @@ class SecurityHeadersMiddleware:
                 "script-src": "'self' https://js.stripe.com",
             }
         """
-        directives = getattr(settings, "CSP_DIRECTIVES", None) or _default_csp()
+        directives = dict(getattr(settings, "CSP_DIRECTIVES", None) or _default_csp())
+        if extra_script_src:
+            current = directives.get("script-src", "'self'")
+            directives["script-src"] = f"{current} {extra_script_src}"
         return "; ".join(f"{k} {v}" for k, v in directives.items())
 
 

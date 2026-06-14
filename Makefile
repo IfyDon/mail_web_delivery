@@ -1,28 +1,31 @@
-.PHONY: run worker beat shell migrate test lint
+.PHONY: run worker beat flower shell migrate test lint fmt
+
+PYTHON = .venv/Scripts/python
+CELERY = $(PYTHON) -m celery -A config.celery
 
 run:
-	.venv/bin/python manage.py runserver
+	$(PYTHON) manage.py runserver
 
 worker:
-	.venv/bin/celery -A config.celery worker --loglevel=info
+	$(CELERY) worker --loglevel=info --pool=solo
 
 beat:
-	.venv/bin/celery -A config.celery beat --loglevel=info
+	$(CELERY) beat --loglevel=info
 
 flower:
-	.venv/bin/celery -A config.celery flower
+	$(CELERY) flower --port=5555
 
 shell:
-	.venv/bin/python manage.py shell_plus
+	$(PYTHON) manage.py shell_plus
 
 migrate:
-	.venv/bin/python manage.py makemigrations && .venv/bin/python manage.py migrate
+	$(PYTHON) manage.py makemigrations && $(PYTHON) manage.py migrate
 
 test:
-	.venv/bin/pytest
+	$(PYTHON) -m pytest
 
 lint:
-	.venv/bin/ruff check . && .venv/bin/black --check .
+	$(PYTHON) -m ruff check . && $(PYTHON) -m black --check .
 
 fmt:
-	.venv/bin/black . && .venv/bin/ruff --fix .
+	$(PYTHON) -m black . && $(PYTHON) -m ruff --fix .

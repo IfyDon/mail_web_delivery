@@ -1,4 +1,5 @@
 {% extends "landing/base.html" %}
+{% load static %}
 
 {% block title %}Pricing — WebMail{% endblock %}
 
@@ -31,8 +32,8 @@
           @input="compute()"
           class="flex-1 h-2 accent-indigo-600"
         />
-        <span class="text-sm font-semibold text-gray-900 shrink-0 w-32 text-right font-mono" x-text="emailsLabel"></span>
-        <span class="text-sm text-gray-500 shrink-0">emails / mo</span>
+        <span class="text-sm font-semibold text-gray-900 shrink-0 w-36 text-right font-mono" x-text="emailsLabel"></span>
+        <span class="text-sm text-gray-500 shrink-0" x-show="emailsLabel !== 'Unlimited'">emails / mo</span>
       </div>
 
       <div class="text-center rounded-xl border-2 p-6 transition-colors"
@@ -54,7 +55,12 @@
     <div class="grid gap-8 lg:grid-cols-3">
 
       {# Developer #}
-      <div class="rounded-2xl border border-gray-200 bg-white p-8 flex flex-col">
+      <div id="plan-developer" class="rounded-2xl border border-gray-200 bg-white p-8 flex flex-col relative transition-all duration-500">
+        <div class="your-plan-badge absolute -top-4 left-1/2 -translate-x-1/2 opacity-0 scale-0 transition-all duration-300 origin-bottom pointer-events-none z-10">
+          <span class="rounded-full bg-emerald-500 px-3 py-1 text-xs font-semibold text-white shadow-lg whitespace-nowrap flex items-center gap-1.5">
+            <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span></span>Your plan
+          </span>
+        </div>
         <p class="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-3">Developer</p>
         <div class="flex items-end gap-1 mb-1">
           <span class="text-5xl font-extrabold text-gray-900">Free</span>
@@ -77,7 +83,12 @@
       </div>
 
       {# Startup — highlighted #}
-      <div class="rounded-2xl border-2 border-indigo-500 bg-white p-8 flex flex-col relative shadow-xl">
+      <div id="plan-startup" class="rounded-2xl border-2 border-indigo-500 bg-white p-8 flex flex-col relative shadow-xl transition-all duration-500">
+        <div class="your-plan-badge absolute -top-9 left-1/2 -translate-x-1/2 opacity-0 scale-0 transition-all duration-300 origin-bottom pointer-events-none z-10">
+          <span class="rounded-full bg-emerald-500 px-3 py-1 text-xs font-semibold text-white shadow-lg whitespace-nowrap flex items-center gap-1.5">
+            <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span></span>Your plan
+          </span>
+        </div>
         <div class="absolute -top-3 left-1/2 -translate-x-1/2">
           <span class="rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white shadow">
             Most popular
@@ -106,7 +117,12 @@
       </div>
 
       {# Enterprise #}
-      <div class="rounded-2xl border border-gray-200 bg-white p-8 flex flex-col">
+      <div id="plan-enterprise" class="rounded-2xl border border-gray-200 bg-white p-8 flex flex-col relative transition-all duration-500">
+        <div class="your-plan-badge absolute -top-4 left-1/2 -translate-x-1/2 opacity-0 scale-0 transition-all duration-300 origin-bottom pointer-events-none z-10">
+          <span class="rounded-full bg-emerald-500 px-3 py-1 text-xs font-semibold text-white shadow-lg whitespace-nowrap flex items-center gap-1.5">
+            <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span></span>Your plan
+          </span>
+        </div>
         <p class="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-3">Enterprise</p>
         <div class="flex items-end gap-1 mb-1">
           <span class="text-5xl font-extrabold text-gray-900">Custom</span>
@@ -213,43 +229,5 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
-function usageCalc() {
-  function sliderToEmails(v) {
-    if (v >= 100) return Infinity;
-    const min = Math.log10(1000);
-    const max = Math.log10(500001);
-    return Math.round(Math.pow(10, min + (v / 100) * (max - min)));
-  }
-  function fmt(n) {
-    if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
-    if (n >= 1000)    return Math.round(n / 1000) + 'K';
-    return String(n);
-  }
-  const plans = [
-    { max: 10000,    name: 'Developer', price: 'Free',          color: 'text-gray-700',   border: 'border-gray-300',  desc: 'Up to 10,000 emails free forever.' },
-    { max: 50000,    name: 'Startup',   price: '$29 / month',   color: 'text-indigo-600', border: 'border-indigo-400',desc: 'Up to 50,000 emails per month.' },
-    { max: 500000,   name: 'Growth',    price: '$79 / month',   color: 'text-purple-600', border: 'border-purple-400',desc: 'Up to 500,000 emails per month.' },
-    { max: Infinity, name: 'Enterprise',price: 'Contact us',    color: 'text-gray-700',   border: 'border-gray-400',  desc: 'Volume pricing for high senders.' },
-  ];
-  return {
-    sliderVal: 10,
-    emailsLabel: '1K',
-    planName: 'Developer', planPrice: 'Free',
-    planColor: 'text-gray-700', planBorder: 'border-2 border-gray-300',
-    planDesc: 'Up to 10,000 emails free forever.',
-    compute() {
-      const emails = sliderToEmails(parseInt(this.sliderVal));
-      this.emailsLabel = emails === Infinity ? '500K+' : fmt(emails);
-      const plan = plans.find(p => emails <= p.max) ?? plans[plans.length - 1];
-      this.planName   = plan.name;
-      this.planPrice  = plan.price;
-      this.planColor  = plan.color;
-      this.planBorder = 'border-2 ' + plan.border;
-      this.planDesc   = plan.desc;
-    },
-    init() { this.compute(); },
-  };
-}
-</script>
+<script src="{% static 'js/pricing.js' %}"></script>
 {% endblock %}

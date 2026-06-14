@@ -451,54 +451,8 @@
   </div>
 </section>
 
-<script>
-function heroCopy() {
-  const code = `curl -X POST https://api.webmail.io/v1/send \\
-  -H "Authorization: Bearer <api_key>" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "to":        "user@example.com",
-    "from":      "you@yourdomain.com",
-    "subject":   "Welcome",
-    "html_body": "<h1>Hello!</h1>"
-  }'`;
-  return {
-    copied: false,
-    copy() {
-      navigator.clipboard?.writeText(code).then(() => {
-        this.copied = true;
-        setTimeout(() => { this.copied = false; }, 2000);
-      });
-    },
-  };
-}
-
-function statsBar() {
-  return {
-    init(el) {
-      const io = new IntersectionObserver(([entry]) => {
-        if (entry.isIntersecting) {
-          el.querySelectorAll('.stat-num').forEach((n, i) => {
-            n.style.animationDelay = (i * 0.12) + 's';
-            n.style.animationFillMode = 'both';
-          });
-          io.disconnect();
-        }
-      }, { threshold: 0.4 });
-      io.observe(el);
-    },
-  };
-}
-
-/* Scroll reveal */
-(function () {
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
-    });
-  }, { threshold: 0.12 });
-  document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el));
-})();
-</script>
+{% block extra_scripts %}
+<script src="{% static 'js/landing-index.js' %}"></script>
+{% endblock %}
 
 {% endblock %}

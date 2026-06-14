@@ -16,6 +16,7 @@ factory-boy>=3.3
 Faker>=24.9
 responses>=0.25                # mock HTTP calls
 celery[pytest]>=5.4
+flower>=2.0                    # Celery task monitor UI (localhost:5555)
 
 # ── Code quality ──────────────────────────────────────────────────────
 black>=24.3
