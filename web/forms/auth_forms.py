@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth import authenticate
+from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth.password_validation import validate_password
 
 from apps.accounts.models import CustomUser
@@ -108,3 +109,12 @@ class LoginForm(forms.Form):
 
     def get_user(self):
         return self._user
+
+
+class StyledSetPasswordForm(SetPasswordForm):
+    """SetPasswordForm with Tailwind widget styling for the password reset confirm page."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in ("new_password1", "new_password2"):
+            self.fields[field].widget.attrs.update({"class": _INPUT_CSS})

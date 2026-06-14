@@ -1,6 +1,8 @@
 """URL patterns for the marketing site and public-facing web views."""
+from django.contrib.auth import views as auth_views
 from django.urls import path
 
+from web.forms.auth_forms import StyledSetPasswordForm
 from web.views.account import LoginView, LogoutView, SignUpView
 from web.views.dashboard import DashboardView
 from web.views.landing import (
@@ -29,6 +31,33 @@ urlpatterns = [
     path("signup/", SignUpView.as_view(), name="signup"),
     path("login/", LoginView.as_view(), name="login"),
     path("logout/", LogoutView.as_view(), name="logout"),
+
+    # Password reset flow
+    path("password-reset/",
+         auth_views.PasswordResetView.as_view(
+             template_name="registration/password_reset_form.html",
+             email_template_name="registration/password_reset_email.html",
+             subject_template_name="registration/password_reset_subject.txt",
+             success_url="/password-reset/done/",
+         ),
+         name="password_reset"),
+    path("password-reset/done/",
+         auth_views.PasswordResetDoneView.as_view(
+             template_name="registration/password_reset_done.html",
+         ),
+         name="password_reset_done"),
+    path("password-reset/<uidb64>/<token>/",
+         auth_views.PasswordResetConfirmView.as_view(
+             template_name="registration/password_reset_confirm.html",
+             form_class=StyledSetPasswordForm,
+             success_url="/password-reset/complete/",
+         ),
+         name="password_reset_confirm"),
+    path("password-reset/complete/",
+         auth_views.PasswordResetCompleteView.as_view(
+             template_name="registration/password_reset_complete.html",
+         ),
+         name="password_reset_complete"),
 
     # Dashboard (authenticated)
     path("dashboard/", DashboardView.as_view(), name="dashboard"),
