@@ -4,8 +4,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc libpq-dev libjpeg-dev zlib1g-dev && rm -rf /var/lib/apt/lists/*
-COPY requirements/prod.txt .
-RUN pip install --upgrade pip && pip install --prefix=/install -r prod.txt
+COPY requirements/ requirements/
+RUN pip install --upgrade pip && pip install --prefix=/install -r requirements/prod.txt
 
 # ── Stage 2: runtime ──────────────────────────────────────────────────
 FROM python:3.12-slim
