@@ -27,12 +27,15 @@ SECURE_HSTS_PRELOAD = True
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# Email backend — SendGrid via django-anymail (add 'anymail' to INSTALLED_APPS inherited from base)
-# Switch to 'anymail.backends.amazon_ses.EmailBackend' for AWS SES.
 INSTALLED_APPS = INSTALLED_APPS + ['anymail']  # noqa: F405
-EMAIL_BACKEND = 'anymail.backends.sendgrid.EmailBackend'
+EMAIL_BACKEND = 'anymail.backends.amazon_ses.EmailBackend'
 ANYMAIL = {
-    'SENDGRID_API_KEY': os.getenv('SENDGRID_API_KEY', ''),
+    'AMAZON_SES_CLIENT_PARAMS': {
+        'region_name': os.getenv('AWS_SES_REGION', 'us-east-1'),
+        'aws_access_key_id': os.getenv('AWS_ACCESS_KEY_ID', ''),
+        'aws_secret_access_key': os.getenv('AWS_SECRET_ACCESS_KEY', ''),
+    },
+    'AMAZON_SES_CONFIGURATION_SET_NAME': 'webmail-events',
 }
 
 # CORS

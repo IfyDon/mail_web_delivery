@@ -1,5 +1,3 @@
-version: "3.9"
-
 x-common-env: &common-env
   DJANGO_SETTINGS_MODULE: config.settings.prod
   DATABASE_URL: postgresql://web_mail_user:${DB_PASSWORD}@db:5432/web_mail_db
