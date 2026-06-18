@@ -1,5 +1,5 @@
-{# ── Testimonials carousel ────────────────────────────────────────── #}
-<section class="bg-gray-50 py-24" x-data="testimonials()">
+{# ── Testimonials carousel — vanilla JS, no Alpine dependency ────── #}
+<section class="bg-gray-50 py-24">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
     <div class="text-center mb-14">
@@ -8,8 +8,9 @@
     </div>
 
     <div class="relative overflow-hidden">
-      <div class="flex transition-transform duration-500 ease-in-out"
-           :style="`transform: translateX(-${active * 100}%)`">
+      <div id="testimonials-track"
+           class="flex transition-transform duration-500 ease-in-out"
+           style="transform: translateX(0%)">
 
         {# Slide 0 #}
         <div class="w-full flex-shrink-0 px-4">
@@ -89,25 +90,21 @@
       </div>
     </div>
 
-    {# Dot navigation #}
-    <div class="mt-8 flex justify-center gap-2">
-      <template x-for="(_, i) in 5" :key="i">
-        <button @click="active = i"
-                :class="active === i ? 'bg-indigo-600 w-6' : 'bg-gray-300 w-2'"
-                class="h-2 rounded-full transition-all duration-300"></button>
-      </template>
-    </div>
+    {# Dot navigation — populated by testimonials.js #}
+    <div id="testimonials-dots" class="mt-8 flex justify-center gap-2"></div>
 
     {# Prev / Next arrows #}
     <div class="mt-4 flex justify-center gap-3">
-      <button @click="prev()"
-              class="rounded-full border border-gray-200 bg-white p-2 text-gray-500 hover:border-indigo-300 hover:text-indigo-600 transition-colors shadow-sm">
+      <button id="testimonials-prev"
+              class="rounded-full border border-gray-200 bg-white p-2 text-gray-500 hover:border-indigo-300 hover:text-indigo-600 transition-colors shadow-sm"
+              aria-label="Previous testimonial">
         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
       </button>
-      <button @click="next()"
-              class="rounded-full border border-gray-200 bg-white p-2 text-gray-500 hover:border-indigo-300 hover:text-indigo-600 transition-colors shadow-sm">
+      <button id="testimonials-next"
+              class="rounded-full border border-gray-200 bg-white p-2 text-gray-500 hover:border-indigo-300 hover:text-indigo-600 transition-colors shadow-sm"
+              aria-label="Next testimonial">
         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
         </svg>
@@ -116,5 +113,3 @@
 
   </div>
 </section>
-
-{# testimonials() is defined in static/js/testimonials.js — loaded globally in base.html #}
