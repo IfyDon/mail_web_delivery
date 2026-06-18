@@ -56,12 +56,42 @@
           </figure>
         </div>
 
+        {# Slide 3 #}
+        <div class="w-full flex-shrink-0 px-4">
+          <figure class="mx-auto max-w-2xl rounded-2xl bg-white p-10 shadow-md ring-1 ring-gray-100 text-center">
+            <blockquote class="text-lg text-gray-700 leading-relaxed">
+              "We send 2 million transactional emails a month. Switching to WebMail cut
+              our infrastructure costs by 40% while actually improving inbox placement."
+            </blockquote>
+            <figcaption class="mt-6 flex flex-col items-center gap-1">
+              <div class="h-10 w-10 rounded-full bg-rose-100 flex items-center justify-center text-rose-700 font-bold text-sm">PA</div>
+              <p class="font-semibold text-gray-900 mt-2">Priya Anand</p>
+              <p class="text-sm text-gray-500">VP Engineering, ScaleUp</p>
+            </figcaption>
+          </figure>
+        </div>
+
+        {# Slide 4 #}
+        <div class="w-full flex-shrink-0 px-4">
+          <figure class="mx-auto max-w-2xl rounded-2xl bg-white p-10 shadow-md ring-1 ring-gray-100 text-center">
+            <blockquote class="text-lg text-gray-700 leading-relaxed">
+              "The webhook reliability is night and day versus our old provider. Zero missed
+              events in six months — our support team finally stopped chasing lost emails."
+            </blockquote>
+            <figcaption class="mt-6 flex flex-col items-center gap-1">
+              <div class="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-bold text-sm">TO</div>
+              <p class="font-semibold text-gray-900 mt-2">Tom O'Brien</p>
+              <p class="text-sm text-gray-500">Lead Developer, FinTrack</p>
+            </figcaption>
+          </figure>
+        </div>
+
       </div>
     </div>
 
     {# Dot navigation #}
     <div class="mt-8 flex justify-center gap-2">
-      <template x-for="(_, i) in 3" :key="i">
+      <template x-for="(_, i) in 5" :key="i">
         <button @click="active = i"
                 :class="active === i ? 'bg-indigo-600 w-6' : 'bg-gray-300 w-2'"
                 class="h-2 rounded-full transition-all duration-300"></button>
