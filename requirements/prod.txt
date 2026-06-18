@@ -3,7 +3,7 @@
 # ── Production extras ─────────────────────────────────────────────────
 dj-database-url>=2.1           # prod.py imports this at module level
 sentry-sdk[django]>=1.44       # error tracking
-psycopg2>=2.9                  # compiled (not binary) for production
+psycopg2-binary>=2.9           # binary wheel — correct for Docker (no gcc/sysroot needed)
 uvicorn[standard]>=0.29        # ASGI server (alternative to gunicorn)
 prometheus-client>=0.20        # metrics endpoint
 python-json-logger>=2.0        # structured JSON logging for ELK/Loki
