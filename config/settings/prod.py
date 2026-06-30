@@ -45,7 +45,7 @@ CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'https://example.com').
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
-sentry_dsn = os.getenv('SENTRY_DSN', '')
+sentry_dsn = os.getenv('SENTRY_DSN', '').strip()
 if sentry_dsn:
     sentry_sdk.init(
         dsn=sentry_dsn,
