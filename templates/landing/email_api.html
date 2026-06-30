@@ -240,6 +240,142 @@
   </div>
 </section>
 
+{# ── Webhook Security ─────────────────────────────────────────────── #}
+<section class="py-24 t-s2 border-b t-divide">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16">
+      <span class="inline-block rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 mb-4">Webhooks</span>
+      <h2 class="text-3xl font-bold tracking-tight t-head sm:text-4xl mb-4">
+        HMAC-signed webhook verification
+      </h2>
+      <p class="t-muted text-lg max-w-2xl mx-auto">
+        Every webhook payload is signed with HMAC-SHA256. Verify signatures on your server to
+        reject forged requests.
+      </p>
+    </div>
+
+    <div class="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-start">
+
+      {# Left: explanation + error codes #}
+      <div class="mb-12 lg:mb-0">
+        <h3 class="text-lg font-bold t-head mb-3">Signature header</h3>
+        <p class="t-body text-sm leading-relaxed mb-6">
+          Each request includes an <code class="t-code-bg px-1.5 py-0.5 rounded text-emerald-400 text-sm font-mono">X-WebMail-Signature</code>
+          header containing a hex-encoded HMAC-SHA256 digest of the raw request body,
+          keyed with your webhook secret.
+        </p>
+
+        <h3 class="text-lg font-bold t-head mb-3 mt-8">Rate limits</h3>
+        <div class="rounded-xl border t-card overflow-hidden" style="border-color:var(--c-border)">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b t-divide">
+                <th class="px-4 py-3 text-left font-semibold t-head">Plan</th>
+                <th class="px-4 py-3 text-left font-semibold t-head">Monthly quota</th>
+                <th class="px-4 py-3 text-left font-semibold t-head">Rate limit</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y t-divide">
+              <tr>
+                <td class="px-4 py-3 t-body font-medium">Free</td>
+                <td class="px-4 py-3 t-muted">1,000 emails</td>
+                <td class="px-4 py-3 t-muted">10 req/s</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 t-body font-medium">Pro</td>
+                <td class="px-4 py-3 t-muted">100,000 emails</td>
+                <td class="px-4 py-3 t-muted">100 req/s</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 t-body font-medium">Enterprise</td>
+                <td class="px-4 py-3 t-muted">Unlimited</td>
+                <td class="px-4 py-3 t-muted">Custom</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="text-lg font-bold t-head mb-3 mt-8">API error codes</h3>
+        <div class="rounded-xl border t-card overflow-hidden" style="border-color:var(--c-border)">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b t-divide">
+                <th class="px-4 py-3 text-left font-semibold t-head">Status</th>
+                <th class="px-4 py-3 text-left font-semibold t-head">Code</th>
+                <th class="px-4 py-3 text-left font-semibold t-head">Meaning</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y t-divide text-xs">
+              <tr>
+                <td class="px-4 py-2.5"><span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-mono font-semibold">202</span></td>
+                <td class="px-4 py-2.5 font-mono t-muted">queued</td>
+                <td class="px-4 py-2.5 t-body">Message accepted and queued for delivery</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2.5"><span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded font-mono font-semibold">400</span></td>
+                <td class="px-4 py-2.5 font-mono t-muted">invalid_params</td>
+                <td class="px-4 py-2.5 t-body">Missing or malformed request fields</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2.5"><span class="bg-red-100 text-red-700 px-2 py-0.5 rounded font-mono font-semibold">401</span></td>
+                <td class="px-4 py-2.5 font-mono t-muted">invalid_api_key</td>
+                <td class="px-4 py-2.5 t-body">API key missing, invalid, or revoked</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2.5"><span class="bg-red-100 text-red-700 px-2 py-0.5 rounded font-mono font-semibold">429</span></td>
+                <td class="px-4 py-2.5 font-mono t-muted">rate_limit_exceeded</td>
+                <td class="px-4 py-2.5 t-body">Too many requests — retry with backoff</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2.5"><span class="bg-red-100 text-red-700 px-2 py-0.5 rounded font-mono font-semibold">500</span></td>
+                <td class="px-4 py-2.5 font-mono t-muted">server_error</td>
+                <td class="px-4 py-2.5 t-body">Transient server error — safe to retry</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {# Right: code example #}
+      <div>
+        <div class="rounded-2xl overflow-hidden shadow-xl" style="background:#0f172a">
+          <div class="flex items-center justify-between px-4 py-3 border-b" style="border-color:rgba(255,255,255,.08); background:#1e293b">
+            <span class="text-xs text-gray-400 font-semibold">Webhook verification · Python</span>
+            <span class="text-xs text-emerald-400 font-semibold">HMAC-SHA256</span>
+          </div>
+          <pre class="p-5 text-xs leading-relaxed font-mono overflow-auto text-gray-300 m-0"><code><span class="text-gray-500">import</span> <span class="text-indigo-300">hmac</span>, <span class="text-indigo-300">hashlib</span>
+
+<span class="text-gray-500">def</span> <span class="text-yellow-400">verify_webhook</span>(payload: <span class="text-indigo-300">bytes</span>, signature: <span class="text-indigo-300">str</span>, secret: <span class="text-indigo-300">str</span>) <span class="text-gray-500">-></span> <span class="text-indigo-300">bool</span>:
+    expected = hmac.<span class="text-yellow-400">new</span>(
+        secret.<span class="text-yellow-400">encode</span>(),
+        payload,
+        hashlib.sha256,
+    ).<span class="text-yellow-400">hexdigest</span>()
+    <span class="text-gray-500">return</span> hmac.<span class="text-yellow-400">compare_digest</span>(expected, signature)
+
+
+<span class="text-gray-500"># In your webhook handler (e.g. Django view):</span>
+<span class="text-gray-500">def</span> <span class="text-yellow-400">webhook_handler</span>(request):
+    sig = request.headers.<span class="text-yellow-400">get</span>(<span class="text-green-400">"X-WebMail-Signature"</span>, <span class="text-green-400">""</span>)
+    <span class="text-gray-500">if not</span> <span class="text-yellow-400">verify_webhook</span>(request.body, sig, WEBHOOK_SECRET):
+        <span class="text-gray-500">return</span> HttpResponse(status=<span class="text-orange-400">403</span>)
+
+    event = json.<span class="text-yellow-400">loads</span>(request.body)
+    event_type = event[<span class="text-green-400">"event"</span>]  <span class="text-gray-500"># "delivered" | "opened" | "bounced"</span>
+    ...</code></pre>
+          <div class="border-t px-4 py-3" style="border-color:rgba(255,255,255,.08); background:#1e293b">
+            <p class="text-xs text-gray-500">
+              Use <code class="text-gray-300">hmac.compare_digest</code> to prevent timing attacks.
+              Retry logic uses exponential back-off over 10 attempts.
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
 {# ── Testimonial ──────────────────────────────────────────────────── #}
 <section class="py-24 t-s3 border-b t-divide">
   <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">

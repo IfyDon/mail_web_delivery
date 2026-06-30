@@ -3,6 +3,39 @@
 
 {% block title %}WebMail — Transactional Email Infrastructure{% endblock %}
 
+{% block meta_description %}<meta name="description" content="WebMail: Reliable transactional email infrastructure. 99.9% deliverability SLA, sub-second delivery, HMAC-signed webhooks, and dedicated IPs. Start free with 1,000 emails/month.">{% endblock %}
+
+{% block og_tags %}
+<meta property="og:title" content="WebMail — Transactional Email Infrastructure">
+<meta property="og:description" content="99.9% deliverability SLA, sub-second delivery, zero shared-IP surprises. Free up to 1,000 emails/month.">
+<meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="WebMail">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="WebMail — Transactional Email Infrastructure">
+<meta name="twitter:description" content="99.9% deliverability SLA, sub-second delivery, zero shared-IP surprises.">
+{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "WebMail",
+  "description": "Transactional email infrastructure with 99.9% deliverability SLA, sub-second delivery, and real-time webhooks.",
+  "url": "https://webmailapi.com",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD",
+    "description": "Free tier: 1,000 emails/month"
+  }
+}
+</script>
+{% endblock %}
+
 {% block extra_head %}
 <style>
   /* ── Keyframe animations ─────────────────────────────── */

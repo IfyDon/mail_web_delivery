@@ -1,6 +1,7 @@
 """URL patterns for the marketing site and public-facing web views."""
 from django.contrib.auth import views as auth_views
 from django.urls import path
+from django.views.generic import TemplateView
 
 from web.forms.auth_forms import StyledSetPasswordForm
 from web.views.account import LoginView, LogoutView, SignUpView
@@ -14,6 +15,18 @@ from web.views.landing import (
 from web.views.legal import GDPRView, PrivacyView, TermsView
 
 urlpatterns = [
+    # SEO
+    path(
+        "robots.txt",
+        TemplateView.as_view(template_name="robots.txt", content_type="text/plain"),
+        name="robots",
+    ),
+    path(
+        "sitemap.xml",
+        TemplateView.as_view(template_name="sitemap.xml", content_type="application/xml"),
+        name="sitemap",
+    ),
+
     # Landing pages
     path("", IndexView.as_view(), name="home"),
     path("features/", FeaturesView.as_view(), name="features"),

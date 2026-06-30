@@ -4,6 +4,31 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}WebMail — Transactional Email Infrastructure{% endblock %}</title>
+
+  {# ── SEO & Canonical ── #}
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+  {% block meta_description %}<meta name="description" content="WebMail: Reliable transactional email with 99.9% deliverability SLA, sub-second delivery, and real-time webhooks. Start free with 1,000 emails/month.">{% endblock %}
+
+  {# ── Open Graph & Twitter Card ── #}
+  {% block og_tags %}
+  <meta property="og:title" content="WebMail — Transactional Email Infrastructure">
+  <meta property="og:description" content="99.9% deliverability SLA, sub-second delivery, zero shared-IP surprises. Free up to 1,000 emails/month.">
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="WebMail">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="WebMail — Transactional Email Infrastructure">
+  <meta name="twitter:description" content="99.9% deliverability SLA, sub-second delivery, zero shared-IP surprises.">
+  {% endblock %}
+
+  {# ── Favicon ── #}
+  <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
+  <link rel="apple-touch-icon" href="{% static 'img/favicon.ico' %}">
+
+  {# ── Performance hints ── #}
+  <link rel="preload" as="style" href="{% static 'css/output.css' %}">
+  <link rel="dns-prefetch" href="//api.webmail.io">
+
   <link rel="stylesheet" href="{% static 'css/output.css' %}">
 
   {# ── Anti-FOUC + Alpine store init — external file bypasses CSP inline block ── #}
@@ -117,6 +142,7 @@
   </style>
 
   <link rel="stylesheet" href="{% static 'css/highlight-github-dark.min.css' %}">
+  {% block structured_data %}{% endblock %}
   {% block extra_head %}{% endblock %}
 </head>
 <body class="antialiased">
@@ -166,7 +192,7 @@
 
       <div class="hidden md:flex items-center gap-3">
         {# Theme toggle — vanilla JS #}
-        <button id="theme-btn" type="button" class="theme-btn" title="Toggle theme">
+        <button id="theme-btn" type="button" class="theme-btn" title="Toggle theme" aria-label="Toggle dark/light theme">
           <svg id="theme-icon-sun" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M12 3v1m0 16v1m8.66-9H21M3 12H2m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 6a6 6 0 100 12A6 6 0 0012 6z"/>
@@ -198,7 +224,8 @@
   <div id="mobile-menu" class="md:hidden border-t px-4 py-4 space-y-3 t-s1" style="display:none; border-color:var(--c-divide)">
     <div>
       <button type="button" id="mob-prod-btn"
-              class="flex items-center justify-between w-full text-sm font-medium text-gray-700 hover:text-indigo-600">
+              class="flex items-center justify-between w-full text-sm font-medium text-gray-700 hover:text-indigo-600"
+              aria-expanded="false" aria-haspopup="menu">
         Product
         <svg id="mob-prod-chevron" class="h-4 w-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -219,7 +246,7 @@
     <a href="/api/docs/"           class="block text-sm font-medium text-gray-700 hover:text-indigo-600">API docs</a>
     <a href="/login/"              class="block text-sm font-medium t-body hover:text-teal-600">Sign in</a>
     <a href="/signup/"             class="block rounded-lg bg-teal-600 px-4 py-2 text-center text-sm font-semibold text-white">Start free trial</a>
-    <button type="button" id="mob-theme-btn" class="theme-btn w-full justify-center">
+    <button type="button" id="mob-theme-btn" class="theme-btn w-full justify-center" aria-label="Toggle dark/light theme">
       <svg id="mob-theme-icon-sun" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M12 3v1m0 16v1m8.66-9H21M3 12H2m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 6a6 6 0 100 12A6 6 0 0012 6z"/>
@@ -234,7 +261,7 @@
 </nav>
 
 {# ── Nav JS — external file, safe under CSP script-src 'self' ── #}
-<script src="{% static 'js/nav.js' %}"></script>
+<script src="{% static 'js/nav.js' %}" defer></script>
 
 {# ── Page content ────────────────────────────────────────────────── #}
 {% block content %}{% endblock %}
