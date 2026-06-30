@@ -1,6 +1,6 @@
-"""Billing service: quota checks, Stripe customer lifecycle, invoice sync."""
+"""Billing service: quota checks, Paystack customer lifecycle, transaction sync."""
 import logging
-from datetime import datetime, timezone
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -38,48 +38,50 @@ def increment_quota(user) -> None:
     """Increment the sent counter for the current billing period."""
     from apps.accounts.models import Quota
     Quota.objects.filter(user=user).update(
-        emails_sent_this_month=models_f('emails_sent_this_month') + 1
+        emails_sent_this_month=_f('emails_sent_this_month') + 1
     )
 
 
 def reset_quota(user) -> None:
-    """Reset monthly counter to zero (called by Celery Beat at period start)."""
+    """Reset monthly counter to zero (called on billing period renewal)."""
     from apps.accounts.models import Quota
     Quota.objects.filter(user=user).update(emails_sent_this_month=0)
 
 
 def _plan_limit(user) -> int:
-    """Return the email limit from the user's active subscription plan, or the free default."""
+    """Return email limit from the user's active subscription plan, or the free default."""
     try:
-        sub = user.subscription
-        limit = sub.plan.email_limit
+        limit = user.subscription.plan.email_limit
         return limit if limit is not None else 0  # 0 = unlimited
     except AttributeError:
         return 1_000  # free tier default — subscription not yet created
 
 
-# ── Stripe customer lifecycle ────────────────────────────────────────────────
+# ── Paystack customer lifecycle ──────────────────────────────────────────────
 
-def get_or_create_stripe_customer(user) -> str:
-    """Return the Stripe customer ID for *user*, creating one if needed."""
-    from integrations.stripe.client import StripeClient
+def get_or_create_paystack_customer(user) -> str:
+    """Return the Paystack customer_code for *user*, creating one if needed."""
+    from integrations.paystack.client import PaystackClient
 
     try:
         sub = user.subscription
-        if sub.stripe_customer_id:
-            return sub.stripe_customer_id
+        if sub.paystack_customer_code:
+            return sub.paystack_customer_code
     except AttributeError:
-        pass  # no subscription row yet — will create one below
+        pass
 
-    client = StripeClient()
-    customer_id = client.create_customer(email=user.email, name=user.get_full_name())
+    name_parts = (user.get_full_name() or '').split(' ', 1)
+    first = name_parts[0] if name_parts else ''
+    last = name_parts[1] if len(name_parts) > 1 else ''
 
-    # Persist customer ID — upsert on the subscription record (or create a stub)
-    _upsert_subscription_customer_id(user, customer_id)
-    return customer_id
+    customer_code = PaystackClient().create_customer(
+        email=user.email, first_name=first, last_name=last
+    )
+    _upsert_subscription_customer_code(user, customer_code)
+    return customer_code
 
 
-def _upsert_subscription_customer_id(user, customer_id: str) -> None:
+def _upsert_subscription_customer_code(user, customer_code: str) -> None:
     from apps.billing.models import Plan, Subscription
     free_plan = Plan.objects.filter(slug=Plan.SLUG_FREE).first()
     if free_plan is None:
@@ -87,135 +89,224 @@ def _upsert_subscription_customer_id(user, customer_id: str) -> None:
         return
     Subscription.objects.update_or_create(
         user=user,
-        defaults={'stripe_customer_id': customer_id, 'plan': free_plan},
+        defaults={'paystack_customer_code': customer_code, 'plan': free_plan},
     )
 
 
-# ── Subscription sync from Stripe ────────────────────────────────────────────
+# ── Subscription sync from Paystack ──────────────────────────────────────────
 
-def sync_from_stripe_subscription(stripe_sub) -> None:
-    """Upsert a local Subscription row from a Stripe Subscription object."""
+def sync_from_paystack_subscription(ps_sub: dict) -> None:
+    """Upsert a local Subscription from a Paystack subscription data dict."""
     from apps.billing.models import Plan, Subscription
 
-    stripe_price_id = None
-    if stripe_sub.get('items') and stripe_sub['items']['data']:
-        stripe_price_id = stripe_sub['items']['data'][0]['price']['id']
+    subscription_code = ps_sub.get('subscription_code', '')
+    customer_code = (ps_sub.get('customer') or {}).get('customer_code', '')
+    plan_code = (ps_sub.get('plan') or {}).get('plan_code', '')
+    email_token = ps_sub.get('email_token', '')
 
-    plan = None
-    if stripe_price_id:
-        plan = Plan.objects.filter(stripe_price_id=stripe_price_id, is_active=True).first()
+    plan = Plan.objects.filter(
+        paystack_plan_code=plan_code, is_active=True
+    ).first() if plan_code else None
 
-    # Find subscription by stripe_subscription_id or stripe_customer_id
     sub = (
-        Subscription.objects.filter(stripe_subscription_id=stripe_sub['id']).first()
-        or Subscription.objects.filter(stripe_customer_id=stripe_sub['customer']).first()
+        Subscription.objects.filter(
+            paystack_subscription_code=subscription_code
+        ).first() if subscription_code else None
+    ) or (
+        Subscription.objects.filter(
+            paystack_customer_code=customer_code
+        ).first() if customer_code else None
     )
+
     if sub is None:
         logger.warning(
-            'billing_service: no local Subscription found for Stripe sub %s', stripe_sub['id']
+            'billing_service: no local Subscription for sub=%s customer=%s',
+            subscription_code, customer_code,
         )
         return
 
-    update_fields = {
-        'stripe_subscription_id': stripe_sub['id'],
-        'status': _map_stripe_status(stripe_sub['status']),
-    }
+    updates: dict = {'status': _map_paystack_status(ps_sub.get('status', ''))}
+    if subscription_code:
+        updates['paystack_subscription_code'] = subscription_code
+    if email_token:
+        updates['paystack_email_token'] = email_token
     if plan:
-        update_fields['plan'] = plan
-        # Keep quota in sync with new plan limit
+        updates['plan'] = plan
         from apps.accounts.models import Quota
         Quota.objects.filter(user=sub.user).update(
             monthly_limit=plan.email_limit if plan.email_limit is not None else 0
         )
-    if stripe_sub.get('current_period_start'):
-        update_fields['current_period_start'] = datetime.fromtimestamp(
-            stripe_sub['current_period_start'], tz=timezone.utc
-        )
-    if stripe_sub.get('current_period_end'):
-        update_fields['current_period_end'] = datetime.fromtimestamp(
-            stripe_sub['current_period_end'], tz=timezone.utc
-        )
 
-    for key, val in update_fields.items():
+    for raw_field, model_field in (
+        ('created_at', 'current_period_start'),
+        ('next_payment_date', 'current_period_end'),
+    ):
+        raw = ps_sub.get(raw_field)
+        if raw:
+            try:
+                updates[model_field] = datetime.fromisoformat(raw.replace('Z', '+00:00'))
+            except (ValueError, AttributeError):
+                pass
+
+    for key, val in updates.items():
         setattr(sub, key, val)
     sub.save()
-    logger.info('billing_service: synced subscription %s → %s', stripe_sub['id'], sub.status)
+    logger.info('billing_service: synced subscription %s → %s', subscription_code, sub.status)
 
 
-def _map_stripe_status(stripe_status: str) -> str:
+def _map_paystack_status(ps_status: str) -> str:
     from apps.billing.models import Subscription
-    mapping = {
-        'active':     Subscription.STATUS_ACTIVE,
-        'past_due':   Subscription.STATUS_PAST_DUE,
-        'canceled':   Subscription.STATUS_CANCELLED,
-        'cancelled':  Subscription.STATUS_CANCELLED,
-        'trialing':   Subscription.STATUS_TRIALING,
-        'incomplete': Subscription.STATUS_INCOMPLETE,
-    }
-    return mapping.get(stripe_status, Subscription.STATUS_INCOMPLETE)
+    return {
+        'active':       Subscription.STATUS_ACTIVE,
+        'non-renewing': Subscription.STATUS_CANCELLED,
+        'cancelled':    Subscription.STATUS_CANCELLED,
+        'attention':    Subscription.STATUS_PAST_DUE,
+        'completed':    Subscription.STATUS_CANCELLED,
+        'incomplete':   Subscription.STATUS_INCOMPLETE,
+    }.get(ps_status, Subscription.STATUS_INCOMPLETE)
 
 
-# ── Invoice sync ─────────────────────────────────────────────────────────────
+# ── Transaction sync (invoice equivalent) ────────────────────────────────────
 
-def sync_invoice(stripe_invoice) -> None:
-    """Upsert a local Invoice from a Stripe Invoice object."""
+def sync_transaction(ps_tx: dict) -> None:
+    """Upsert a local Invoice from a Paystack transaction data dict."""
     from apps.billing.models import Invoice, Subscription
 
-    sub = Subscription.objects.filter(
-        stripe_subscription_id=stripe_invoice.get('subscription', '')
-    ).first()
+    reference = ps_tx.get('reference', '')
+    if not reference:
+        return
+
+    subscription_code = ps_tx.get('subscription_code') or (
+        (ps_tx.get('plan') or {}).get('subscription_code', '')
+    )
+    sub = (
+        Subscription.objects.filter(
+            paystack_subscription_code=subscription_code
+        ).first() if subscription_code else None
+    )
+
+    ps_status = ps_tx.get('status', '')
+    invoice_status = {
+        'success': Invoice.STATUS_PAID,
+        'failed':  Invoice.STATUS_OPEN,
+    }.get(ps_status, Invoice.STATUS_OPEN)
+
+    period_start = None
+    for date_field in ('paid_at', 'created_at'):
+        raw = ps_tx.get(date_field)
+        if raw:
+            try:
+                period_start = datetime.fromisoformat(raw.replace('Z', '+00:00'))
+                break
+            except (ValueError, AttributeError):
+                pass
 
     Invoice.objects.update_or_create(
-        stripe_invoice_id=stripe_invoice['id'],
+        paystack_reference=reference,
         defaults={
             'subscription': sub,
-            'amount_paid': stripe_invoice.get('amount_paid', 0),
-            'currency': stripe_invoice.get('currency', 'usd'),
-            'status': stripe_invoice.get('status', Invoice.STATUS_OPEN),
-            'pdf_url': stripe_invoice.get('invoice_pdf', '') or '',
-            'hosted_url': stripe_invoice.get('hosted_invoice_url', '') or '',
-            'period_start': (
-                datetime.fromtimestamp(stripe_invoice['period_start'], tz=timezone.utc)
-                if stripe_invoice.get('period_start') else None
-            ),
-            'period_end': (
-                datetime.fromtimestamp(stripe_invoice['period_end'], tz=timezone.utc)
-                if stripe_invoice.get('period_end') else None
-            ),
+            'amount_paid': ps_tx.get('amount', 0),
+            'currency': ps_tx.get('currency', 'ngn').lower(),
+            'status': invoice_status,
+            'period_start': period_start,
         },
     )
-    logger.info(
-        'billing_service: synced invoice %s (%s)',
-        stripe_invoice['id'], stripe_invoice.get('status'),
-    )
+    logger.info('billing_service: synced transaction %s (%s)', reference, ps_status)
 
 
 # ── Session helpers (called by API views) ────────────────────────────────────
 
 def create_checkout_url(user, plan_slug: str, success_url: str, cancel_url: str) -> str:
-    """Return a Stripe Checkout URL for upgrading to *plan_slug*."""
+    """
+    Initialize a Paystack transaction for *plan_slug* and return the authorization_url.
+    The user is redirected to that URL to complete payment on Paystack's hosted page.
+    On success Paystack redirects to success_url?reference=REF and fires a webhook.
+    cancel_url is stored in metadata so the frontend can redirect on abandonment.
+    """
     from apps.billing.models import Plan
-    from integrations.stripe.client import StripeClient
+    from integrations.paystack.client import PaystackClient
 
     plan = Plan.objects.get(slug=plan_slug, is_active=True)
-    if not plan.stripe_price_id:
-        raise ValueError(f'Plan "{plan_slug}" has no Stripe Price ID configured.')
+    if not plan.paystack_plan_code:
+        raise ValueError(f'Plan "{plan_slug}" has no Paystack Plan Code configured.')
 
-    customer_id = get_or_create_stripe_customer(user)
-    return StripeClient().create_checkout_session(
-        customer_id, plan.stripe_price_id, success_url, cancel_url
+    # price_monthly is in major currency units; Paystack needs the smallest unit (×100)
+    amount = int(plan.price_monthly * 100)
+
+    _ = get_or_create_paystack_customer(user)  # ensures customer record exists
+
+    tx = PaystackClient().initialize_transaction(
+        email=user.email,
+        amount=amount,
+        plan_code=plan.paystack_plan_code,
+        callback_url=success_url,
+        metadata={
+            'user_id': str(user.pk),
+            'plan_slug': plan_slug,
+            'cancel_url': cancel_url,
+        },
     )
+    logger.info(
+        'billing_service: initialized Paystack transaction for user=%s plan=%s',
+        user.pk, plan_slug,
+    )
+    return tx['authorization_url']
 
 
-def create_portal_url(user, return_url: str) -> str:
-    """Return a Stripe Customer Portal URL for the user."""
-    from integrations.stripe.client import StripeClient
-    customer_id = get_or_create_stripe_customer(user)
-    return StripeClient().create_portal_session(customer_id, return_url)
+def create_manage_url(user) -> str:
+    """Return the Paystack subscription manage URL (equivalent of Stripe Customer Portal)."""
+    from integrations.paystack.client import PaystackClient
+
+    try:
+        sub = user.subscription
+        if not sub.paystack_subscription_code:
+            raise ValueError('No active Paystack subscription found.')
+        return PaystackClient().get_manage_link(sub.paystack_subscription_code)
+    except AttributeError as exc:
+        raise ValueError('User has no subscription.') from exc
 
 
-# F expression import kept local to avoid Django app-loading order issues
-def models_f(field: str):
-    """Return a Django F() expression for *field*."""
+def verify_and_sync_transaction(reference: str) -> dict:
+    """
+    Verify a Paystack transaction by reference, sync the invoice and subscription,
+    and return a summary dict {status, plan, subscription_status}.
+    Called by the billing/verify/ endpoint after the user returns from Paystack checkout.
+    """
+    from integrations.paystack.client import PaystackClient
+
+    tx = PaystackClient().verify_transaction(reference)
+    sync_transaction(tx)
+
+    plan_code = (tx.get('plan') or {}).get('plan_code', '')
+    plan_name = (tx.get('plan') or {}).get('name', '')
+
+    subscription_status = ''
+    sub_code = tx.get('subscription_code', '')
+    if sub_code:
+        from apps.billing.models import Subscription
+        try:
+            sub = Subscription.objects.get(paystack_subscription_code=sub_code)
+            subscription_status = sub.status
+        except Subscription.DoesNotExist:
+            pass
+
+    if tx.get('status') == 'success' and sub_code:
+        from apps.billing.models import Subscription
+        try:
+            sub = Subscription.objects.get(paystack_subscription_code=sub_code)
+            reset_quota(sub.user)
+        except Subscription.DoesNotExist:
+            pass
+
+    return {
+        'status': tx.get('status', ''),
+        'plan': plan_name or plan_code,
+        'subscription_status': subscription_status,
+    }
+
+
+# ── Internal helpers ─────────────────────────────────────────────────────────
+
+def _f(field: str):
     from django.db.models import F
     return F(field)

@@ -14,10 +14,11 @@ from api.v1.views.billing import (
     CheckoutSessionView,
     InvoiceListView,
     PortalSessionView,
+    VerifyTransactionView,
 )
 from api.v1.views.stats import StatsView
 from api.v1.views.stats_export import StatsExportView
-from api.v1.views.stripe_webhook import StripeWebhookView
+from api.v1.views.paystack_webhook import PaystackWebhookView
 from api.v1.views.suppressions import (
     SuppressionDetailView,
     SuppressionExportView,
@@ -92,7 +93,7 @@ urlpatterns = [
 
     # Webhooks (order: specific paths before generic <pk>/)
     path("webhooks/ses/", SESInboundView.as_view(), name="ses-inbound"),
-    path("webhooks/stripe/", StripeWebhookView.as_view(), name="stripe-webhook"),
+    path("webhooks/paystack/", PaystackWebhookView.as_view(), name="paystack-webhook"),
     path("webhooks/", WebhookListView.as_view(), name="webhook-list"),
     path("webhooks/<int:pk>/", WebhookDetailView.as_view(), name="webhook-detail"),
     path("webhooks/<int:pk>/test/", WebhookTestView.as_view(), name="webhook-test"),
@@ -112,5 +113,6 @@ urlpatterns = [
     path("billing/", BillingOverviewView.as_view(), name="billing-overview"),
     path("billing/checkout/", CheckoutSessionView.as_view(), name="billing-checkout"),
     path("billing/portal/", PortalSessionView.as_view(), name="billing-portal"),
+    path("billing/verify/", VerifyTransactionView.as_view(), name="billing-verify"),
     path("billing/invoices/", InvoiceListView.as_view(), name="billing-invoices"),
 ]

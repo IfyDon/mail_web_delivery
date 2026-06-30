@@ -1,4 +1,4 @@
-"""Billing API views: overview, Stripe Checkout, Customer Portal, invoices."""
+"""Billing API views: overview, Paystack checkout, subscription portal, invoices."""
 import logging
 
 from django.conf import settings
@@ -13,11 +13,14 @@ from apps.billing.serializers import (
     CheckoutResponseSerializer,
     InvoiceSerializer,
     PortalResponseSerializer,
+    VerifyRequestSerializer,
+    VerifyResponseSerializer,
 )
 from services.billing_service import (
     create_checkout_url,
-    create_portal_url,
+    create_manage_url,
     get_usage,
+    verify_and_sync_transaction,
 )
 
 logger = logging.getLogger(__name__)
@@ -54,7 +57,7 @@ class BillingOverviewView(APIView):
 @extend_schema(
     request=CheckoutRequestSerializer,
     responses={200: CheckoutResponseSerializer},
-    summary='Create a Stripe Checkout session for a plan upgrade',
+    summary='Initialize a Paystack transaction and return the authorization URL',
     tags=['Billing'],
 )
 class CheckoutSessionView(APIView):
@@ -75,33 +78,52 @@ class CheckoutSessionView(APIView):
             )
         except Exception as exc:  # noqa: BLE001
             logger.warning('CheckoutSessionView: %s', exc)
-            return Response(
-                {'detail': str(exc)},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'checkout_url': url})
 
 
 @extend_schema(
     responses={200: PortalResponseSerializer},
-    summary='Create a Stripe Customer Portal session to manage the subscription',
+    summary='Return the Paystack subscription management link',
     tags=['Billing'],
 )
 class PortalSessionView(APIView):
     def post(self, request):
-        return_url = request.data.get('return_url') or f'{_FRONTEND_BASE}/billing'
-
         try:
-            url = create_portal_url(request.user, return_url=return_url)
+            url = create_manage_url(request.user)
         except Exception as exc:  # noqa: BLE001
             logger.warning('PortalSessionView: %s', exc)
-            return Response(
-                {'detail': str(exc)},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'portal_url': url})
+
+
+@extend_schema(
+    request=VerifyRequestSerializer,
+    responses={200: VerifyResponseSerializer},
+    summary='Verify a Paystack transaction after the user returns from checkout',
+    tags=['Billing'],
+)
+class VerifyTransactionView(APIView):
+    """
+    Called by the frontend after Paystack redirects back with ?reference=REF.
+    Verifies the transaction, syncs the invoice and subscription, and returns
+    the outcome.
+    """
+
+    def post(self, request):
+        serializer = VerifyRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        reference = serializer.validated_data['reference']
+
+        try:
+            result = verify_and_sync_transaction(reference)
+        except Exception as exc:  # noqa: BLE001
+            logger.warning('VerifyTransactionView: %s', exc)
+            return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(result)
 
 
 @extend_schema(

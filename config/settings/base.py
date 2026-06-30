@@ -275,12 +275,11 @@ CACHES = {
     }
 }
 
-# ── Stripe ────────────────────────────────────────────────────────────────────
-STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', '')
-STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', '')
-STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET', '')
+# ── Paystack ──────────────────────────────────────────────────────────────────
+PAYSTACK_SECRET_KEY = os.getenv('PAYSTACK_SECRET_KEY', '')
+PAYSTACK_PUBLIC_KEY = os.getenv('PAYSTACK_PUBLIC_KEY', '')
 
-# Base URL for the React frontend (used when building Stripe redirect URLs)
+# Base URL for the React frontend (used when building Paystack redirect URLs)
 FRONTEND_BASE_URL = os.getenv('FRONTEND_BASE_URL', 'http://localhost:3000')
 
 # Public base URL used to build tracking pixel / click-redirect links

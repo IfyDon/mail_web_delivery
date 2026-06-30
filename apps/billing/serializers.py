@@ -24,14 +24,16 @@ class InvoiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Invoice
         fields = [
-            'id', 'stripe_invoice_id', 'amount_paid', 'amount_display',
+            'id', 'paystack_reference', 'amount_paid', 'amount_display',
             'currency', 'status', 'pdf_url', 'hosted_url',
             'period_start', 'period_end', 'created_at',
         ]
 
     def get_amount_display(self, obj):
-        """Return amount as a formatted dollar string, e.g. '$15.00'."""
-        return f'${obj.amount_paid / 100:.2f}'
+        """Return amount formatted in major currency units, e.g. '₦500.00'."""
+        symbols = {'ngn': '₦', 'usd': '$', 'ghs': '₵', 'kes': 'KSh ', 'zar': 'R'}
+        symbol = symbols.get(obj.currency.lower(), obj.currency.upper() + ' ')
+        return f'{symbol}{obj.amount_paid / 100:.2f}'
 
 
 class BillingOverviewSerializer(serializers.Serializer):
@@ -52,3 +54,13 @@ class CheckoutResponseSerializer(serializers.Serializer):
 
 class PortalResponseSerializer(serializers.Serializer):
     portal_url = serializers.URLField()
+
+
+class VerifyRequestSerializer(serializers.Serializer):
+    reference = serializers.CharField()
+
+
+class VerifyResponseSerializer(serializers.Serializer):
+    status = serializers.CharField()
+    plan = serializers.CharField(allow_blank=True)
+    subscription_status = serializers.CharField()

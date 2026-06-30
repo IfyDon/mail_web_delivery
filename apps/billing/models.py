@@ -17,9 +17,9 @@ class Plan(models.Model):
         null=True, blank=True,
         help_text='Monthly email quota. NULL means unlimited.',
     )
-    stripe_price_id = models.CharField(
+    paystack_plan_code = models.CharField(
         max_length=255, blank=True,
-        help_text='Stripe Price ID (e.g. price_XXXX). Empty for free plan.',
+        help_text='Paystack Plan Code (e.g. PLN_XXXX). Empty for free plan.',
     )
     is_active = models.BooleanField(default=True)
     features = models.JSONField(default=list, help_text='List of feature strings shown in UI.')
@@ -56,8 +56,12 @@ class Subscription(models.Model):
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT, related_name='subscriptions')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_ACTIVE)
 
-    stripe_customer_id = models.CharField(max_length=255, blank=True, db_index=True)
-    stripe_subscription_id = models.CharField(max_length=255, blank=True, db_index=True)
+    paystack_customer_code = models.CharField(max_length=255, blank=True, db_index=True)
+    paystack_subscription_code = models.CharField(max_length=255, blank=True, db_index=True)
+    paystack_email_token = models.CharField(
+        max_length=255, blank=True,
+        help_text='Required by Paystack to enable/disable this subscription.',
+    )
 
     current_period_start = models.DateTimeField(null=True, blank=True)
     current_period_end = models.DateTimeField(null=True, blank=True)
@@ -77,7 +81,7 @@ class Subscription(models.Model):
 
 
 class Invoice(models.Model):
-    """A billing invoice synced from Stripe."""
+    """A billing record synced from Paystack transactions."""
 
     STATUS_PAID = 'paid'
     STATUS_OPEN = 'open'
@@ -97,9 +101,11 @@ class Invoice(models.Model):
         related_name='invoices',
         null=True, blank=True,
     )
-    stripe_invoice_id = models.CharField(max_length=255, unique=True)
-    amount_paid = models.IntegerField(default=0, help_text='Amount in cents.')
-    currency = models.CharField(max_length=3, default='usd')
+    paystack_reference = models.CharField(max_length=255, unique=True)
+    amount_paid = models.IntegerField(
+        default=0, help_text='Amount in smallest currency unit (kobo for NGN, cents for USD).'
+    )
+    currency = models.CharField(max_length=3, default='ngn')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_OPEN)
     pdf_url = models.URLField(blank=True)
     hosted_url = models.URLField(blank=True)
@@ -111,4 +117,4 @@ class Invoice(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f'{self.stripe_invoice_id} — {self.status}'
+        return f'{self.paystack_reference} — {self.status}'

@@ -43,7 +43,7 @@ Jinja2>=3.1                    # template rendering in template_service.py
 python-json-logger>=2.0        # structured JSON log output for ELK/Datadog
 
 # ── Billing ───────────────────────────────────────────────────────────
-stripe>=7.0                    # Stripe billing SDK
+# Paystack uses the requests library (already a dependency above) — no extra SDK needed.
 
 # ── Geo & device tracking ───────────────────────────────────────────────────────────────────
 geoip2>=4.8                    # MaxMind GeoLite2 country/city lookups
