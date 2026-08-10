@@ -148,11 +148,11 @@
 
     /* ── Nav CTA button — explicit contrast anchor ─────────────── */
     .btn-cta-nav {
-      background-color: #0d9488;  /* teal-600: 8.4:1 contrast on white text */
+      background-color: #0f766e;  /* teal-700: higher contrast per PageSpeed */
       color: #ffffff;
     }
     .btn-cta-nav:hover {
-      background-color: #0f766e;  /* teal-700 */
+      background-color: #115e59;  /* teal-800 */
     }
   </style>
 
@@ -279,7 +279,7 @@
 <script src="{% static 'js/nav.js' %}" defer></script>
 
 {# ── Page content ────────────────────────────────────────────────── #}
-{% block content %}{% endblock %}
+<main>{% block content %}{% endblock %}</main>
 
 {# ── Footer ──────────────────────────────────────────────────────── #}
 <footer class="bg-gray-950 text-gray-400 mt-auto">

@@ -10,11 +10,14 @@
 
     if (!track) return; // carousel not on this page
 
-    // Build dots
+    // Build dots — p-2 -m-2 expands tap target to 48px without altering visual size
     for (var i = 0; i < TOTAL; i++) {
       var dot = document.createElement('button');
-      dot.className = 'h-2 rounded-full transition-all duration-300';
+      dot.className = 'p-2 -m-2';
       dot.setAttribute('aria-label', 'Go to testimonial ' + (i + 1));
+      var inner = document.createElement('span');
+      inner.className = 'block h-2 rounded-full transition-all duration-300';
+      dot.appendChild(inner);
       dotsWrap.appendChild(dot);
       (function (idx) {
         dot.addEventListener('click', function () { goTo(idx); });
@@ -26,7 +29,8 @@
       track.style.transform = 'translateX(-' + (active * 100) + '%)';
       var dots = dotsWrap.querySelectorAll('button');
       dots.forEach(function (d, i) {
-        d.className = 'h-2 rounded-full transition-all duration-300 ' +
+        var inner = d.querySelector('span');
+        if (inner) inner.className = 'block h-2 rounded-full transition-all duration-300 ' +
           (i === active ? 'bg-indigo-600 w-6' : 'bg-gray-300 w-2');
       });
     }

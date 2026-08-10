@@ -54,8 +54,8 @@
         {# Code block #}
         <div class="rounded-b-xl rounded-tr-xl bg-gray-900 ring-1 ring-white/10 overflow-hidden">
           <div class="flex items-center justify-between px-4 py-2 border-b border-white/10">
-            <span class="text-xs text-gray-400" x-text="tabs[active].label"></span>
-            <button @click="copy()"
+            <span class="text-xs text-gray-300" x-text="tabs[active].label"></span>
+            <button @click="copy()" aria-label="Copy code snippet to clipboard"
                     class="text-xs text-gray-400 hover:text-white transition-colors flex items-center gap-1">
               <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

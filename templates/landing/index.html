@@ -38,27 +38,30 @@
 
 {% block extra_head %}
 <style>
-  /* ── Keyframe animations ─────────────────────────────── */
+  /* ── Keyframe animations (GPU-composited: transform + opacity only) ── */
   @keyframes gradient-shift {
-    0%,100% { background-position: 0% 50%; }
-    50%      { background-position: 100% 50%; }
+    /* translate3d instead of background-position — composited on GPU */
+    0%,100% { transform: translate3d(0, 0, 0); }
+    50%      { transform: translate3d(-15%, -8%, 0); }
   }
   @keyframes float {
     0%,100% { transform: translateY(0); }
     50%      { transform: translateY(-14px); }
   }
   @keyframes blob {
-    0%,100% { transform: translate(0,0) scale(1);    border-radius: 60% 40% 30% 70%/60% 30% 70% 40%; }
-    33%      { transform: translate(24px,-28px) scale(1.05); border-radius: 30% 60% 70% 40%/50% 60% 30% 60%; }
-    66%      { transform: translate(-18px,14px) scale(.96); border-radius: 50% 40% 55% 35%/40% 55% 60% 50%; }
+    /* border-radius removed — not GPU composited; keep only transform */
+    0%,100% { transform: translate(0,0) scale(1); }
+    33%      { transform: translate(24px,-28px) scale(1.05); }
+    66%      { transform: translate(-18px,14px) scale(.96); }
   }
   @keyframes fade-up {
     from { opacity:0; transform:translateY(28px); }
     to   { opacity:1; transform:translateY(0); }
   }
   @keyframes glow-pulse {
-    0%,100% { box-shadow: 0 0 40px rgba(99,102,241,.25), 0 30px 60px rgba(0,0,0,.55); }
-    50%      { box-shadow: 0 0 80px rgba(139,92,246,.4),  0 30px 60px rgba(0,0,0,.55); }
+    /* opacity instead of box-shadow — composited on GPU */
+    0%,100% { opacity: 0.3; }
+    50%      { opacity: 1; }
   }
   @keyframes count-in {
     from { opacity:0; transform:translateY(10px); }
@@ -70,10 +73,12 @@
   }
 
   /* ── Hero ───────────────────────────────────────────── */
-  .hero-bg {
+  .hero-bg { background: #0f0c29; }  /* static base; .hero-grad-layer animates */
+  .hero-grad-layer {
+    position: absolute; inset: -25%;
     background: linear-gradient(135deg, #0f0c29, #1e1b4b, #312e81, #4c1d95, #1e1b4b, #0f0c29);
-    background-size: 400% 400%;
     animation: gradient-shift 14s ease infinite;
+    will-change: transform;
   }
   .hero-orb-1 { animation: blob 16s ease-in-out infinite; }
   .hero-orb-2 { animation: blob 20s ease-in-out infinite reverse; }
@@ -89,7 +94,17 @@
 
   /* ── Code block ─────────────────────────────────────── */
   .code-float { animation: float 6s ease-in-out infinite; }
-  .code-glow  { animation: glow-pulse 4.5s ease-in-out infinite; }
+  /* Glow via ::after opacity — avoids box-shadow repaint */
+  .code-glow-wrap { position: relative; box-shadow: 0 30px 60px rgba(0,0,0,.55); border-radius: 1rem; }
+  .code-glow-wrap::after {
+    content: '';
+    position: absolute; inset: -2px;
+    border-radius: 1.1rem;
+    box-shadow: 0 0 80px rgba(139,92,246,.4);
+    animation: glow-pulse 4.5s ease-in-out infinite;
+    pointer-events: none;
+    z-index: -1;
+  }
 
   /* ── Scroll reveal ──────────────────────────────────── */
   .reveal {
@@ -125,6 +140,14 @@
     background-clip: text;
   }
 
+  /* ── Bottom CTA animated gradient layer ─────────────── */
+  .cta-grad-layer {
+    position: absolute; inset: -25%;
+    background: linear-gradient(135deg, #4c1d95, #312e81, #1e1b4b, #0f0c29, #1e1b4b, #312e81, #4c1d95);
+    animation: gradient-shift 12s ease infinite;
+    will-change: transform;
+  }
+
   /* ── Step number circles — WCAG AA compliant ────────── */
   .step-number {
     display: flex; align-items: center; justify-content: center;
@@ -149,6 +172,9 @@
 
 {# ── Hero ─────────────────────────────────────────────────────────── #}
 <section class="relative overflow-hidden hero-bg text-white">
+
+  {# GPU-composited gradient animation layer #}
+  <div class="hero-grad-layer" aria-hidden="true"></div>
 
   {# Grid overlay #}
   <div class="pointer-events-none absolute inset-0"
@@ -224,7 +250,8 @@
 
       {# Right 40%: code block #}
       <div class="lg:col-span-2 fade-up d-3" x-data="heroCopy()">
-        <div class="code-float code-glow rounded-2xl bg-gray-950 ring-1 ring-white/10 overflow-hidden">
+        <div class="code-glow-wrap">  {# glow via ::after — avoids box-shadow repaint #}
+        <div class="code-float rounded-2xl bg-gray-950 ring-1 ring-white/10 overflow-hidden">
           {# Header bar #}
           <div class="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-gray-900/50">
             <div class="flex gap-1.5">
@@ -232,8 +259,8 @@
               <span class="h-3 w-3 rounded-full bg-yellow-500/80"></span>
               <span class="h-3 w-3 rounded-full bg-green-500/80"></span>
             </div>
-            <span class="text-xs text-gray-400 font-mono">POST /api/v1/send</span>
-            <button @click="copy()"
+            <span class="text-xs text-gray-300 font-mono">POST /api/v1/send</span>
+            <button @click="copy()" aria-label="Copy code to clipboard"
                     class="text-xs text-gray-500 hover:text-gray-300 transition-colors flex items-center gap-1">
               <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -268,6 +295,7 @@
   <span class="text-indigo-300">"submitted_at"</span><span class="text-gray-500">:</span> <span class="text-green-400">"2025-06-06T10:30:00Z"</span>
 <span class="text-gray-500">}</span></code></pre>
         </div>
+        </div>{# /code-glow-wrap #}
       </div>
 
     </div>
@@ -477,7 +505,8 @@
 
 {# ── Final CTA ────────────────────────────────────────────────────── #}
 <section class="relative overflow-hidden py-24 text-white text-center"
-         style="background:linear-gradient(135deg,#1e1b4b,#312e81,#4c1d95); background-size:400% 400%; animation:gradient-shift 12s ease infinite;">
+         style="background:#1e1b4b;">
+  <div class="cta-grad-layer" aria-hidden="true"></div>
   <div class="pointer-events-none absolute inset-0"
        style="background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:40px 40px"></div>
   <div class="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-64 w-64 rounded-full opacity-20"
