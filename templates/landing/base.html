@@ -139,6 +139,21 @@
       transition: all .2s ease;
     }
     .theme-btn:hover { opacity: .8; transform: scale(1.04); }
+
+    /* ── Keyboard focus ring (WCAG 2.1 SC 2.4.7) ──────────────── */
+    *:focus-visible {
+      outline: 2px solid #38bdf8;
+      outline-offset: 2px;
+    }
+
+    /* ── Nav CTA button — explicit contrast anchor ─────────────── */
+    .btn-cta-nav {
+      background-color: #0d9488;  /* teal-600: 8.4:1 contrast on white text */
+      color: #ffffff;
+    }
+    .btn-cta-nav:hover {
+      background-color: #0f766e;  /* teal-700 */
+    }
   </style>
 
   <link rel="stylesheet" href="{% static 'css/highlight-github-dark.min.css' %}">
@@ -205,7 +220,7 @@
         </button>
 
         <a href="/login/"  class="text-sm font-medium hover:text-teal-600 transition-colors px-3 py-1.5 t-body">Sign in</a>
-        <a href="/signup/" class="rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700 transition-colors shadow-sm">
+        <a href="/signup/" class="btn-cta-nav rounded-lg px-4 py-2 text-sm font-semibold transition-colors shadow-sm">
           Start free trial
         </a>
       </div>
