@@ -2,7 +2,9 @@
 import json
 import logging
 
+from django.utils.decorators import method_decorator
 from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 
 from integrations.paystack.client import PaystackClient
@@ -12,6 +14,7 @@ logger = logging.getLogger(__name__)
 PAYSTACK_TRUSTED_IPS = {'52.31.139.75', '52.49.173.169', '52.214.14.220'}
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class PaystackWebhookView(View):
     """
     POST /webhooks/paystack/
