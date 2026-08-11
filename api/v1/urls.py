@@ -1,5 +1,6 @@
 """URL routing for API v1."""
 from django.urls import include, path
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -93,7 +94,7 @@ urlpatterns = [
 
     # Webhooks (order: specific paths before generic <pk>/)
     path("webhooks/ses/", SESInboundView.as_view(), name="ses-inbound"),
-    path("webhooks/paystack/", PaystackWebhookView.as_view(), name="paystack-webhook"),
+    path("webhooks/paystack/", csrf_exempt(PaystackWebhookView.as_view()), name="paystack-webhook"),
     path("webhooks/", WebhookListView.as_view(), name="webhook-list"),
     path("webhooks/<int:pk>/", WebhookDetailView.as_view(), name="webhook-detail"),
     path("webhooks/<int:pk>/test/", WebhookTestView.as_view(), name="webhook-test"),
