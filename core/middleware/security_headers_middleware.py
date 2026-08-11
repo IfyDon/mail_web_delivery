@@ -1,14 +1,16 @@
-"""Security headers middleware: CSP, HSTS, and other protective headers."""
+"""Security headers middleware: CSP, HSTS, CORP, and other protective headers."""
+import secrets
 from django.conf import settings
 
 
 _DOCS_PATHS = ('/api/docs', '/api/redoc', '/api/schema')
+_API_PATHS  = ('/api/',)
 
 
 class SecurityHeadersMiddleware:
-    """Add CSP, X-Content-Type-Options, Referrer-Policy, and Permissions-Policy
-    to every response. Values are read from settings so they can be tightened
-    per environment without touching code.
+    """Add CSP, CORP, X-Content-Type-Options, Referrer-Policy, and
+    Permissions-Policy to every response. Values are read from settings so
+    they can be tightened per environment without touching code.
     """
 
     def __init__(self, get_response):
@@ -20,6 +22,12 @@ class SecurityHeadersMiddleware:
         self._docs_csp = self._build_csp(extra_script_src="'unsafe-eval'")
 
     def __call__(self, request):
+        # Generate a per-request nonce for CSP style-src.
+        # Templates access it via the csp_nonce context processor.
+        # To fully remove 'unsafe-inline' from style-src, all inline style=""
+        # attributes in templates must first be moved to <style nonce="..."> blocks.
+        request.csp_nonce = secrets.token_urlsafe(16)
+
         response = self.get_response(request)
         self._apply(request, response)
         return response
@@ -30,7 +38,12 @@ class SecurityHeadersMiddleware:
         # Skip if already set (e.g. DRF streaming responses or tests)
         if "Content-Security-Policy" not in response:
             is_docs = request.path.startswith(_DOCS_PATHS)
-            response["Content-Security-Policy"] = self._docs_csp if is_docs else self._csp
+            csp = self._docs_csp if is_docs else self._csp
+            # Inject the per-request nonce into style-src
+            nonce = getattr(request, 'csp_nonce', '')
+            if nonce:
+                csp = csp.replace("style-src", f"style-src 'nonce-{nonce}'", 1)
+            response["Content-Security-Policy"] = csp
 
         response.setdefault("X-Content-Type-Options", "nosniff")
         response.setdefault("X-Frame-Options", "DENY")
@@ -38,6 +51,15 @@ class SecurityHeadersMiddleware:
         response.setdefault(
             "Permissions-Policy",
             "geolocation=(), microphone=(), camera=(), payment=()",
+        )
+
+        # Cross-Origin-Resource-Policy:
+        #   API endpoints are consumed cross-origin by third-party clients.
+        #   All other pages (HTML/static) are restricted to same-origin.
+        is_api = request.path.startswith(_API_PATHS)
+        response.setdefault(
+            "Cross-Origin-Resource-Policy",
+            "cross-origin" if is_api else "same-origin",
         )
 
         # HSTS — only meaningful over HTTPS; skip in DEBUG

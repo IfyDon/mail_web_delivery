@@ -35,7 +35,7 @@
   <script src="{% static 'js/theme-init.js' %}"></script>
 
   {# ── Theme CSS variables ──────────────────────────────── #}
-  <style>
+  <style nonce="{{ csp_nonce }}">
     /* Light — green/blue blend */
     :root, [data-theme="light"] {
       --c-bg-body:    linear-gradient(135deg,#ecfdf5 0%,#eff6ff 100%);
@@ -154,6 +154,8 @@
     .btn-cta-nav:hover {
       background-color: #115e59;  /* teal-800 */
     }
+
+    [x-cloak] { display: none !important; }
   </style>
 
   <link rel="stylesheet" href="{% static 'css/highlight-github-dark.min.css' %}">
@@ -177,7 +179,7 @@
         <span class="text-lg font-bold tracking-tight t-head">WebMail</span>
       </a>
 
-      <div class="hidden md:flex items-center gap-7 text-sm font-medium" style="color:var(--c-body)">
+      <div class="hidden md:flex items-center gap-7 text-sm font-medium t-body">
         {# Product dropdown — vanilla JS, no Alpine #}
         <div class="relative" id="prod-wrap">
           <button type="button" id="prod-btn"
@@ -189,8 +191,7 @@
             </svg>
           </button>
           <div id="prod-menu"
-               class="absolute top-full left-0 mt-2 w-56 rounded-xl shadow-lg py-2 z-50 t-card"
-               style="display:none; border: 1px solid var(--c-border)">
+               class="absolute top-full left-0 mt-2 w-56 rounded-xl shadow-lg py-2 z-50 t-card border hidden">
             <a href="{% url 'email_api' %}"              class="block px-4 py-2 text-sm t-body hover:text-teal-600 transition-colors">Email API</a>
             <a href="{% url 'feature_transactional' %}"  class="block px-4 py-2 text-sm t-body hover:text-teal-600 transition-colors">Transactional Email</a>
             <a href="{% url 'feature_delivery' %}"       class="block px-4 py-2 text-sm t-body hover:text-teal-600 transition-colors">Email Delivery</a>
@@ -208,7 +209,7 @@
       <div class="hidden md:flex items-center gap-3">
         {# Theme toggle — vanilla JS #}
         <button id="theme-btn" type="button" class="theme-btn" title="Toggle theme" aria-label="Toggle dark/light theme">
-          <svg id="theme-icon-sun" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none">
+          <svg id="theme-icon-sun" class="h-4 w-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M12 3v1m0 16v1m8.66-9H21M3 12H2m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 6a6 6 0 100 12A6 6 0 0012 6z"/>
           </svg>
@@ -229,14 +230,14 @@
       <button type="button" id="mobile-btn" class="md:hidden rounded-md p-2 text-gray-500 hover:bg-gray-100 transition-colors" aria-label="Toggle menu">
         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path id="icon-hamburger" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-          <path id="icon-close" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" style="display:none"/>
+          <path id="icon-close" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
         </svg>
       </button>
     </div>
   </div>
 
   {# Mobile menu #}
-  <div id="mobile-menu" class="md:hidden border-t px-4 py-4 space-y-3 t-s1" style="display:none; border-color:var(--c-divide)">
+  <div id="mobile-menu" class="md:hidden border-t px-4 py-4 space-y-3 t-s1 t-divide hidden">
     <div>
       <button type="button" id="mob-prod-btn"
               class="flex items-center justify-between w-full text-sm font-medium text-gray-700 hover:text-indigo-600"
@@ -246,7 +247,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
         </svg>
       </button>
-      <div id="mob-prod-menu" class="mt-2 pl-4 space-y-2 border-l-2 border-indigo-100" style="display:none">
+      <div id="mob-prod-menu" class="mt-2 pl-4 space-y-2 border-l-2 border-indigo-100 hidden">
         <a href="{% url 'email_api' %}"             class="block text-sm text-gray-600 hover:text-indigo-600">Email API</a>
         <a href="{% url 'feature_transactional' %}" class="block text-sm text-gray-600 hover:text-indigo-600">Transactional Email</a>
         <a href="{% url 'feature_delivery' %}"      class="block text-sm text-gray-600 hover:text-indigo-600">Email Delivery</a>
@@ -262,7 +263,7 @@
     <a href="/login/"              class="block text-sm font-medium t-body hover:text-teal-600">Sign in</a>
     <a href="/signup/"             class="block rounded-lg bg-teal-600 px-4 py-2 text-center text-sm font-semibold text-white">Start free trial</a>
     <button type="button" id="mob-theme-btn" class="theme-btn w-full justify-center" aria-label="Toggle dark/light theme">
-      <svg id="mob-theme-icon-sun" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none">
+      <svg id="mob-theme-icon-sun" class="h-4 w-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M12 3v1m0 16v1m8.66-9H21M3 12H2m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 6a6 6 0 100 12A6 6 0 0012 6z"/>
       </svg>
@@ -355,7 +356,7 @@
      x-transition:leave-start="opacity-100 translate-y-0"
      x-transition:leave-end="opacity-0 translate-y-4"
      class="fixed bottom-0 inset-x-0 z-50 bg-white border-t border-gray-200 shadow-2xl"
-     style="display:none">
+     x-cloak>
   <div class="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
     <div class="flex flex-col md:flex-row md:items-start gap-5">
       <div class="flex-1 min-w-0">

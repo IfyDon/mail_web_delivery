@@ -8,12 +8,12 @@
     try { localStorage.setItem('wm_theme', t); } catch(e) {}
     var sun  = id('theme-icon-sun'),  moon  = id('theme-icon-moon'),  lbl  = id('theme-label');
     var msun = id('mob-theme-icon-sun'), mmoon = id('mob-theme-icon-moon'), mlbl = id('mob-theme-label');
-    if (sun)   sun.style.display  = dark ? '' : 'none';
-    if (moon)  moon.style.display = dark ? 'none' : '';
-    if (lbl)   lbl.textContent    = dark ? 'Light' : 'Dark';
-    if (msun)  msun.style.display  = dark ? '' : 'none';
-    if (mmoon) mmoon.style.display = dark ? 'none' : '';
-    if (mlbl)  mlbl.textContent    = dark ? 'Light' : 'Dark';
+    if (sun)   sun.classList.toggle('hidden', !dark);
+    if (moon)  moon.classList.toggle('hidden', dark);
+    if (lbl)   lbl.textContent = dark ? 'Light' : 'Dark';
+    if (msun)  msun.classList.toggle('hidden', !dark);
+    if (mmoon) mmoon.classList.toggle('hidden', dark);
+    if (mlbl)  mlbl.textContent = dark ? 'Light' : 'Dark';
   }
 
   // Sync icons on load immediately (theme-init.js handles the data-theme attr)
@@ -29,8 +29,8 @@
     /* ── Desktop Product dropdown ─────────────────────── */
     var wrap = id('prod-wrap'), menu = id('prod-menu'), btn = id('prod-btn'), chev = id('prod-chevron');
     var prodOpen = false;
-    function openProd()  { prodOpen = true;  menu.style.display = ''; chev.style.transform = 'rotate(180deg)'; btn.setAttribute('aria-expanded','true'); }
-    function closeProd() { prodOpen = false; menu.style.display = 'none'; chev.style.transform = ''; btn.setAttribute('aria-expanded','false'); }
+    function openProd()  { prodOpen = true;  menu.classList.remove('hidden'); chev.style.transform = 'rotate(180deg)'; btn.setAttribute('aria-expanded','true'); }
+    function closeProd() { prodOpen = false; menu.classList.add('hidden'); chev.style.transform = ''; btn.setAttribute('aria-expanded','false'); }
 
     if (wrap) {
       wrap.addEventListener('mouseenter', openProd);
@@ -47,9 +47,9 @@
     if (mobileBtn) {
       mobileBtn.addEventListener('click', function() {
         mobileOpen = !mobileOpen;
-        mobileMenu.style.display = mobileOpen ? '' : 'none';
-        if (hamIcon)   hamIcon.style.display   = mobileOpen ? 'none' : '';
-        if (closeIcon) closeIcon.style.display = mobileOpen ? '' : 'none';
+        mobileMenu.classList.toggle('hidden', !mobileOpen);
+        if (hamIcon)   hamIcon.classList.toggle('hidden', mobileOpen);
+        if (closeIcon) closeIcon.classList.toggle('hidden', !mobileOpen);
       });
     }
 
@@ -59,7 +59,7 @@
     if (mobProdBtn) {
       mobProdBtn.addEventListener('click', function() {
         mobProdOpen = !mobProdOpen;
-        mobProdMenu.style.display = mobProdOpen ? '' : 'none';
+        mobProdMenu.classList.toggle('hidden', !mobProdOpen);
         if (mobChev) mobChev.style.transform = mobProdOpen ? 'rotate(180deg)' : '';
       });
     }
