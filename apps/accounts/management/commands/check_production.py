@@ -11,7 +11,6 @@ Exit codes:
 
 import os
 import sys
-import urllib.request
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -86,19 +85,19 @@ class Command(BaseCommand):
             "Set AWS_ACCESS_KEY_ID+AWS_SECRET_ACCESS_KEY, or SENDGRID_API_KEY, or SMTP_HOST",
         ))
 
-        # ── Stripe live keys ──────────────────────────────────────────────────
-        stripe_secret = os.getenv("STRIPE_SECRET_KEY", "")
-        stripe_webhook = os.getenv("STRIPE_WEBHOOK_SECRET", "")
+        # ── Paystack live keys ────────────────────────────────────────────────
+        paystack_secret = os.getenv("PAYSTACK_SECRET_KEY", "")
+        paystack_public = os.getenv("PAYSTACK_PUBLIC_KEY", "")
         checks += [
             self._req(
-                "STRIPE_SECRET_KEY is a live key (sk_live_...)",
-                stripe_secret.startswith("sk_live_"),
-                "Replace the test Stripe key with your live sk_live_... key",
+                "PAYSTACK_SECRET_KEY is a live key (sk_live_...)",
+                paystack_secret.startswith("sk_live_"),
+                "Set PAYSTACK_SECRET_KEY=sk_live_... from Paystack Dashboard → Settings → API Keys",
             ),
             self._req(
-                "STRIPE_WEBHOOK_SECRET is set",
-                bool(stripe_webhook) and stripe_webhook.startswith("whsec_"),
-                "Run deploy/06_stripe.sh to register the webhook and get the signing secret",
+                "PAYSTACK_PUBLIC_KEY is a live key (pk_live_...)",
+                paystack_public.startswith("pk_live_"),
+                "Set PAYSTACK_PUBLIC_KEY=pk_live_... from Paystack Dashboard → Settings → API Keys",
             ),
         ]
 
