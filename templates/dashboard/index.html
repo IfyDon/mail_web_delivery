@@ -2,27 +2,230 @@
 {% block title %}Dashboard — WebMail{% endblock %}
 
 {% block content %}
-<div class="py-10">
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+<div>
+
+    {# ── Top bar ──────────────────────────────────────────────────────── #}
     <div class="flex items-center justify-between mb-8">
-      <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
-      <form method="post" action="/logout/">
-        {% csrf_token %}
-        <button type="submit"
-                class="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
-          Sign out
-        </button>
-      </form>
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <p class="text-sm text-gray-500 mt-0.5">{{ request.user.email }}</p>
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="/api/redoc/" target="_blank"
+           class="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors">
+          API Docs
+        </a>
+        <a href="/admin/" target="_blank"
+           class="text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
+          Admin
+        </a>
+        <form method="post" action="/logout/">
+          {% csrf_token %}
+          <button type="submit"
+                  class="text-sm font-medium text-red-500 hover:text-red-700 transition-colors">
+            Sign out
+          </button>
+        </form>
+      </div>
     </div>
-    <div class="rounded-lg border border-gray-200 bg-white p-8 text-center">
-      <p class="text-gray-500 text-sm">
-        Welcome, <span class="font-semibold text-gray-900">{{ request.user.email }}</span>
-      </p>
-      <p class="mt-4 text-sm text-gray-400">
-        Your dashboard is loading. Check <a href="/api/docs/" class="text-indigo-600 hover:underline">API docs</a>
-        or visit the <a href="/admin/" class="text-indigo-600 hover:underline">admin panel</a>.
-      </p>
+
+    {# ── Checkout status banner ───────────────────────────────────────── #}
+    {% if checkout_status == 'success' %}
+    <div class="mb-6 rounded-lg bg-green-50 border border-green-200 px-5 py-4 flex items-center gap-3">
+      <svg class="h-5 w-5 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <p class="text-sm font-medium text-green-800">Payment successful — your plan has been upgraded.</p>
     </div>
-  </div>
+    {% elif checkout_status == 'cancel' %}
+    <div class="mb-6 rounded-lg bg-yellow-50 border border-yellow-200 px-5 py-4 flex items-center gap-3">
+      <svg class="h-5 w-5 text-yellow-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <p class="text-sm font-medium text-yellow-800">Checkout was cancelled. Your plan was not changed.</p>
+    </div>
+    {% endif %}
+
+    {# ── Stats row ────────────────────────────────────────────────────── #}
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+
+      {# Plan card #}
+      <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-widest text-gray-400">Current Plan</p>
+        <p class="mt-2 text-2xl font-bold text-gray-900">
+          {% if plan %}{{ plan.name }}{% else %}Free{% endif %}
+        </p>
+        {% if plan and plan.price_monthly > 0 %}
+        <p class="text-xs text-gray-500 mt-1">${{ plan.price_monthly }}/mo</p>
+        {% else %}
+        <p class="text-xs text-gray-500 mt-1">Free tier</p>
+        {% endif %}
+      </div>
+
+      {# Usage card #}
+      <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-widest text-gray-400">Emails This Month</p>
+        <p class="mt-2 text-2xl font-bold text-gray-900">
+          {% if quota %}{{ quota.emails_sent_this_month|default:0 }}{% else %}0{% endif %}
+        </p>
+        <p class="text-xs text-gray-500 mt-1">
+          of {% if quota and quota.monthly_limit %}{{ quota.monthly_limit }}{% else %}1,000{% endif %} limit
+        </p>
+        {% if quota %}
+        <div class="mt-2 h-1.5 w-full rounded-full bg-gray-100">
+          <div class="h-1.5 rounded-full {% if usage_pct >= 90 %}bg-red-500{% elif usage_pct >= 70 %}bg-yellow-500{% else %}bg-indigo-500{% endif %}"
+               style="width: {{ usage_pct }}%"></div>
+        </div>
+        {% endif %}
+      </div>
+
+      {# Domains card #}
+      <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-widest text-gray-400">Domains</p>
+        <p class="mt-2 text-2xl font-bold text-gray-900">{{ domain_count }}</p>
+        <p class="text-xs text-gray-500 mt-1">verified sending domains</p>
+      </div>
+
+      {# Webhooks card #}
+      <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-widest text-gray-400">Webhooks</p>
+        <p class="mt-2 text-2xl font-bold text-gray-900">{{ webhook_count }}</p>
+        <p class="text-xs text-gray-500 mt-1">active endpoints</p>
+      </div>
+
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      {# ── API Keys ─────────────────────────────────────────────────── #}
+      <div class="lg:col-span-2 rounded-xl border border-gray-200 bg-white shadow-sm">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <h2 class="text-sm font-semibold text-gray-900">API Keys</h2>
+          <a href="/dashboard/api-keys/create/"
+             class="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700 transition-colors">
+            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            New Key
+          </a>
+        </div>
+
+        {% if api_keys %}
+        <ul class="divide-y divide-gray-50">
+          {% for key in api_keys %}
+          <li class="px-6 py-4 flex items-center justify-between gap-4">
+            <div class="min-w-0">
+              <p class="text-sm font-medium text-gray-900 truncate">{{ key.name }}</p>
+              <p class="text-xs text-gray-400 font-mono mt-0.5">{{ key.prefix }}••••••••</p>
+              {% if key.last_used_at %}
+              <p class="text-xs text-gray-400 mt-0.5">Last used {{ key.last_used_at|timesince }} ago</p>
+              {% else %}
+              <p class="text-xs text-gray-400 mt-0.5">Never used</p>
+              {% endif %}
+            </div>
+            <form method="post" action="/dashboard/api-keys/{{ key.pk }}/revoke/"
+                  onsubmit="return confirm('Revoke this key? This cannot be undone.')">
+              {% csrf_token %}
+              <button type="submit"
+                      class="text-xs text-red-500 hover:text-red-700 font-medium transition-colors">
+                Revoke
+              </button>
+            </form>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <div class="px-6 py-10 text-center">
+          <svg class="mx-auto h-8 w-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+          </svg>
+          <p class="mt-2 text-sm text-gray-500">No API keys yet.</p>
+          <a href="/dashboard/api-keys/create/"
+             class="mt-3 inline-block text-sm font-medium text-indigo-600 hover:text-indigo-800">
+            Create your first key →
+          </a>
+        </div>
+        {% endif %}
+      </div>
+
+      {# ── Sidebar ──────────────────────────────────────────────────── #}
+      <div class="space-y-6">
+
+        {# Quick links #}
+        <div class="rounded-xl border border-gray-200 bg-white shadow-sm">
+          <div class="px-6 py-4 border-b border-gray-100">
+            <h2 class="text-sm font-semibold text-gray-900">Quick Links</h2>
+          </div>
+          <ul class="divide-y divide-gray-50 text-sm">
+            <li>
+              <a href="/api/redoc/" target="_blank"
+                 class="flex items-center justify-between px-6 py-3 text-gray-700 hover:bg-gray-50 transition-colors">
+                API Reference
+                <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                </svg>
+              </a>
+            </li>
+            <li>
+              <a href="/pricing/"
+                 class="flex items-center justify-between px-6 py-3 text-gray-700 hover:bg-gray-50 transition-colors">
+                {% if plan and plan.price_monthly > 0 %}Manage Plan{% else %}Upgrade Plan{% endif %}
+                <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+              </a>
+            </li>
+            <li>
+              <a href="/admin/"
+                 class="flex items-center justify-between px-6 py-3 text-gray-700 hover:bg-gray-50 transition-colors">
+                Admin Panel
+                <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                </svg>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        {# Subscription status #}
+        <div class="rounded-xl border border-gray-200 bg-white shadow-sm">
+          <div class="px-6 py-4 border-b border-gray-100">
+            <h2 class="text-sm font-semibold text-gray-900">Subscription</h2>
+          </div>
+          <div class="px-6 py-4">
+            {% if subscription %}
+              <div class="flex items-center gap-2 mb-3">
+                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
+                  {% if subscription.status == 'active' %}bg-green-100 text-green-800
+                  {% elif subscription.status == 'past_due' %}bg-red-100 text-red-800
+                  {% elif subscription.status == 'cancelled' %}bg-gray-100 text-gray-600
+                  {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                  {{ subscription.status|title }}
+                </span>
+                <span class="text-sm text-gray-700 font-medium">{{ plan.name }}</span>
+              </div>
+              {% if subscription.current_period_end %}
+              <p class="text-xs text-gray-400">Renews {{ subscription.current_period_end|date:"N j, Y" }}</p>
+              {% endif %}
+              {% if subscription.paystack_subscription_code %}
+              <a href="/api/v1/billing/portal/"
+                 class="mt-3 block text-center rounded-lg border border-gray-200 px-4 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                Manage Billing
+              </a>
+              {% endif %}
+            {% else %}
+              <p class="text-sm text-gray-500 mb-3">You are on the Free plan.</p>
+              <a href="/pricing/"
+                 class="block text-center rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700 transition-colors">
+                Upgrade Now
+              </a>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
 </div>
 {% endblock %}
