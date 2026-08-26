@@ -66,8 +66,8 @@ class CheckoutSessionView(APIView):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
-        success_url = data.get('success_url') or f'{_FRONTEND_BASE}/billing?checkout=success'
-        cancel_url = data.get('cancel_url') or f'{_FRONTEND_BASE}/billing?checkout=cancel'
+        success_url = data.get('success_url') or f'{_FRONTEND_BASE}/dashboard/?checkout=success'
+        cancel_url = data.get('cancel_url') or f'{_FRONTEND_BASE}/pricing/?checkout=cancel'
 
         try:
             url = create_checkout_url(
