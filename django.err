@@ -1,0 +1,22 @@
+Watching for file changes with StatReloader
+INFO 2026-06-14 15:58:20,835 autoreload 14888 7632 Watching for file changes with StatReloader
+C:\Users\USA\Desktop\Project\mail\web_mail\web\urls.py changed, reloading.
+INFO 2026-06-14 16:19:44,010 autoreload 14888 7632 C:\Users\USA\Desktop\Project\mail\web_mail\web\urls.py changed, reloading.
+Watching for file changes with StatReloader
+INFO 2026-06-14 16:19:46,010 autoreload 19124 1608 Watching for file changes with StatReloader
+C:\Users\USA\Desktop\Project\mail\web_mail\web\urls.py changed, reloading.
+INFO 2026-06-14 16:19:57,989 autoreload 19124 1608 C:\Users\USA\Desktop\Project\mail\web_mail\web\urls.py changed, reloading.
+Watching for file changes with StatReloader
+INFO 2026-06-14 16:20:00,290 autoreload 3476 16780 Watching for file changes with StatReloader
+C:\Users\USA\Desktop\Project\mail\web_mail\web\forms\auth_forms.py changed, reloading.
+INFO 2026-06-14 16:21:35,206 autoreload 3476 16780 C:\Users\USA\Desktop\Project\mail\web_mail\web\forms\auth_forms.py changed, reloading.
+Watching for file changes with StatReloader
+INFO 2026-06-14 16:21:40,137 autoreload 12976 12564 Watching for file changes with StatReloader
+C:\Users\USA\Desktop\Project\mail\web_mail\web\forms\auth_forms.py changed, reloading.
+INFO 2026-06-14 16:21:50,006 autoreload 12976 12564 C:\Users\USA\Desktop\Project\mail\web_mail\web\forms\auth_forms.py changed, reloading.
+Watching for file changes with StatReloader
+INFO 2026-06-14 16:21:54,847 autoreload 18996 4188 Watching for file changes with StatReloader
+C:\Users\USA\Desktop\Project\mail\web_mail\web\urls.py changed, reloading.
+INFO 2026-06-14 16:22:08,529 autoreload 18996 4188 C:\Users\USA\Desktop\Project\mail\web_mail\web\urls.py changed, reloading.
+Watching for file changes with StatReloader
+INFO 2026-06-14 16:22:11,504 autoreload 20072 17136 Watching for file changes with StatReloader
