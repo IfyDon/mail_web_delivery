@@ -1,0 +1,129 @@
+INFO 2026-06-14 14:11:17,557 command 3456 13752 Visit me at http://0.0.0.0:5555
+INFO 2026-06-14 14:11:17,575 command 3456 13752 Broker: redis://localhost:6379/0
+DEBUG 2026-06-14 14:11:17,579 functional 3456 13752 
+def chunks(task, it, n):
+    return 1
+
+DEBUG 2026-06-14 14:11:17,582 functional 3456 13752 
+def send_email_task(self, message_id):
+    return 1
+
+DEBUG 2026-06-14 14:11:17,586 functional 3456 13752 
+def process_inbound_event(payload, source):
+    return 1
+
+DEBUG 2026-06-14 14:11:17,591 functional 3456 13752 
+def backend_cleanup():
+    return 1
+
+DEBUG 2026-06-14 14:11:17,593 functional 3456 13752 
+def group(self, tasks, result, group_id, partial_args, add_to_parent=0):
+    return 1
+
+DEBUG 2026-06-14 14:11:17,596 functional 3456 13752 
+def decay_engagement_scores():
+    return 1
+
+DEBUG 2026-06-14 14:11:17,597 functional 3456 13752 
+def cleanup_old_events():
+    return 1
+
+DEBUG 2026-06-14 14:11:17,598 functional 3456 13752 
+def accumulate(self, *args, **kwargs):
+    return 1
+
+DEBUG 2026-06-14 14:11:17,599 functional 3456 13752 
+def chain(*args, **kwargs):
+    return 1
+
+DEBUG 2026-06-14 14:11:17,599 functional 3456 13752 
+def dispatch_webhook_task(self, webhook_id, log_id, payload):
+    return 1
+
+DEBUG 2026-06-14 14:11:17,600 functional 3456 13752 
+def unlock_chord(self, group_id, callback, interval=0, max_retries=1, result=2, Result=3, GroupResult=4, result_from_tuple=5, **kwargs):
+    return 1
+
+DEBUG 2026-06-14 14:11:17,600 functional 3456 13752 
+def chord(self, header, body, partial_args=0, interval=1, countdown=2, max_retries=3, eager=4, **kwargs):
+    return 1
+
+DEBUG 2026-06-14 14:11:17,601 functional 3456 13752 
+def reset_monthly_quotas():
+    return 1
+
+DEBUG 2026-06-14 14:11:17,602 functional 3456 13752 
+def dispatch_scheduled_messages():
+    return 1
+
+DEBUG 2026-06-14 14:11:17,602 functional 3456 13752 
+def xmap(task, it):
+    return 1
+
+DEBUG 2026-06-14 14:11:17,603 functional 3456 13752 
+def xstarmap(task, it):
+    return 1
+
+DEBUG 2026-06-14 14:11:17,605 functional 3456 13752 
+def aggregate_daily_stats(target_date_iso=0):
+    return 1
+
+INFO 2026-06-14 14:11:17,606 command 3456 13752 Registered tasks: 
+['celery.accumulate',
+ 'celery.backend_cleanup',
+ 'celery.chain',
+ 'celery.chord',
+ 'celery.chord_unlock',
+ 'celery.chunks',
+ 'celery.group',
+ 'celery.map',
+ 'celery.starmap',
+ 'workers.tasks.aggregate_stats.aggregate_daily_stats',
+ 'workers.tasks.cleanup.cleanup_old_events',
+ 'workers.tasks.decay_scores.decay_engagement_scores',
+ 'workers.tasks.dispatch_scheduled.dispatch_scheduled_messages',
+ 'workers.tasks.process_events.process_inbound_event',
+ 'workers.tasks.reset_quota.reset_monthly_quotas',
+ 'workers.tasks.send_email.send_email_task',
+ 'workers.tasks.webhook_dispatch.dispatch_webhook_task']
+DEBUG 2026-06-14 14:11:17,607 command 3456 13752 Settings: {'cookie_secret': '8s2n9umpiFeJhBDXbi7UIXwubc5HUifbq1zFD1S0pvHawfZmIER2e5MPoF_vTeQDdmsR8H8hz_Pd4LT9VnGW7A',
+ 'debug': False,
+ 'login_url': '/login',
+ 'static_path': 'C:\\Users\\USA\\Desktop\\Project\\mail\\web_mail\\.venv\\Lib\\site-packages\\flower\\static',
+ 'static_url_prefix': '/static/',
+ 'template_path': 'C:\\Users\\USA\\Desktop\\Project\\mail\\web_mail\\.venv\\Lib\\site-packages\\flower\\templates'}
+DEBUG 2026-06-14 14:11:17,608 events 3456 13752 Starting enable events timer...
+DEBUG 2026-06-14 14:11:17,614 events 3456 2004 Capturing events...
+INFO 2026-06-14 14:11:17,618 mixins 3456 2004 Connected to redis://localhost:6379/0
+DEBUG 2026-06-14 14:11:17,636 inspector 3456 14236 Sending stats inspect command
+DEBUG 2026-06-14 14:11:17,636 inspector 3456 1740 Sending active_queues inspect command
+DEBUG 2026-06-14 14:11:17,636 inspector 3456 9804 Sending registered inspect command
+DEBUG 2026-06-14 14:11:17,636 inspector 3456 9036 Sending scheduled inspect command
+DEBUG 2026-06-14 14:11:17,636 inspector 3456 17316 Sending active inspect command
+DEBUG 2026-06-14 14:11:17,636 inspector 3456 10184 Sending reserved inspect command
+DEBUG 2026-06-14 14:11:17,636 inspector 3456 18456 Sending revoked inspect command
+DEBUG 2026-06-14 14:11:17,636 inspector 3456 4064 Sending conf inspect command
+DEBUG 2026-06-14 14:11:18,663 inspector 3456 1740 Inspect command active_queues took 1.03s to complete
+DEBUG 2026-06-14 14:11:18,673 inspector 3456 9036 Inspect command scheduled took 1.03s to complete
+DEBUG 2026-06-14 14:11:18,673 inspector 3456 17316 Inspect command active took 1.03s to complete
+DEBUG 2026-06-14 14:11:18,675 inspector 3456 9804 Inspect command registered took 1.04s to complete
+DEBUG 2026-06-14 14:11:18,847 inspector 3456 14236 Inspect command stats took 1.21s to complete
+DEBUG 2026-06-14 14:11:18,848 inspector 3456 10184 Inspect command reserved took 1.20s to complete
+DEBUG 2026-06-14 14:11:18,848 inspector 3456 18456 Inspect command revoked took 1.20s to complete
+DEBUG 2026-06-14 14:11:18,848 inspector 3456 4064 Inspect command conf took 1.20s to complete
+DEBUG 2026-06-14 14:12:16,904 inspector 3456 9804 Sending stats inspect command
+DEBUG 2026-06-14 14:12:16,905 inspector 3456 17316 Sending conf inspect command
+DEBUG 2026-06-14 14:12:16,904 inspector 3456 10184 Sending registered inspect command
+DEBUG 2026-06-14 14:12:16,904 inspector 3456 18456 Sending scheduled inspect command
+DEBUG 2026-06-14 14:12:16,904 inspector 3456 4064 Sending active inspect command
+DEBUG 2026-06-14 14:12:16,904 inspector 3456 1740 Sending reserved inspect command
+DEBUG 2026-06-14 14:12:16,905 inspector 3456 9036 Sending revoked inspect command
+DEBUG 2026-06-14 14:12:16,904 inspector 3456 14236 Sending active_queues inspect command
+DEBUG 2026-06-14 14:12:16,928 inspector 3456 10184 Inspect command registered took 0.02s to complete
+DEBUG 2026-06-14 14:12:16,945 inspector 3456 18456 Inspect command scheduled took 0.04s to complete
+DEBUG 2026-06-14 14:12:16,946 inspector 3456 4064 Inspect command active took 0.03s to complete
+DEBUG 2026-06-14 14:12:16,946 inspector 3456 1740 Inspect command reserved took 0.03s to complete
+DEBUG 2026-06-14 14:12:16,947 inspector 3456 17316 Inspect command conf took 0.04s to complete
+DEBUG 2026-06-14 14:12:16,947 inspector 3456 9804 Inspect command stats took 0.04s to complete
+DEBUG 2026-06-14 14:12:16,948 inspector 3456 9036 Inspect command revoked took 0.03s to complete
+DEBUG 2026-06-14 14:12:16,951 inspector 3456 14236 Inspect command active_queues took 0.03s to complete
