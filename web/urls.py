@@ -5,6 +5,7 @@ from django.views.generic import TemplateView
 
 from web.forms.auth_forms import StyledSetPasswordForm
 from web.views.account import LoginView, LogoutView, SignUpView
+from web.views.api_keys import APIKeyCreateView, APIKeyRevokeView
 from web.views.dashboard import DashboardView
 from web.views.landing import (
     EmailApiView, FeaturesView, IndexView, PricingView,
@@ -74,6 +75,8 @@ urlpatterns = [
 
     # Dashboard (authenticated)
     path("dashboard/", DashboardView.as_view(), name="dashboard"),
+    path("dashboard/api-keys/create/", APIKeyCreateView.as_view(), name="api_key_create"),
+    path("dashboard/api-keys/<int:pk>/revoke/", APIKeyRevokeView.as_view(), name="api_key_revoke"),
 
     # Legal pages
     path("terms/", TermsView.as_view(), name="terms"),
