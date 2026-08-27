@@ -8,7 +8,7 @@ from web.views.account import LoginView, LogoutView, SignUpView, TwoFactorVerify
 from web.views.analytics_ui import AnalyticsView
 from web.views.api_keys import APIKeyCreateView, APIKeyRevokeView
 from web.views.audit_ui import AuditLogView
-from web.views.billing_ui import BillingView
+from web.views.billing_ui import BillingCheckoutView, BillingView
 from web.views.dashboard import DashboardView
 from web.views.domains_ui import DomainDeleteView, DomainVerifyView, DomainsView
 from web.views.messages_ui import MessageDetailView, MessageResendView, MessagesView
@@ -117,6 +117,7 @@ urlpatterns = [
     path("dashboard/messages/<uuid:pk>/resend/", MessageResendView.as_view(), name="message_resend"),
     path("dashboard/analytics/", AnalyticsView.as_view(), name="analytics"),
     path("dashboard/billing/", BillingView.as_view(), name="billing"),
+    path("dashboard/billing/checkout/", BillingCheckoutView.as_view(), name="billing_checkout"),
 
     path("dashboard/team/", TeamView.as_view(), name="team"),
     path("dashboard/team/<int:pk>/role/", TeamRoleChangeView.as_view(), name="team_role_change"),

@@ -110,10 +110,17 @@
           <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> CSV export</li>
           <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Email support (&lt; 4 h SLA)</li>
         </ul>
+        {% if request.user.is_authenticated %}
+        <a href="/dashboard/billing/checkout/?plan=startup"
+           class="block rounded-lg bg-indigo-600 py-2.5 text-center text-sm font-semibold text-white hover:bg-indigo-700 shadow transition-colors">
+          Upgrade to Startup
+        </a>
+        {% else %}
         <a href="/signup/?plan=startup"
            class="block rounded-lg bg-indigo-600 py-2.5 text-center text-sm font-semibold text-white hover:bg-indigo-700 shadow transition-colors">
           Start free trial
         </a>
+        {% endif %}
       </div>
 
       {# Enterprise #}

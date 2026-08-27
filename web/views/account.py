@@ -21,6 +21,9 @@ class SignUpView(View):
         if form.is_valid():
             user = form.save()
             login(request, user)
+            plan = request.GET.get("plan", "").strip()
+            if plan and plan != "free":
+                return redirect(f"/dashboard/billing/checkout/?plan={plan}")
             return redirect("dashboard")
         return render(request, self.template_name, {"form": form})
 
