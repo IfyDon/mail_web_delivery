@@ -94,12 +94,9 @@ class LoginForm(forms.Form):
         email = cleaned.get("email", "").lower()
         password = cleaned.get("password")
         if email and password:
-            try:
-                user_obj = CustomUser.objects.get(email=email)
-                username = user_obj.username
-            except CustomUser.DoesNotExist as exc:
-                raise forms.ValidationError("Invalid email or password.") from exc
-            user = authenticate(username=username, password=password)
+            # EmailBackend.authenticate() takes the identifier directly in `username=`
+            # and looks it up as an email — do not resolve to the DB username field here.
+            user = authenticate(username=email, password=password)
             if user is None:
                 raise forms.ValidationError("Invalid email or password.")
             if not user.is_active:

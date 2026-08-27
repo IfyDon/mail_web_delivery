@@ -23,7 +23,7 @@ def invite_member(owner, email: str, role: str) -> TeamMember:
         member.accepted_at = None
         member.save()
 
-    accept_url = f"{settings.FRONTEND_BASE_URL}/accept-invite/{token}/"
+    accept_url = f"{settings.BASE_URL}/accept-invite/{token}/"
     send_mail(
         subject=f"You've been invited to join {owner.email}'s WebMail account",
         message=(

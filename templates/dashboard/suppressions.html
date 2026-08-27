@@ -1,1 +1,101 @@
-<!-- Suppression list (no JS) -->
+{% extends "dashboard/base.html" %}
+{% block title %}Suppressions{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="text-xl font-bold text-gray-900">Suppression List</h1>
+    <p class="text-sm text-gray-500 mt-0.5">{{ total }} total suppressed address{{ total|pluralize:"es" }}</p>
+  </div>
+</div>
+
+{# ── Add manual suppression ───────────────────────────────────────────── #}
+<div class="rounded-xl border border-gray-200 bg-white shadow-sm p-5 mb-5">
+  <h2 class="text-sm font-semibold text-gray-900 mb-3">Suppress an address manually</h2>
+  <form method="post" action="/dashboard/suppressions/" class="flex gap-3">
+    {% csrf_token %}
+    <input type="email" name="email" placeholder="user@example.com" required
+           class="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+    <button type="submit"
+            class="rounded-lg bg-gray-800 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-900 transition-colors">
+      Suppress
+    </button>
+  </form>
+</div>
+
+{# ── Filter tabs ──────────────────────────────────────────────────────── #}
+<div class="flex flex-wrap gap-2 mb-5">
+  <a href="/dashboard/suppressions/"
+     class="rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors
+            {% if not reason_filter %}bg-gray-800 text-white border-gray-800{% else %}bg-white text-gray-600 border-gray-200 hover:bg-gray-50{% endif %}">
+    All ({{ total }})
+  </a>
+  {% for val, label in reason_choices %}
+  <a href="/dashboard/suppressions/?reason={{ val }}"
+     class="rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors
+            {% if reason_filter == val %}bg-gray-800 text-white border-gray-800{% else %}bg-white text-gray-600 border-gray-200 hover:bg-gray-50{% endif %}">
+    {{ label }}
+  </a>
+  {% endfor %}
+</div>
+
+{# ── Table ────────────────────────────────────────────────────────────── #}
+<div class="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+  {% if suppressions %}
+  <table class="min-w-full text-sm">
+    <thead class="bg-gray-50 border-b border-gray-200">
+      <tr>
+        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Email</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Reason</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Suppressed</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400"></th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-50">
+      {% for sup in suppressions %}
+      <tr class="hover:bg-gray-50 transition-colors">
+        <td class="px-5 py-3 font-mono text-xs text-gray-900">{{ sup.email }}</td>
+        <td class="px-5 py-3">
+          <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium
+            {% if sup.reason == 'bounce' %}bg-orange-100 text-orange-800
+            {% elif sup.reason == 'complaint' %}bg-red-100 text-red-800
+            {% elif sup.reason == 'unsubscribe' %}bg-gray-100 text-gray-600
+            {% else %}bg-blue-100 text-blue-800{% endif %}">
+            {{ sup.get_reason_display }}
+          </span>
+        </td>
+        <td class="px-5 py-3 text-xs text-gray-400">{{ sup.created_at|date:"M j, Y" }}</td>
+        <td class="px-5 py-3 text-right">
+          <form method="post" action="/dashboard/suppressions/{{ sup.pk }}/remove/"
+                onsubmit="return confirm('Remove {{ sup.email }} from suppression list? Future emails will be delivered.')">
+            {% csrf_token %}
+            <button type="submit"
+                    class="text-xs text-indigo-600 hover:text-indigo-800 font-medium transition-colors">
+              Remove
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if suppressions|length == 200 %}
+  <div class="px-5 py-3 border-t border-gray-100 text-center">
+    <p class="text-xs text-gray-400">Showing most recent 200 entries. Use the API to export the full list.</p>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="py-14 text-center">
+    <svg class="mx-auto h-10 w-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+    </svg>
+    <p class="mt-3 text-sm text-gray-500">
+      No suppressions{% if reason_filter %} for this reason{% endif %}.
+    </p>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

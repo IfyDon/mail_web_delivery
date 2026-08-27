@@ -1,1 +1,136 @@
-<!-- Fallback domain list (no JS) -->
+{% extends "dashboard/base.html" %}
+{% block title %}Domains{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="text-xl font-bold text-gray-900">Sending Domains</h1>
+    <p class="text-sm text-gray-500 mt-0.5">Add and verify domains you'll send email from</p>
+  </div>
+</div>
+
+{# ── Add domain form ──────────────────────────────────────────────────── #}
+<div class="rounded-xl border border-gray-200 bg-white shadow-sm p-5 mb-6">
+  <h2 class="text-sm font-semibold text-gray-900 mb-3">Add a domain</h2>
+  <form method="post" action="/dashboard/domains/" class="flex gap-3">
+    {% csrf_token %}
+    <input type="text" name="domain" placeholder="mail.yourdomain.com" required
+           class="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+    <button type="submit"
+            class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors">
+      Add Domain
+    </button>
+  </form>
+</div>
+
+{# ── Domain list ──────────────────────────────────────────────────────── #}
+{% if domains %}
+<div class="space-y-4">
+  {% for domain in domains %}
+  <div class="rounded-xl border border-gray-200 bg-white shadow-sm">
+
+    {# Header row #}
+    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+      <div class="flex items-center gap-3">
+        <span class="font-mono text-sm font-semibold text-gray-900">{{ domain.domain }}</span>
+        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium
+          {% if domain.verification_status == 'verified' %}bg-green-100 text-green-800
+          {% elif domain.verification_status == 'pending' %}bg-yellow-100 text-yellow-800
+          {% elif domain.verification_status == 'failed' %}bg-red-100 text-red-800
+          {% else %}bg-gray-100 text-gray-600{% endif %}">
+          {{ domain.get_verification_status_display }}
+        </span>
+        {# Per-record status badges #}
+        <span class="text-xs {% if domain.spf_verified %}text-green-600{% else %}text-gray-400{% endif %}">SPF{% if domain.spf_verified %} ✓{% else %} ✗{% endif %}</span>
+        <span class="text-xs {% if domain.dkim_verified %}text-green-600{% else %}text-gray-400{% endif %}">DKIM{% if domain.dkim_verified %} ✓{% else %} ✗{% endif %}</span>
+        <span class="text-xs {% if domain.dmarc_verified %}text-green-600{% else %}text-gray-400{% endif %}">DMARC{% if domain.dmarc_verified %} ✓{% else %} ✗{% endif %}</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <form method="post" action="/dashboard/domains/{{ domain.pk }}/verify/">
+          {% csrf_token %}
+          <button type="submit"
+                  class="rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-700 hover:bg-indigo-100 transition-colors">
+            Verify DNS
+          </button>
+        </form>
+        <form method="post" action="/dashboard/domains/{{ domain.pk }}/delete/"
+              onsubmit="return confirm('Remove {{ domain.domain }}?')">
+          {% csrf_token %}
+          <button type="submit"
+                  class="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-100 transition-colors">
+            Remove
+          </button>
+        </form>
+      </div>
+    </div>
+
+    {# DNS records #}
+    {% with dns=domain.get_dns_instructions %}
+    <div class="px-5 py-4 space-y-4 text-sm">
+
+      {# SPF #}
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1.5">
+          SPF Record {% if domain.spf_verified %}<span class="text-green-600">✓ Verified</span>{% endif %}
+        </p>
+        <div class="grid grid-cols-[80px_1fr] gap-x-3 gap-y-1 text-xs font-mono bg-gray-50 rounded-lg px-4 py-3">
+          <span class="text-gray-400">Type</span><span class="text-gray-800">{{ dns.spf.record_type }}</span>
+          <span class="text-gray-400">Host</span><span class="text-gray-800 break-all">{{ dns.spf.host }}</span>
+          <span class="text-gray-400">Value</span><span class="text-gray-800 break-all">{{ dns.spf.value }}</span>
+        </div>
+      </div>
+
+      {# DKIM #}
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1.5">
+          DKIM Record {% if domain.dkim_verified %}<span class="text-green-600">✓ Verified</span>{% endif %}
+        </p>
+        {% if domain.dkim_public_key %}
+        <div class="grid grid-cols-[80px_1fr] gap-x-3 gap-y-1 text-xs font-mono bg-gray-50 rounded-lg px-4 py-3">
+          <span class="text-gray-400">Type</span><span class="text-gray-800">{{ dns.dkim.record_type }}</span>
+          <span class="text-gray-400">Host</span><span class="text-gray-800 break-all">{{ dns.dkim.host }}</span>
+          <span class="text-gray-400">Value</span>
+          <span class="text-gray-800 break-all text-[10px] leading-relaxed">v=DKIM1; k=rsa; p={{ domain.dkim_public_key|slice:"27:-25"|cut:"\n" }}</span>
+        </div>
+        {% else %}
+        <p class="text-xs text-gray-400 italic">DKIM keys not generated yet. Re-add the domain to generate them.</p>
+        {% endif %}
+      </div>
+
+      {# DMARC #}
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1.5">
+          DMARC Record {% if domain.dmarc_verified %}<span class="text-green-600">✓ Verified</span>{% endif %}
+        </p>
+        <div class="grid grid-cols-[80px_1fr] gap-x-3 gap-y-1 text-xs font-mono bg-gray-50 rounded-lg px-4 py-3">
+          <span class="text-gray-400">Type</span><span class="text-gray-800">{{ dns.dmarc.record_type }}</span>
+          <span class="text-gray-400">Host</span><span class="text-gray-800 break-all">{{ dns.dmarc.host }}</span>
+          <span class="text-gray-400">Value</span><span class="text-gray-800 break-all">{{ dns.dmarc.value }}</span>
+        </div>
+      </div>
+
+    </div>
+    {% endwith %}
+
+    {% if domain.last_checked_at %}
+    <div class="px-5 pb-3">
+      <p class="text-xs text-gray-400">Last checked {{ domain.last_checked_at|timesince }} ago</p>
+    </div>
+    {% endif %}
+
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="rounded-xl border-2 border-dashed border-gray-200 py-16 text-center">
+  <svg class="mx-auto h-10 w-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+          d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+  </svg>
+  <p class="mt-3 text-sm text-gray-500">No sending domains yet.</p>
+  <p class="text-xs text-gray-400 mt-1">Add a domain above to get started.</p>
+</div>
+{% endif %}
+
+{% endblock %}

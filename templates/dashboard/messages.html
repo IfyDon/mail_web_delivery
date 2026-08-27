@@ -1,1 +1,95 @@
-<!-- Fallback message history table (no JS) -->
+{% extends "dashboard/base.html" %}
+{% block title %}Messages{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="text-xl font-bold text-gray-900">Message History</h1>
+    <p class="text-sm text-gray-500 mt-0.5">All emails sent through your account</p>
+  </div>
+</div>
+
+{# ── Filters ──────────────────────────────────────────────────────────── #}
+<div class="flex flex-wrap gap-2 mb-5">
+  <a href="/dashboard/messages/"
+     class="rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors
+            {% if not status_filter %}bg-indigo-600 text-white border-indigo-600{% else %}bg-white text-gray-600 border-gray-200 hover:bg-gray-50{% endif %}">
+    All
+  </a>
+  {% for val, label in status_choices %}
+  <a href="/dashboard/messages/?status={{ val }}"
+     class="rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors
+            {% if status_filter == val %}bg-indigo-600 text-white border-indigo-600{% else %}bg-white text-gray-600 border-gray-200 hover:bg-gray-50{% endif %}">
+    {{ label }}
+  </a>
+  {% endfor %}
+</div>
+
+{# ── Table ────────────────────────────────────────────────────────────── #}
+<div class="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+  {% if messages_list %}
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-50 border-b border-gray-200">
+        <tr>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">To</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Subject</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Status</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Stream</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Sent</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-50">
+        {% for msg in messages_list %}
+        <tr class="hover:bg-gray-50 transition-colors cursor-pointer"
+            onclick="window.location='/dashboard/messages/{{ msg.pk }}/'">
+          <td class="px-5 py-3 text-gray-900 font-mono text-xs">
+            <a href="/dashboard/messages/{{ msg.pk }}/" class="hover:text-indigo-600">{{ msg.to_address }}</a>
+          </td>
+          <td class="px-5 py-3 text-gray-700 max-w-xs truncate">{{ msg.subject }}</td>
+          <td class="px-5 py-3">
+            <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium
+              {% if msg.status == 'delivered' %}bg-green-100 text-green-800
+              {% elif msg.status == 'sent' %}bg-blue-100 text-blue-800
+              {% elif msg.status == 'opened' %}bg-purple-100 text-purple-800
+              {% elif msg.status == 'clicked' %}bg-indigo-100 text-indigo-800
+              {% elif msg.status == 'queued' or msg.status == 'sending' %}bg-yellow-100 text-yellow-800
+              {% elif msg.status == 'failed' or msg.status == 'permanently_failed' %}bg-red-100 text-red-800
+              {% elif msg.status == 'suppressed' %}bg-orange-100 text-orange-800
+              {% elif msg.status == 'scheduled' %}bg-sky-100 text-sky-800
+              {% else %}bg-gray-100 text-gray-600{% endif %}">
+              {{ msg.get_status_display }}
+            </span>
+          </td>
+          <td class="px-5 py-3">
+            <span class="text-xs text-gray-500">{{ msg.stream|title }}</span>
+          </td>
+          <td class="px-5 py-3 text-xs text-gray-400 whitespace-nowrap">
+            {{ msg.created_at|date:"M j, Y H:i" }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if messages_list|length == 100 %}
+  <div class="px-5 py-3 border-t border-gray-100 text-center">
+    <p class="text-xs text-gray-400">Showing most recent 100 messages. Use the API to export more.</p>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="py-16 text-center">
+    <svg class="mx-auto h-10 w-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+    </svg>
+    <p class="mt-3 text-sm text-gray-500">No messages
+      {% if status_filter %}with status "{{ status_filter }}"{% endif %} yet.
+    </p>
+    <p class="mt-1 text-xs text-gray-400">Send your first email via the API using your API key.</p>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

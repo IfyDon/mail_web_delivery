@@ -118,3 +118,8 @@ class Invoice(models.Model):
 
     def __str__(self):
         return f'{self.paystack_reference} — {self.status}'
+
+    @property
+    def amount_display(self):
+        """amount_paid in the major currency unit (e.g. naira, not kobo)."""
+        return self.amount_paid / 100

@@ -1,1 +1,62 @@
-<!-- Fallback template list (no JS) -->
+{% extends "dashboard/base.html" %}
+{% block title %}Templates{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="text-xl font-bold text-gray-900">Email Templates</h1>
+    <p class="text-sm text-gray-500 mt-0.5">Reusable templates for your transactional emails</p>
+  </div>
+  <a href="/dashboard/templates/create/"
+     class="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors">
+    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+    </svg>
+    New Template
+  </a>
+</div>
+
+{% if templates %}
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  {% for tpl in templates %}
+  <div class="rounded-xl border border-gray-200 bg-white shadow-sm p-5 flex flex-col justify-between">
+    <div>
+      <p class="text-sm font-semibold text-gray-900 truncate">{{ tpl.name }}</p>
+      {% if tpl.subject %}
+      <p class="text-xs text-gray-400 mt-0.5 truncate">{{ tpl.subject }}</p>
+      {% endif %}
+      {% if tpl.description %}
+      <p class="text-xs text-gray-500 mt-2 line-clamp-2">{{ tpl.description }}</p>
+      {% endif %}
+    </div>
+    <div class="mt-4 flex items-center justify-between">
+      <p class="text-xs text-gray-400">Updated {{ tpl.updated_at|timesince }} ago</p>
+      <div class="flex items-center gap-2">
+        <a href="/dashboard/templates/{{ tpl.pk }}/edit/"
+           class="text-xs font-medium text-indigo-600 hover:text-indigo-800 transition-colors">Edit</a>
+        <form method="post" action="/dashboard/templates/{{ tpl.pk }}/delete/"
+              onsubmit="return confirm('Delete {{ tpl.name }}? This cannot be undone.')">
+          {% csrf_token %}
+          <button type="submit" class="text-xs font-medium text-red-500 hover:text-red-700 transition-colors">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="rounded-xl border-2 border-dashed border-gray-200 py-16 text-center">
+  <svg class="mx-auto h-10 w-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+  </svg>
+  <p class="mt-3 text-sm text-gray-500">No templates yet.</p>
+  <a href="/dashboard/templates/create/"
+     class="mt-3 inline-block text-sm font-medium text-indigo-600 hover:text-indigo-800">
+    Create your first template →
+  </a>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -20,8 +20,8 @@ def _client_ip(request) -> str:
 class IPWhitelistMiddleware:
     # Paths exempt from IP checking even for whitelisted users
     _EXEMPT_PREFIXES = (
-        "/api/v1/webhooks/stripe/",  # Stripe IPs can't be whitelisted
-        "/api/v1/webhooks/ses/",     # AWS SNS IPs can't be whitelisted
+        "/api/v1/webhooks/paystack/",  # Paystack IPs can't be whitelisted
+        "/api/v1/webhooks/ses/",       # AWS SNS IPs can't be whitelisted
     )
 
     def __init__(self, get_response):

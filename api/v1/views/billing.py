@@ -25,7 +25,7 @@ from services.billing_service import (
 
 logger = logging.getLogger(__name__)
 
-_FRONTEND_BASE = getattr(settings, 'FRONTEND_BASE_URL', 'http://localhost:3000')
+_FRONTEND_BASE = getattr(settings, 'BASE_URL', 'http://localhost:8000')
 
 
 @extend_schema(
