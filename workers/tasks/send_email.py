@@ -79,6 +79,12 @@ def send_email_task(self, message_id: str) -> dict:
         'List-Unsubscribe': make_list_unsubscribe_header(msg.from_address, unsubscribe_url),
         'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
     }
+    if msg.reply_to:
+        headers['Reply-To'] = msg.reply_to
+    if msg.cc_addresses:
+        headers['Cc'] = list(msg.cc_addresses)
+    if msg.bcc_addresses:
+        headers['Bcc'] = list(msg.bcc_addresses)
 
     # CAN-SPAM §5(a)(6): every commercial email must include a valid physical address.
     physical_address = getattr(settings, 'PHYSICAL_ADDRESS', '')
@@ -95,7 +101,16 @@ def send_email_task(self, message_id: str) -> dict:
         if text:
             text = text + footer_text
 
-    payload = {'html': html, 'text': text}
+    attachments = [
+        {
+            'filename': att.filename,
+            'content_type': att.content_type,
+            'content': att.file.read(),
+        }
+        for att in msg.attachments.all()
+    ]
+
+    payload = {'html': html, 'text': text, 'attachments': attachments}
 
     msg.status = Message.STATUS_SENDING
     msg.attempts += 1
@@ -149,15 +164,24 @@ def _relay(headers: dict, payload: dict) -> dict:
 
     # Final fallback: Django's configured EMAIL_BACKEND (console in dev)
     from django.core.mail import EmailMultiAlternatives
+    extra_headers = {
+        k: v for k, v in headers.items()
+        if k not in ('Subject', 'From', 'To', 'Cc', 'Bcc', 'Reply-To')
+    }
     mail = EmailMultiAlternatives(
         subject=headers.get('Subject', ''),
         body=payload.get('text', '') or payload.get('html', ''),
         from_email=headers.get('From', ''),
         to=[headers.get('To', '')],
-        headers={k: v for k, v in headers.items() if k not in ('Subject', 'From', 'To')},
+        cc=headers.get('Cc') or None,
+        bcc=headers.get('Bcc') or None,
+        reply_to=[headers['Reply-To']] if headers.get('Reply-To') else None,
+        headers=extra_headers,
     )
     if payload.get('html'):
         mail.attach_alternative(payload['html'], 'text/html')
+    for att in payload.get('attachments', []):
+        mail.attach(att['filename'], att['content'], att['content_type'])
     mail.send()
     return {'MessageId': 'dev-console', 'provider': 'django'}
 

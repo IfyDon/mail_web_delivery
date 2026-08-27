@@ -58,6 +58,9 @@ class Message(models.Model):
 
     to_address = models.EmailField()
     from_address = models.EmailField()
+    reply_to = models.EmailField(blank=True)
+    cc_addresses = models.JSONField(default=list, blank=True)
+    bcc_addresses = models.JSONField(default=list, blank=True)
     subject = models.CharField(max_length=998)
     html_body = models.TextField(blank=True)
     text_body = models.TextField(blank=True)
@@ -97,3 +100,17 @@ class Message(models.Model):
 
     def __str__(self):
         return f'{self.from_address} → {self.to_address} [{self.status}]'
+
+
+class MessageAttachment(models.Model):
+    """A file attached to a Message, uploaded as base64 content via the send API."""
+
+    message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='attachments')
+    file = models.FileField(upload_to='attachments/%Y/%m/%d/')
+    filename = models.CharField(max_length=255)
+    content_type = models.CharField(max_length=100, default='application/octet-stream')
+    size = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.filename} ({self.size} bytes) on {self.message_id}'

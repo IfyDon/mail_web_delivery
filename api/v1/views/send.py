@@ -61,6 +61,9 @@ def _build_message(user, data: dict, domain) -> Message:
         template_version=template_version,
         to_address=data["to"],
         from_address=data["from_address"],
+        reply_to=data.get("reply_to", ""),
+        cc_addresses=data.get("cc", []),
+        bcc_addresses=data.get("bcc", []),
         subject=data["subject"],
         html_body=html_body,
         text_body=text_body,
@@ -70,6 +73,28 @@ def _build_message(user, data: dict, domain) -> Message:
         scheduled_at=send_at if is_scheduled else None,
         status=Message.STATUS_SCHEDULED if is_scheduled else Message.STATUS_QUEUED,
     )
+
+
+def _save_attachments(msg: Message, attachments_data: list) -> None:
+    """Decode base64 attachment payloads and store them against *msg*."""
+    if not attachments_data:
+        return
+
+    import base64
+
+    from django.core.files.base import ContentFile
+
+    from apps.email_messages.models import MessageAttachment
+
+    for att in attachments_data:
+        raw = base64.b64decode(att["content"])
+        MessageAttachment.objects.create(
+            message=msg,
+            file=ContentFile(raw, name=att["filename"]),
+            filename=att["filename"],
+            content_type=att.get("content_type", "application/octet-stream"),
+            size=len(raw),
+        )
 
 
 @extend_schema(
@@ -113,6 +138,7 @@ class SendView(APIView):
 
         msg = _build_message(request.user, data, domain)
         msg.save()
+        _save_attachments(msg, data.get("attachments", []))
         if msg.status != Message.STATUS_SCHEDULED:
             queue_email(str(msg.pk))
         increment_quota(request.user)
@@ -182,6 +208,7 @@ class BatchSendView(APIView):
 
             msg = _build_message(request.user, data, domain)
             msg.save()
+            _save_attachments(msg, data.get("attachments", []))
             to_queue.append(msg)
             results.append({"index": idx, "status": "queued", "message_id": str(msg.pk)})
 
