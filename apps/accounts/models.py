@@ -131,3 +131,25 @@ class AuditLog(models.Model):
 
     def __str__(self):
         return f"[{self.created_at}] {self.user_id} — {self.action}"
+
+
+class IdempotencyKey(models.Model):
+    """Caches a send-endpoint response so a client-retried request with the
+    same key returns the original result instead of sending a duplicate email.
+    """
+
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='idempotency_keys')
+    endpoint = models.CharField(max_length=50)
+    key = models.CharField(max_length=255)
+    request_hash = models.CharField(max_length=64)
+    response_status = models.PositiveSmallIntegerField()
+    response_body = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        unique_together = ('user', 'endpoint', 'key')
+        verbose_name = "Idempotency Key"
+        verbose_name_plural = "Idempotency Keys"
+
+    def __str__(self):
+        return f"{self.endpoint}:{self.key} ({self.user_id})"

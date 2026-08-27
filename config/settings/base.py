@@ -257,6 +257,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'workers.tasks.rotate_dkim.rotate_dkim_keys',
         'schedule': crontab(hour=4, minute=0),  # daily at 04:00 UTC
     },
+    'cleanup-expired-idempotency-keys': {
+        'task': 'workers.tasks.cleanup_idempotency.cleanup_expired_idempotency_keys',
+        'schedule': crontab(hour=5, minute=0),  # daily at 05:00 UTC
+    },
 }
 
 # ── Redis cache ───────────────────────────────────────────────────────────────

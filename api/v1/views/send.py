@@ -1,7 +1,7 @@
 """POST /v1/send and POST /v1/send/batch — validate, suppress-check, queue, return 202."""
 import logging
 
-from drf_spectacular.utils import OpenApiExample, extend_schema
+from drf_spectacular.utils import OpenApiExample, OpenApiParameter, extend_schema
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -11,6 +11,9 @@ from apps.domains.models import Domain
 from apps.email_messages.models import Message
 from services.billing_service import check_quota, increment_quota
 from services.email_service import check_suppression, queue_email
+from services.idempotency_service import (
+    check_idempotency, get_idempotency_key, hash_request_body, store_idempotency,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +22,18 @@ _SEND_RESPONSE_EXAMPLE = OpenApiExample(
     value={"message_id": "550e8400-e29b-41d4-a716-446655440000", "status": "queued", "submitted_at": "2025-01-15T10:30:00Z"},
     response_only=True,
     status_codes=["202"],
+)
+
+_IDEMPOTENCY_HEADER = OpenApiParameter(
+    name="Idempotency-Key",
+    location=OpenApiParameter.HEADER,
+    required=False,
+    type=str,
+    description=(
+        "Optional client-generated key. Replaying the same key within 24h "
+        "returns the original response instead of sending a duplicate email. "
+        "Reusing a key with a different request body returns 409."
+    ),
 )
 
 
@@ -99,6 +114,7 @@ def _save_attachments(msg: Message, attachments_data: list) -> None:
 
 @extend_schema(
     request=SendEmailSerializer,
+    parameters=[_IDEMPOTENCY_HEADER],
     responses={202: {"type": "object", "properties": {
         "message_id": {"type": "string", "format": "uuid"},
         "status": {"type": "string"},
@@ -110,31 +126,49 @@ def _save_attachments(msg: Message, attachments_data: list) -> None:
 )
 class SendView(APIView):
     def post(self, request):
+        idem_key = get_idempotency_key(request)
+        request_hash = hash_request_body(request.data) if idem_key else ""
+
+        if idem_key:
+            cached, conflict = check_idempotency(request.user, "send", idem_key, request_hash)
+            if conflict:
+                return Response(
+                    {"status": "error", "code": 409, "message":
+                     "Idempotency-Key was already used with a different request body."},
+                    status=status.HTTP_409_CONFLICT,
+                )
+            if cached:
+                return Response(cached["body"], status=cached["status"])
+
+        status_code, body = self._handle(request)
+
+        if idem_key:
+            store_idempotency(request.user, "send", idem_key, request_hash, status_code, body)
+
+        return Response(body, status=status_code)
+
+    @staticmethod
+    def _handle(request):
         serializer = SendEmailSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
         domain = _resolve_domain(request.user, data["from_address"])
         if domain is None:
-            return Response(
-                {"status": "error", "code": 422, "errors": [
+            return status.HTTP_422_UNPROCESSABLE_ENTITY, {
+                "status": "error", "code": 422, "errors": [
                     {"field": "from_address", "message": "Sender domain is not verified."}
-                ]},
-                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            )
+                ],
+            }
 
         if not check_quota(request.user):
-            return Response(
-                {"status": "error", "code": 402,
-                 "message": "Monthly email quota exceeded. Please upgrade your plan."},
-                status=status.HTTP_402_PAYMENT_REQUIRED,
-            )
+            return status.HTTP_402_PAYMENT_REQUIRED, {
+                "status": "error", "code": 402,
+                "message": "Monthly email quota exceeded. Please upgrade your plan.",
+            }
 
         if check_suppression(data["to"]):
-            return Response(
-                {"message_id": None, "status": "suppressed"},
-                status=status.HTTP_202_ACCEPTED,
-            )
+            return status.HTTP_202_ACCEPTED, {"message_id": None, "status": "suppressed"}
 
         msg = _build_message(request.user, data, domain)
         msg.save()
@@ -143,44 +177,65 @@ class SendView(APIView):
             queue_email(str(msg.pk))
         increment_quota(request.user)
 
-        return Response(
-            {"message_id": str(msg.pk), "status": msg.status, "submitted_at": msg.created_at},
-            status=status.HTTP_202_ACCEPTED,
-        )
+        return status.HTTP_202_ACCEPTED, {
+            "message_id": str(msg.pk), "status": msg.status,
+            "submitted_at": msg.created_at.isoformat(),
+        }
 
 
 @extend_schema(
     request={"application/json": {"type": "object", "properties": {
         "messages": {"type": "array", "items": {"$ref": "#/components/schemas/SendEmail"}, "maxItems": 500}
     }}},
+    parameters=[_IDEMPOTENCY_HEADER],
     responses={202: {"type": "object"}},
     summary="Send up to 500 emails in a batch",
     tags=["Sending"],
 )
 class BatchSendView(APIView):
     def post(self, request):
+        idem_key = get_idempotency_key(request)
+        request_hash = hash_request_body(request.data) if idem_key else ""
+
+        if idem_key:
+            cached, conflict = check_idempotency(request.user, "send_batch", idem_key, request_hash)
+            if conflict:
+                return Response(
+                    {"status": "error", "code": 409, "message":
+                     "Idempotency-Key was already used with a different request body."},
+                    status=status.HTTP_409_CONFLICT,
+                )
+            if cached:
+                return Response(cached["body"], status=cached["status"])
+
+        status_code, body = self._handle(request)
+
+        if idem_key:
+            store_idempotency(request.user, "send_batch", idem_key, request_hash, status_code, body)
+
+        return Response(body, status=status_code)
+
+    @staticmethod
+    def _handle(request):
         raw_messages = request.data.get("messages", [])
         if not isinstance(raw_messages, list) or len(raw_messages) == 0:
-            return Response(
-                {"status": "error", "code": 400, "errors": [
+            return status.HTTP_400_BAD_REQUEST, {
+                "status": "error", "code": 400, "errors": [
                     {"field": "messages", "message": "Provide a non-empty list of messages (max 500)."}
-                ]},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+                ],
+            }
         if len(raw_messages) > 500:
-            return Response(
-                {"status": "error", "code": 400, "errors": [
+            return status.HTTP_400_BAD_REQUEST, {
+                "status": "error", "code": 400, "errors": [
                     {"field": "messages", "message": "Batch size exceeds 500."}
-                ]},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+                ],
+            }
 
         if not check_quota(request.user):
-            return Response(
-                {"status": "error", "code": 402,
-                 "message": "Monthly email quota exceeded. Please upgrade your plan."},
-                status=status.HTTP_402_PAYMENT_REQUIRED,
-            )
+            return status.HTTP_402_PAYMENT_REQUIRED, {
+                "status": "error", "code": 402,
+                "message": "Monthly email quota exceeded. Please upgrade your plan.",
+            }
 
         results = []
         to_queue = []
@@ -216,7 +271,4 @@ class BatchSendView(APIView):
             queue_email(str(msg.pk))
             increment_quota(request.user)
 
-        return Response(
-            {"results": results, "total": len(results)},
-            status=status.HTTP_202_ACCEPTED,
-        )
+        return status.HTTP_202_ACCEPTED, {"results": results, "total": len(results)}
