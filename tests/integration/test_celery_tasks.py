@@ -18,6 +18,14 @@ class TestSendEmailTask:
         assert message.provider_message_id == "provider-001"
 
     def test_marks_suppressed_when_bounced(self, message, bounce, celery_eager):
+        # check_suppression(email, user=...) checks the per-user Suppression
+        # table, not the raw Bounce table directly — in production this row
+        # is created by the SES inbound webhook's _suppress_for_senders()
+        # alongside the Bounce record, so recreate that here.
+        from apps.suppressions.models import Suppression
+        Suppression.objects.create(
+            user=message.user, email=bounce.email, reason=Suppression.REASON_BOUNCE,
+        )
         message.to_address = bounce.email
         message.save()
         from workers.tasks.send_email import send_email_task
@@ -41,10 +49,16 @@ class TestSendEmailTask:
         mock_relay.assert_not_called()
 
     def test_relay_failure_triggers_retry(self, message, celery_eager):
+        # Calling a bound task directly (not via .apply()/.delay()) is
+        # Celery's "called_directly" path: self.retry() can't actually
+        # schedule a retry outside a real worker context, so it re-raises.
+        # That's expected here — what we're really asserting is that the
+        # Message row is correctly marked failed before that propagates.
         from workers.tasks.send_email import send_email_task
         with patch("workers.tasks.send_email._relay", side_effect=Exception("SMTP down")):
             with patch("workers.tasks.webhook_dispatch.dispatch_webhook_task.delay"):
-                result = send_email_task(str(message.pk))
+                with pytest.raises(Exception):
+                    send_email_task(str(message.pk))
         message.refresh_from_db()
         assert message.status in ("failed", "permanently_failed")
 

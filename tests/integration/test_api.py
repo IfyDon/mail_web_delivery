@@ -11,18 +11,18 @@ class TestAuthRegister:
 
     def test_register_success(self, api_client):
         resp = api_client.post(self.url, {
-            "username": "newuser",
             "email": "newuser@example.com",
             "password": "StrongPass123!",
+            "password_confirm": "StrongPass123!",
         })
         assert resp.status_code == 201
         assert "token" in resp.data
 
     def test_register_duplicate_email(self, api_client, user):
         resp = api_client.post(self.url, {
-            "username": "dup",
             "email": user.email,
             "password": "StrongPass123!",
+            "password_confirm": "StrongPass123!",
         })
         assert resp.status_code == 400
 

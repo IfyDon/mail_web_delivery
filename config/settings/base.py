@@ -168,10 +168,16 @@ AUTHENTICATION_BACKENDS = [
 
 # Django REST Framework
 REST_FRAMEWORK = {
+    # Order matters: DRF sources the WWW-Authenticate header (and therefore
+    # whether an anonymous request gets 401 vs. 403) from the FIRST
+    # authenticator that implements authenticate_header(), regardless of
+    # which one actually would have handled the request. APIKeyAuthentication
+    # is the primary auth method for this API and is the one that provides
+    # it — list it first.
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
         'core.authentication.APIKeyAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',

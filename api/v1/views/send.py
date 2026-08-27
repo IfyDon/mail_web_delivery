@@ -167,7 +167,7 @@ class SendView(APIView):
                 "message": "Monthly email quota exceeded. Please upgrade your plan.",
             }
 
-        if check_suppression(data["to"]):
+        if check_suppression(data["to"], user=request.user):
             return status.HTTP_202_ACCEPTED, {"message_id": None, "status": "suppressed"}
 
         msg = _build_message(request.user, data, domain)
@@ -257,7 +257,7 @@ class BatchSendView(APIView):
                 })
                 continue
 
-            if check_suppression(data["to"]):
+            if check_suppression(data["to"], user=request.user):
                 results.append({"index": idx, "status": "suppressed", "message_id": None})
                 continue
 

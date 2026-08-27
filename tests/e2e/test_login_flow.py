@@ -12,9 +12,9 @@ class TestLoginFlow:
     def test_full_register_login_access_logout(self, api_client):
         # Step 1 — Register
         resp = api_client.post(self.REGISTER_URL, {
-            "username": "e2euser",
             "email": "e2e@example.com",
             "password": "E2ePassword1!",
+            "password_confirm": "E2ePassword1!",
         })
         assert resp.status_code == 201
         token = resp.data["token"]

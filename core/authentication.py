@@ -39,3 +39,11 @@ class APIKeyAuthentication(BaseAuthentication):
         
         # Return (user, auth) tuple
         return (api_key.user, api_key)
+
+    def authenticate_header(self, request):
+        # Without this, DRF has no authenticator to source a WWW-Authenticate
+        # header from (SessionAuthentication doesn't provide one either) and
+        # coerces every anonymous request's 401 NotAuthenticated to 403 —
+        # see rest_framework.views.APIView.handle_exception. This is the
+        # primary auth method for the API, so it should be the one DRF asks.
+        return 'Bearer'

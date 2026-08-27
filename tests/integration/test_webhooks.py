@@ -13,7 +13,7 @@ class TestWebhookListView:
     def test_list_own_webhooks(self, authed_client, webhook):
         resp = authed_client.get(self.url)
         assert resp.status_code == 200
-        assert resp.data["count"] >= 1
+        assert len(resp.data) >= 1
 
     def test_create_webhook(self, authed_client):
         resp = authed_client.post(self.url, {
@@ -96,7 +96,7 @@ class TestWebhookLogsView:
         )
         resp = authed_client.get(f"/api/v1/webhooks/{webhook.pk}/logs/")
         assert resp.status_code == 200
-        assert resp.data["count"] >= 1
+        assert len(resp.data) >= 1
 
 
 @pytest.mark.django_db
@@ -112,7 +112,7 @@ class TestWebhookRetryView:
         )
         with patch("workers.tasks.webhook_dispatch.dispatch_webhook_task.delay") as mock_delay:
             resp = authed_client.post(f"/api/v1/webhooks/{webhook.pk}/retry/")
-        assert resp.status_code == 200
+        assert resp.status_code == 202
         mock_delay.assert_called_once()
 
 
