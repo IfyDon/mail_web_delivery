@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',  # required by allauth
 
     # Third-party
     'rest_framework',
@@ -45,6 +46,11 @@ INSTALLED_APPS = [
     'django_otp.plugins.otp_totp',
     'django_otp.plugins.otp_static',
     'django_celery_beat',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.microsoft',
 
     # Local apps
     'apps.accounts',
@@ -72,6 +78,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
     'django_otp.middleware.OTPMiddleware',  # For 2FA
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -171,7 +178,45 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'accounts.CustomUser'
 AUTHENTICATION_BACKENDS = [
     'apps.authentication.backends.EmailBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
+
+SITE_ID = 1
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/dashboard/'
+
+# ── Social login (Google / Microsoft) via django-allauth ───────────────────────
+# We use our own login/signup pages and forms — allauth here is purely the
+# OAuth handshake (redirect to provider, exchange code, find-or-create user).
+ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'
+ACCOUNT_ADAPTER = 'apps.authentication.adapters.AccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'apps.authentication.adapters.SocialAccountAdapter'
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
+SOCIALACCOUNT_EMAIL_REQUIRED = True
+SOCIALACCOUNT_LOGIN_ON_GET = True  # skip allauth's intermediate confirmation page
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APPS': [{
+            'client_id': os.getenv('GOOGLE_OAUTH_CLIENT_ID', ''),
+            'secret': os.getenv('GOOGLE_OAUTH_CLIENT_SECRET', ''),
+            'key': '',
+        }],
+        'SCOPE': ['profile', 'email'],
+    },
+    'microsoft': {
+        'APPS': [{
+            'client_id': os.getenv('MICROSOFT_OAUTH_CLIENT_ID', ''),
+            'secret': os.getenv('MICROSOFT_OAUTH_CLIENT_SECRET', ''),
+            'key': '',
+        }],
+        'tenant': os.getenv('MICROSOFT_OAUTH_TENANT', 'common'),
+    },
+}
 
 # Django REST Framework
 REST_FRAMEWORK = {

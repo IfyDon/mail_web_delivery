@@ -69,6 +69,10 @@ urlpatterns = [
     # Cookie consent (django-cookie-consent)
     path('cookies/', include('cookie_consent.urls')),
 
+    # Social login (Google / Microsoft) — OAuth handshake only, see
+    # apps.authentication.adapters. Our own pages remain /login/ and /signup/.
+    path('accounts/', include('allauth.urls')),
+
     # Marketing site and dashboard
     path('', include('web.urls')),
 ]
