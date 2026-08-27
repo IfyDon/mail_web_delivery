@@ -81,6 +81,16 @@
         Analytics
       </a>
 
+      <a href="/dashboard/contacts/"
+         class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors
+                {% if '/contacts/' in p %}bg-indigo-50 text-indigo-700{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
+        <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 100-8 4 4 0 000 8zm6 3c0-1.657-3.134-3-7-3s-7 1.343-7 3v2h14v-2z"/>
+        </svg>
+        Contacts
+      </a>
+
       <a href="/dashboard/webhooks/"
          class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                 {% if '/webhooks/' in p %}bg-indigo-50 text-indigo-700{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">

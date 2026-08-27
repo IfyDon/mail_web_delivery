@@ -9,6 +9,7 @@ from web.views.analytics_ui import AnalyticsView
 from web.views.api_keys import APIKeyCreateView, APIKeyRevokeView
 from web.views.audit_ui import AuditLogView
 from web.views.billing_ui import BillingCheckoutView, BillingView
+from web.views.contacts_ui import ContactsView
 from web.views.dashboard import DashboardView
 from web.views.domains_ui import DomainDeleteView, DomainVerifyView, DomainsView
 from web.views.inbound_ui import (
@@ -123,6 +124,7 @@ urlpatterns = [
     path("dashboard/messages/<uuid:pk>/", MessageDetailView.as_view(), name="message_detail"),
     path("dashboard/messages/<uuid:pk>/resend/", MessageResendView.as_view(), name="message_resend"),
     path("dashboard/analytics/", AnalyticsView.as_view(), name="analytics"),
+    path("dashboard/contacts/", ContactsView.as_view(), name="contacts"),
     path("dashboard/billing/", BillingView.as_view(), name="billing"),
     path("dashboard/billing/checkout/", BillingCheckoutView.as_view(), name="billing_checkout"),
 
