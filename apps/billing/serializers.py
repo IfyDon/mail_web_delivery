@@ -1,4 +1,5 @@
 """Serializers for billing overview, plans, subscriptions, and invoices."""
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from apps.billing.models import Invoice, Plan, Subscription
@@ -37,9 +38,19 @@ class InvoiceSerializer(serializers.ModelSerializer):
 
 
 class BillingOverviewSerializer(serializers.Serializer):
-    subscription = SubscriptionSerializer(allow_null=True)
+    # A plain nested-serializer field with allow_null=True makes drf-spectacular
+    # emit `allOf: [$ref] + nullable: true`, a pattern some OpenAPI 3.0 renderers
+    # (including the ReDoc build bundled with drf-spectacular-sidecar) fail to
+    # parse. Route it through a SerializerMethodField instead — identical runtime
+    # output, but a schema shape every renderer can handle.
+    subscription = serializers.SerializerMethodField()
     usage = serializers.DictField()
     plans = PlanSerializer(many=True)
+
+    @extend_schema_field(SubscriptionSerializer)
+    def get_subscription(self, obj):
+        sub = obj.get('subscription') if isinstance(obj, dict) else getattr(obj, 'subscription', None)
+        return SubscriptionSerializer(sub).data if sub else None
 
 
 class CheckoutRequestSerializer(serializers.Serializer):
