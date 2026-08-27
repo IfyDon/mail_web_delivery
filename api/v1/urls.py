@@ -8,6 +8,7 @@ from api.v1.views.messages import MessageDetailView, MessageListView, ResendMess
 from api.v1.views.schedule import CancelScheduleView
 from api.v1.views.send import BatchSendView, SendView
 from api.v1.views.ses_inbound import SESInboundView
+from api.v1.views.ses_inbound_email import SESInboundEmailView
 from api.v1.views.contacts import ContactEngagementView
 from api.v1.views.message_stream import message_stream_view
 from api.v1.views.billing import (
@@ -67,6 +68,9 @@ urlpatterns = [
     # Message streams
     path("streams/", include("apps.streams.urls")),
 
+    # Inbound email routing
+    path("inbound/", include("apps.inbound.urls")),
+
     # Email templates
     path("templates/", include("apps.email_templates.urls")),
 
@@ -94,6 +98,7 @@ urlpatterns = [
 
     # Webhooks (order: specific paths before generic <pk>/)
     path("webhooks/ses/", SESInboundView.as_view(), name="ses-inbound"),
+    path("webhooks/ses-inbound-email/", SESInboundEmailView.as_view(), name="ses-inbound-email"),
     path("webhooks/paystack/", csrf_exempt(PaystackWebhookView.as_view()), name="paystack-webhook"),
     path("webhooks/", WebhookListView.as_view(), name="webhook-list"),
     path("webhooks/<int:pk>/", WebhookDetailView.as_view(), name="webhook-detail"),

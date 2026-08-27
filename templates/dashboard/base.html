@@ -91,6 +91,16 @@
         Webhooks
       </a>
 
+      <a href="/dashboard/inbound/"
+         class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors
+                {% if '/inbound/' in p %}bg-indigo-50 text-indigo-700{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
+        <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+        </svg>
+        Inbound
+      </a>
+
       <a href="/dashboard/suppressions/"
          class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                 {% if '/suppressions/' in p %}bg-indigo-50 text-indigo-700{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">

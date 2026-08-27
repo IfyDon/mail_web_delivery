@@ -1,0 +1,136 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Inbound{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="text-xl font-bold text-gray-900">Inbound Email</h1>
+    <p class="text-sm text-gray-500 mt-0.5">Route mail sent to your domains into your app</p>
+  </div>
+</div>
+
+{# ── Add route form ───────────────────────────────────────────────────── #}
+<div class="rounded-xl border border-gray-200 bg-white shadow-sm p-5 mb-6">
+  <h2 class="text-sm font-semibold text-gray-900 mb-4">Add Route</h2>
+  {% if verified_domains %}
+  <form method="post" action="/dashboard/inbound/" class="flex flex-wrap items-end gap-3">
+    {% csrf_token %}
+    <div>
+      <label class="block text-xs font-medium text-gray-700 mb-1">Domain</label>
+      <select name="domain" required
+              class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+        {% for d in verified_domains %}
+        <option value="{{ d.id }}">{{ d.domain }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-gray-700 mb-1">Matches</label>
+      <select name="match_type" id="match_type" onchange="document.getElementById('local_part_wrap').classList.toggle('hidden', this.value === 'wildcard')"
+              class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+        <option value="wildcard">Entire domain (*@domain)</option>
+        <option value="exact">One address</option>
+      </select>
+    </div>
+    <div id="local_part_wrap" class="hidden">
+      <label class="block text-xs font-medium text-gray-700 mb-1">Address</label>
+      <div class="flex items-center gap-1 text-sm">
+        <input type="text" name="local_part" placeholder="support"
+               class="w-32 rounded-lg border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+        <span class="text-gray-400">@domain</span>
+      </div>
+    </div>
+    <button type="submit"
+            class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors">
+      Add Route
+    </button>
+  </form>
+  {% else %}
+  <p class="text-sm text-gray-500">
+    You need at least one verified domain before you can route inbound mail.
+    <a href="/dashboard/domains/" class="text-indigo-600 hover:underline">Verify a domain</a>.
+  </p>
+  {% endif %}
+</div>
+
+{# ── Route list ───────────────────────────────────────────────────────── #}
+{% if routes %}
+<div class="rounded-xl border border-gray-200 bg-white shadow-sm mb-8 overflow-hidden">
+  <div class="divide-y divide-gray-50">
+    {% for route in routes %}
+    <div class="flex items-center justify-between px-5 py-3">
+      <div class="flex items-center gap-2">
+        <span class="inline-block h-2 w-2 rounded-full {% if route.is_active %}bg-green-500{% else %}bg-gray-300{% endif %}"></span>
+        <span class="text-sm font-mono font-medium text-gray-900">{{ route.address }}</span>
+      </div>
+      <form method="post" action="/dashboard/inbound/{{ route.pk }}/delete/"
+            onsubmit="return confirm('Remove this route? Mail to this address will no longer be routed.')">
+        {% csrf_token %}
+        <button type="submit"
+                class="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-100 transition-colors">
+          Remove
+        </button>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<p class="text-xs text-gray-400 mb-8">
+  Point an MX record at <code class="font-mono bg-gray-100 rounded px-1 py-0.5">10 inbound-smtp.us-east-1.amazonaws.com</code>
+  on each domain above to start receiving mail there. Routed mail is stored below and delivered to any webhook
+  subscribed to the <code class="font-mono bg-gray-100 rounded px-1 py-0.5">inbound</code> event —
+  <a href="/dashboard/webhooks/" class="text-indigo-600 hover:underline">configure one</a>.
+</p>
+{% endif %}
+
+{# ── Recent inbound mail ──────────────────────────────────────────────── #}
+<h2 class="text-sm font-semibold text-gray-900 mb-3">Recent Mail</h2>
+<div class="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+  {% if recent_messages %}
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-50 border-b border-gray-200">
+        <tr>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">From</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">To</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Subject</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Status</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Received</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-50">
+        {% for msg in recent_messages %}
+        <tr class="hover:bg-gray-50 transition-colors cursor-pointer"
+            onclick="window.location='/dashboard/inbound/messages/{{ msg.pk }}/'">
+          <td class="px-5 py-3 text-gray-900 font-mono text-xs">{{ msg.from_address }}</td>
+          <td class="px-5 py-3 text-gray-600 font-mono text-xs">{{ msg.to_address }}</td>
+          <td class="px-5 py-3 text-gray-700 max-w-xs truncate">{{ msg.subject|default:"(no subject)" }}</td>
+          <td class="px-5 py-3">
+            <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium
+              {% if msg.status == 'forwarded' %}bg-green-100 text-green-800
+              {% elif msg.status == 'routed' %}bg-blue-100 text-blue-800
+              {% elif msg.status == 'forward_failed' %}bg-red-100 text-red-800
+              {% else %}bg-gray-100 text-gray-600{% endif %}">
+              {{ msg.get_status_display }}
+            </span>
+          </td>
+          <td class="px-5 py-3 text-gray-500 text-xs whitespace-nowrap">{{ msg.received_at|timesince }} ago</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="py-16 text-center">
+    <svg class="mx-auto h-10 w-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+    </svg>
+    <p class="mt-3 text-sm text-gray-500">No inbound mail yet.</p>
+    <p class="text-xs text-gray-400 mt-1">Add a route above and point your domain's MX record at us to start receiving mail.</p>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

@@ -11,6 +11,9 @@ from web.views.audit_ui import AuditLogView
 from web.views.billing_ui import BillingCheckoutView, BillingView
 from web.views.dashboard import DashboardView
 from web.views.domains_ui import DomainDeleteView, DomainVerifyView, DomainsView
+from web.views.inbound_ui import (
+    InboundMessageDetailView, InboundRouteDeleteView, InboundView,
+)
 from web.views.messages_ui import MessageDetailView, MessageResendView, MessagesView
 from web.views.settings_ui import (
     PasswordChangeView, SettingsView, TwoFactorConfirmView, TwoFactorDisableView,
@@ -108,6 +111,10 @@ urlpatterns = [
 
     path("dashboard/webhooks/", WebhooksView.as_view(), name="webhooks"),
     path("dashboard/webhooks/<int:pk>/delete/", WebhookDeleteView.as_view(), name="webhook_delete"),
+
+    path("dashboard/inbound/", InboundView.as_view(), name="inbound"),
+    path("dashboard/inbound/<int:pk>/delete/", InboundRouteDeleteView.as_view(), name="inbound_route_delete"),
+    path("dashboard/inbound/messages/<int:pk>/", InboundMessageDetailView.as_view(), name="inbound_message_detail"),
 
     path("dashboard/suppressions/", SuppressionsView.as_view(), name="suppressions"),
     path("dashboard/suppressions/<int:pk>/remove/", SuppressionRemoveView.as_view(), name="suppression_remove"),

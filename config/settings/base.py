@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'apps.streams',
     'apps.suppressions',
     'apps.webhooks',
+    'apps.inbound',
     'apps.analytics',
     'apps.billing',
     'tracking',
@@ -300,6 +301,12 @@ PHYSICAL_ADDRESS = os.getenv('PHYSICAL_ADDRESS', '')
 
 # Email configuration (for Django notifications, not transactional emails)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# ── AWS SES ───────────────────────────────────────────────────────────────────
+AWS_SES_REGION = os.getenv('AWS_SES_REGION', 'us-east-1')
+# S3 bucket + key prefix SES writes inbound mail to (see apps.inbound / services.inbound_service)
+AWS_SES_INBOUND_BUCKET = os.getenv('AWS_SES_INBOUND_BUCKET', '')
+AWS_SES_INBOUND_PREFIX = os.getenv('AWS_SES_INBOUND_PREFIX', 'inbound/')
 
 # Logging — JSON-structured output for ELK / Datadog / CloudWatch parsing.
 # Falls back to plain text if python-json-logger is not installed.

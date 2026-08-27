@@ -12,6 +12,7 @@ class Webhook(models.Model):
     EVENT_COMPLAINT = 'complaint'
     EVENT_UNSUBSCRIBE = 'unsubscribe'
     EVENT_PERMANENTLY_FAILED = 'permanently_failed'
+    EVENT_INBOUND = 'inbound'
 
     ALL_EVENT_TYPES = [
         EVENT_DELIVERED,
@@ -21,6 +22,7 @@ class Webhook(models.Model):
         EVENT_COMPLAINT,
         EVENT_UNSUBSCRIBE,
         EVENT_PERMANENTLY_FAILED,
+        EVENT_INBOUND,
     ]
 
     user = models.ForeignKey(
