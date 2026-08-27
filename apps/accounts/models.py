@@ -42,11 +42,19 @@ class APIKey(models.Model):
 
     @classmethod
     def generate_key(cls):
-        """Generate a new API key and return both key and hashed version."""
+        """Generate a new API key and return both key and hashed version.
+
+        The hash must cover the *full* raw key (prefix + suffix) — that's the
+        exact string clients send as `Authorization: Bearer <raw_key>`, and
+        what core.authentication.APIKeyAuthentication hashes to look it up.
+        Hashing only the suffix here would make every generated key
+        permanently unable to authenticate.
+        """
         key = get_random_string(32, allowed_chars='abcdefghijklmnopqrstuvwxyz0123456789')
         prefix = 'sk_live_' + get_random_string(8)
-        hashed = hashlib.sha256(key.encode()).hexdigest()
-        return f"{prefix}{key}", prefix, hashed
+        raw_key = f"{prefix}{key}"
+        hashed = hashlib.sha256(raw_key.encode()).hexdigest()
+        return raw_key, prefix, hashed
 
     def save(self, *args, **kwargs):
         if not self.prefix or not self.hashed_key:
