@@ -1,4 +1,6 @@
 """Server-rendered dashboard views for billing/plan/invoices."""
+import logging
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -8,6 +10,8 @@ from django.views.generic import TemplateView
 
 from apps.billing.models import Plan
 from services.billing_service import create_checkout_url
+
+logger = logging.getLogger(__name__)
 
 
 class BillingCheckoutView(LoginRequiredMixin, View):
@@ -23,9 +27,12 @@ class BillingCheckoutView(LoginRequiredMixin, View):
         if not plan_slug or plan_slug == "free":
             return redirect("billing")
 
+        # Redirect errors to the dashboard, not /pricing/ — the marketing site's
+        # base template doesn't render Django messages, so an anonymous-looking
+        # "nothing happened" was masking real failures here.
         if not Plan.objects.filter(slug=plan_slug, is_active=True).exists():
             messages.error(request, f'Unknown plan "{plan_slug}".')
-            return redirect("pricing")
+            return redirect("billing")
 
         success_url = f"{settings.BASE_URL}/dashboard/billing/?checkout=success"
         cancel_url = f"{settings.BASE_URL}/pricing/?checkout=cancel"
@@ -36,8 +43,12 @@ class BillingCheckoutView(LoginRequiredMixin, View):
                 success_url=success_url, cancel_url=cancel_url,
             )
         except Exception as exc:
+            logger.warning(
+                "BillingCheckoutView: checkout failed for user=%s plan=%s: %s",
+                request.user.pk, plan_slug, exc,
+            )
             messages.error(request, f"Couldn't start checkout: {exc}")
-            return redirect("pricing")
+            return redirect("billing")
 
         return redirect(checkout_url)
 
