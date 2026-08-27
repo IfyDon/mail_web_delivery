@@ -37,11 +37,17 @@ def _generate_backup_codes(user) -> list[str]:
 
 
 def _settings_context(user, **extra) -> dict:
+    from apps.accounts.models import DataExportRequest
+
     has_2fa = TOTPDevice.objects.filter(user=user, name=_DEVICE_NAME, confirmed=True).exists()
     pending_device = TOTPDevice.objects.filter(
         user=user, name=_DEVICE_NAME, confirmed=False
     ).first()
-    ctx = {"has_2fa": has_2fa, "pending_device": pending_device}
+    ctx = {
+        "has_2fa": has_2fa,
+        "pending_device": pending_device,
+        "export_requests": DataExportRequest.objects.filter(user=user)[:5],
+    }
     if pending_device:
         ctx["qr_data_uri"] = _qr_data_uri(pending_device.config_url)
     ctx.update(extra)
@@ -137,3 +143,68 @@ class TwoFactorDisableView(LoginRequiredMixin, View):
         StaticDevice.objects.filter(user=request.user, name=_BACKUP_DEVICE_NAME).delete()
         messages.success(request, "Two-factor authentication disabled.")
         return redirect("settings")
+
+
+class DataExportRequestView(LoginRequiredMixin, View):
+    login_url = "/login/"
+
+    def post(self, request):
+        from apps.accounts.models import DataExportRequest
+        from workers.tasks.data_export import generate_data_export_task
+
+        if DataExportRequest.objects.filter(
+            user=request.user,
+            status__in=(DataExportRequest.STATUS_PENDING, DataExportRequest.STATUS_PROCESSING),
+        ).exists():
+            messages.info(request, "You already have an export in progress.")
+            return redirect("settings")
+
+        export_request = DataExportRequest.objects.create(user=request.user)
+        generate_data_export_task.delay(export_request.pk)
+        messages.success(request, "Your data export is being prepared — check back shortly.")
+        return redirect("settings")
+
+
+class DataExportDownloadView(LoginRequiredMixin, View):
+    login_url = "/login/"
+
+    def get(self, request, pk):
+        from django.http import FileResponse, Http404
+
+        from apps.accounts.models import DataExportRequest
+
+        export_request = DataExportRequest.objects.filter(
+            pk=pk, user=request.user, status=DataExportRequest.STATUS_READY,
+        ).first()
+        if export_request is None or not export_request.file:
+            raise Http404
+
+        return FileResponse(
+            export_request.file.open("rb"),
+            as_attachment=True,
+            filename=f"webmail-data-export-{export_request.pk}.json",
+        )
+
+
+class AccountDeleteView(LoginRequiredMixin, View):
+    login_url = "/login/"
+
+    def post(self, request):
+        from django.contrib.auth import logout
+
+        from services.gdpr_service import anonymize_and_delete_account
+
+        password = request.POST.get("password", "")
+        confirm_text = request.POST.get("confirm_text", "").strip()
+
+        if confirm_text != "DELETE":
+            messages.error(request, 'Type "DELETE" to confirm — your account was not deleted.')
+            return redirect("settings")
+        if not request.user.check_password(password):
+            messages.error(request, "Incorrect password — your account was not deleted.")
+            return redirect("settings")
+
+        anonymize_and_delete_account(request.user)
+        logout(request)
+        messages.success(request, "Your account and data have been deleted.")
+        return redirect("login")

@@ -1,8 +1,15 @@
-from django.db import models
-from django.contrib.auth.models import AbstractUser
-from django.utils.crypto import get_random_string
 import hashlib
 import ipaddress
+
+from django.conf import settings as django_settings
+from django.contrib.auth.models import AbstractUser
+from django.core.files.storage import FileSystemStorage
+from django.db import models
+from django.utils.crypto import get_random_string
+
+# Not served by nginx's /media/ alias — downloads go through an
+# authenticated view that checks ownership first. See DataExportRequest.
+PRIVATE_STORAGE = FileSystemStorage(location=str(django_settings.PRIVATE_MEDIA_ROOT))
 
 
 class CustomUser(AbstractUser):
@@ -153,3 +160,32 @@ class IdempotencyKey(models.Model):
 
     def __str__(self):
         return f"{self.endpoint}:{self.key} ({self.user_id})"
+
+
+class DataExportRequest(models.Model):
+    """A GDPR-style self-service export of everything a user owns."""
+
+    STATUS_PENDING = 'pending'
+    STATUS_PROCESSING = 'processing'
+    STATUS_READY = 'ready'
+    STATUS_FAILED = 'failed'
+    STATUS_CHOICES = [
+        (STATUS_PENDING, 'Pending'),
+        (STATUS_PROCESSING, 'Processing'),
+        (STATUS_READY, 'Ready'),
+        (STATUS_FAILED, 'Failed'),
+    ]
+
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='data_export_requests')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    file = models.FileField(upload_to='data_exports/%Y/%m/', storage=PRIVATE_STORAGE, blank=True)
+    requested_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-requested_at']
+        verbose_name = "Data Export Request"
+        verbose_name_plural = "Data Export Requests"
+
+    def __str__(self):
+        return f"{self.user.email} export ({self.status})"

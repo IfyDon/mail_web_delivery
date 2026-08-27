@@ -16,8 +16,8 @@ from web.views.inbound_ui import (
 )
 from web.views.messages_ui import MessageDetailView, MessageResendView, MessagesView
 from web.views.settings_ui import (
-    PasswordChangeView, SettingsView, TwoFactorConfirmView, TwoFactorDisableView,
-    TwoFactorSetupView,
+    AccountDeleteView, DataExportDownloadView, DataExportRequestView, PasswordChangeView,
+    SettingsView, TwoFactorConfirmView, TwoFactorDisableView, TwoFactorSetupView,
 )
 from web.views.streams_ui import StreamArchiveView, StreamDeleteView, StreamsView
 from web.views.suppressions_ui import SuppressionRemoveView, SuppressionsView
@@ -141,6 +141,9 @@ urlpatterns = [
     path("dashboard/settings/2fa/setup/", TwoFactorSetupView.as_view(), name="2fa_setup"),
     path("dashboard/settings/2fa/confirm/", TwoFactorConfirmView.as_view(), name="2fa_confirm"),
     path("dashboard/settings/2fa/disable/", TwoFactorDisableView.as_view(), name="2fa_disable"),
+    path("dashboard/settings/export/", DataExportRequestView.as_view(), name="data_export_request"),
+    path("dashboard/settings/export/<int:pk>/download/", DataExportDownloadView.as_view(), name="data_export_download"),
+    path("dashboard/settings/delete-account/", AccountDeleteView.as_view(), name="account_delete"),
 
     path("dashboard/audit-log/", AuditLogView.as_view(), name="audit_log"),
 

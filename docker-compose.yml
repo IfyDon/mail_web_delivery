@@ -74,6 +74,7 @@ services:
         condition: service_healthy
     volumes:
       - media_files:/app/media
+      - private_files:/app/private_media
 
   worker:
     build:
@@ -87,6 +88,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    volumes:
+      - private_files:/app/private_media
 
   beat:
     build:
@@ -133,3 +136,4 @@ volumes:
   postgres_data:
   redis_data:
   media_files:
+  private_files:

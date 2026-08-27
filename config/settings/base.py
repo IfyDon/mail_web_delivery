@@ -158,6 +158,12 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# Private media — NOT served by nginx's /media/ alias. Used for files that
+# require an authenticated, per-user access check before download (e.g.
+# GDPR data exports), unlike MEDIA_ROOT which nginx serves to anyone with
+# the URL. See apps.accounts.models.PRIVATE_STORAGE.
+PRIVATE_MEDIA_ROOT = Path(os.getenv('PRIVATE_MEDIA_ROOT', str(BASE_DIR / 'private_media')))
+
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

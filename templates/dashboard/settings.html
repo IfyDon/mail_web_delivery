@@ -96,6 +96,61 @@
     {% endif %}
   </div>
 
+  {# ── Privacy & data ───────────────────────────────────────────────────── #}
+  <div class="rounded-xl border border-gray-200 bg-white shadow-sm p-6 lg:col-span-2">
+    <h2 class="text-sm font-semibold text-gray-900 mb-1">Privacy &amp; Data</h2>
+    <p class="text-sm text-gray-500 mb-4">Export everything we hold about you, or permanently delete your account.</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-3">Export your data</h3>
+        <form method="post" action="/dashboard/settings/export/" class="mb-3">
+          {% csrf_token %}
+          <button type="submit"
+                  class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+            Request Data Export
+          </button>
+        </form>
+        {% if export_requests %}
+        <ul class="space-y-1.5 text-sm">
+          {% for req in export_requests %}
+          <li class="flex items-center justify-between">
+            <span class="text-gray-500 text-xs">{{ req.requested_at|date:"M j, Y H:i" }}</span>
+            {% if req.status == 'ready' %}
+            <a href="/dashboard/settings/export/{{ req.pk }}/download/"
+               class="text-indigo-600 hover:underline text-xs font-medium">Download</a>
+            {% elif req.status == 'failed' %}
+            <span class="text-red-500 text-xs">Failed</span>
+            {% else %}
+            <span class="text-yellow-600 text-xs">Preparing…</span>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+
+      <div>
+        <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-3">Delete your account</h3>
+        <p class="text-xs text-gray-400 mb-3">
+          This permanently erases your domains, messages, templates, webhooks, and API keys. It cannot be undone.
+        </p>
+        <form method="post" action="/dashboard/settings/delete-account/" class="space-y-2"
+              onsubmit="return confirm('This permanently deletes your account and data. Are you sure?')">
+          {% csrf_token %}
+          <input type="password" name="password" placeholder="Confirm your password" required
+                 class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none">
+          <input type="text" name="confirm_text" placeholder='Type "DELETE" to confirm' required
+                 class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none">
+          <button type="submit"
+                  class="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-100 transition-colors">
+            Delete Account
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 {% endblock %}
