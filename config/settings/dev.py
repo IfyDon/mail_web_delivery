@@ -20,6 +20,13 @@ DATABASES = {
 # Development email backend (console output)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
+# base.py's whitenoise ManifestStaticFilesStorage requires collectstatic to
+# have already run (it looks up hashed filenames in a build-time manifest).
+# Production builds run collectstatic in the Dockerfile; dev/CI never do, so
+# any test that renders a template with {% static %} fails with "Missing
+# staticfiles manifest entry" otherwise. Plain storage serves files as-is.
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
 # Relaxed CORS for frontend development
 CORS_ALLOWED_ORIGINS = ['http://localhost:3000', 'http://127.0.0.1:3000']
 CORS_ALLOW_CREDENTIALS = True
