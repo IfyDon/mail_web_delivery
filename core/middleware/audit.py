@@ -21,7 +21,7 @@ class AuditMiddleware:
         response = self.get_response(request)
         if (
             request.method in _WRITE_METHODS
-            and request.path.startswith("/api/")
+            and (request.path.startswith("/api/") or request.path.startswith("/dashboard/"))
             and getattr(request, "user", None)
             and request.user.is_authenticated
             and response.status_code < 500

@@ -274,6 +274,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'workers.tasks.cleanup_idempotency.cleanup_expired_idempotency_keys',
         'schedule': crontab(hour=5, minute=0),  # daily at 05:00 UTC
     },
+    'cleanup-expired-audit-logs': {
+        'task': 'workers.tasks.cleanup_audit_log.cleanup_expired_audit_logs',
+        'schedule': crontab(hour=5, minute=30),  # daily at 05:30 UTC
+    },
 }
 
 # ── Redis cache ───────────────────────────────────────────────────────────────
