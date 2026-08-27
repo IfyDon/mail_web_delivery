@@ -47,14 +47,25 @@ echo "==> SES inbound receiving setup for account=$ACCOUNT_ID region=$REGION"
 # ── 1. Create S3 bucket ──────────────────────────────────────────────────────
 echo ""
 echo "==> [1/5] Creating S3 bucket '$BUCKET_NAME'..."
+_create_bucket_err=$(mktemp)
 if [[ "$REGION" == "us-east-1" ]]; then
-    aws s3api create-bucket --bucket "$BUCKET_NAME" --region "$REGION" 2>/dev/null \
-        || echo "   (bucket already exists)"
+    aws s3api create-bucket --bucket "$BUCKET_NAME" --region "$REGION" 2>"$_create_bucket_err"
 else
     aws s3api create-bucket --bucket "$BUCKET_NAME" --region "$REGION" \
-        --create-bucket-configuration LocationConstraint="$REGION" 2>/dev/null \
-        || echo "   (bucket already exists)"
+        --create-bucket-configuration LocationConstraint="$REGION" 2>"$_create_bucket_err"
 fi
+_create_bucket_rc=$?
+if [[ $_create_bucket_rc -ne 0 ]]; then
+    if grep -q "BucketAlreadyOwnedByYou" "$_create_bucket_err"; then
+        echo "   (bucket already exists — owned by this account, continuing)"
+    else
+        echo "   FAILED to create bucket:"
+        cat "$_create_bucket_err" >&2
+        rm -f "$_create_bucket_err"
+        exit 1
+    fi
+fi
+rm -f "$_create_bucket_err"
 
 echo "==> [2/5] Attaching bucket policy allowing SES to write..."
 aws s3api put-bucket-policy --bucket "$BUCKET_NAME" --policy "{
