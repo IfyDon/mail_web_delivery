@@ -49,6 +49,21 @@ jobs:
       - run: python manage.py migrate --noinput
       - run: pytest tests/ -q
 
+  sdk-python-test:
+    name: Test Python SDK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: sdks/python/pyproject.toml
+      - run: pip install -e ".[dev]"
+        working-directory: sdks/python
+      - run: pytest -q
+        working-directory: sdks/python
+
   deploy:
     name: Deploy to production
     needs: test
