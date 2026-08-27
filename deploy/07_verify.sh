@@ -119,6 +119,21 @@ if [[ "$REDIS_OK" == "PONG" ]]; then ok "Redis connection OK";
 else fail "Redis connection failed";
 fi
 
+# ── 6b. Database backups ──────────────────────────────────────────────────────
+echo ""
+echo "── Database backups ─────────────────────"
+if [[ -f /etc/cron.d/web-mail-backup ]]; then ok "Daily backup cron job installed";
+else fail "No backup cron job at /etc/cron.d/web-mail-backup — run deploy/08_backup.sh";
+fi
+
+BACKUP_DIR="${BACKUP_DIR:-$APP_DIR/backups}"
+LATEST_BACKUP=$(ls -t "$BACKUP_DIR"/web_mail_*.sql.gz 2>/dev/null | head -1 || echo "")
+if [[ -n "$LATEST_BACKUP" ]]; then
+    ok "Most recent backup: $(basename "$LATEST_BACKUP") ($(du -h "$LATEST_BACKUP" | cut -f1))"
+else
+    fail "No backups found in $BACKUP_DIR — run deploy/08_backup.sh"
+fi
+
 # ── 7. Production configuration validation ────────────────────────────────────
 echo ""
 echo "── App configuration ────────────────────"

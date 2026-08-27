@@ -21,7 +21,10 @@ apt-get install -y -qq \
     lsb-release \
     unzip \
     jq \
-    python3-pip
+    python3-pip \
+    cron
+
+systemctl enable --now cron
 
 echo "==> [1b/6] Installing AWS CLI v2..."
 curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tmp/awscliv2.zip
