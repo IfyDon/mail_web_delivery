@@ -72,7 +72,7 @@ class QuotaViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['get'])
     def current(self, request):
         """Get current user's quota."""
-        quota = Quota.objects.get(user=request.user)
+        quota, _ = Quota.objects.get_or_create(user=request.user)
         serializer = QuotaSerializer(quota)
         return Response(serializer.data)
 
