@@ -121,8 +121,12 @@ class TestResetMonthlyQuotas:
 
     def test_multiple_users_reset(self, user, second_user, celery_eager):
         from apps.accounts.models import Quota
-        q1 = Quota.objects.create(user=user, emails_sent_this_month=100, monthly_limit=1000)
-        q2 = Quota.objects.create(user=second_user, emails_sent_this_month=200, monthly_limit=5000)
+        q1, _ = Quota.objects.update_or_create(
+            user=user, defaults={"emails_sent_this_month": 100, "monthly_limit": 1000}
+        )
+        q2, _ = Quota.objects.update_or_create(
+            user=second_user, defaults={"emails_sent_this_month": 200, "monthly_limit": 5000}
+        )
         from workers.tasks.reset_quota import reset_monthly_quotas
         reset_monthly_quotas()
         q1.refresh_from_db()

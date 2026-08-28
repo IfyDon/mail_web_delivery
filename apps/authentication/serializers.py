@@ -1,7 +1,7 @@
 # Serializers: RegisterSerializer, LoginSerializer, TokenSerializer, TwoFactorSerializer
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from apps.accounts.models import CustomUser, Quota
+from apps.accounts.models import CustomUser
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -19,16 +19,15 @@ class RegisterSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        user = CustomUser.objects.create_user(
+        # Quota is provisioned by apps.accounts.signals.create_quota_for_new_user
+        # on CustomUser's post_save — not here, so every creation path gets one.
+        return CustomUser.objects.create_user(
             email=validated_data['email'],
             username=validated_data['email'],  # Use email as username
             password=validated_data['password'],
             first_name=validated_data.get('first_name', ''),
             last_name=validated_data.get('last_name', ''),
         )
-        # Create default quota
-        Quota.objects.create(user=user)
-        return user
 
 
 class LoginSerializer(serializers.Serializer):
