@@ -198,6 +198,13 @@ SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
 SOCIALACCOUNT_EMAIL_REQUIRED = True
 SOCIALACCOUNT_LOGIN_ON_GET = True  # skip allauth's intermediate confirmation page
+# Google/Microsoft both verify email ownership before we ever see it, so a
+# social login whose email matches an existing password-based account can be
+# trusted as that same person — log them into it instead of blocking with
+# "an account already exists, sign in first, then connect" (allauth's
+# default, meant for untrustworthy providers where email isn't proof).
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
