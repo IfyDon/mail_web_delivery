@@ -4,10 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Dashboard{% endblock %} — WebMail</title>
-  {# Not deferred/async — must run before first paint to avoid a flash of
-     the wrong theme. External file, not inline: CSP's script-src is 'self'
-     with no 'unsafe-inline' and no script nonce, so an inline <script>
-     here would be silently dropped by the browser. #}
+  {# Blocking (no defer/async) so the theme applies before first paint. External file, not inline, because CSP's script-src has no 'unsafe-inline'/nonce. #}
   <script src="{% static 'js/theme.js' %}"></script>
   <link rel="stylesheet" href="{% static 'css/output.css' %}">
   {% block extra_head %}{% endblock %}
