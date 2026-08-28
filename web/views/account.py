@@ -7,6 +7,12 @@ from django_otp.plugins.otp_totp.models import TOTPDevice
 
 from web.forms.auth_forms import LoginForm, SignUpForm
 
+# Two AUTHENTICATION_BACKENDS are configured (password + allauth's social
+# backend), so django.contrib.auth.login() can no longer infer which one to
+# use for a user object that wasn't produced by authenticate() — it must be
+# told explicitly, or it raises ValueError.
+_PASSWORD_BACKEND = "apps.authentication.backends.EmailBackend"
+
 
 class SignUpView(View):
     template_name = "registration/signup.html"
@@ -20,7 +26,7 @@ class SignUpView(View):
         form = SignUpForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)
+            login(request, user, backend=_PASSWORD_BACKEND)
             plan = request.GET.get("plan", "").strip()
             if plan and plan != "free":
                 return redirect(f"/dashboard/billing/checkout/?plan={plan}")
@@ -77,7 +83,7 @@ class TwoFactorVerifyView(View):
 
         next_url = request.session.pop("pre_2fa_next", "dashboard")
         request.session.pop("pre_2fa_user_id", None)
-        login(request, user)
+        login(request, user, backend=_PASSWORD_BACKEND)
         otp_login(request, device)
         return redirect(next_url)
 
