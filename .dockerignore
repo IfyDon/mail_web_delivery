@@ -1,0 +1,47 @@
+# Secrets — must never be baked into an image layer. Runtime env vars come
+# from docker-compose's environment block, not from a copied .env file.
+.env
+.env.*
+!.env.example
+
+# VCS
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local data / generated artifacts — never needed in the image; collectstatic
+# and migrate build/populate their own copies at runtime.
+db.sqlite3
+media/
+private_media/
+staticfiles/
+
+# Node (css-builder stage copies only what it needs explicitly)
+node_modules/
+frontend/node_modules/
+
+# SDKs have their own isolated venvs/build artifacts, irrelevant to the app image
+sdks/**/.venv/
+sdks/**/__pycache__/
+sdks/**/*.egg-info/
+sdks/**/dist/
+
+# Editor / OS cruft
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Docs and planning notes not needed at runtime
+*.md
+!README.md
