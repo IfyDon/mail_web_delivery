@@ -288,6 +288,13 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutes
+# Every task in workers/tasks/ is dispatched via plain .delay() with no queue
+# kwarg, so they all route to Celery's built-in default queue name — which is
+# literally "celery", not "default". The worker container only consumes from
+# `-Q default,emails,webhooks` (Dockerfile.celery), so without this, nothing
+# ever gets picked up. Confirmed live: 100k+ backlogged messages sitting
+# unconsumed in the "celery" queue, including outbound send_email_task calls.
+CELERY_TASK_DEFAULT_QUEUE = 'default'
 
 CELERY_BEAT_SCHEDULE = {
     'aggregate-daily-stats': {
