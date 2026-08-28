@@ -14,6 +14,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from integrations.ses.sns_verify import is_trusted_aws_url, verify_sns_message
 from services.inbound_service import fetch_raw_email, parse_raw_email, route_inbound_email
 
 logger = logging.getLogger(__name__)
@@ -23,7 +24,7 @@ class SESInboundEmailView(APIView):
     """POST /api/v1/webhooks/ses-inbound-email/
 
     Receives SNS notifications from AWS for received (inbound) mail.
-    No API-key auth — SNS delivers unauthenticated.
+    No API-key auth — SNS delivers unauthenticated; we verify the SNS signature.
     """
     authentication_classes = []
     permission_classes = [AllowAny]
@@ -34,11 +35,14 @@ class SESInboundEmailView(APIView):
         except (json.JSONDecodeError, ValueError):
             return Response({"error": "Invalid JSON"}, status=400)
 
+        if not verify_sns_message(body):
+            return Response({"error": "Invalid signature"}, status=403)
+
         msg_type = body.get("Type", "")
 
         if msg_type == "SubscriptionConfirmation":
             subscribe_url = body.get("SubscribeURL", "")
-            if subscribe_url.startswith("https://sns."):
+            if is_trusted_aws_url(subscribe_url):
                 try:
                     urllib.request.urlopen(subscribe_url, timeout=5)  # noqa: S310
                     logger.info("ses_inbound_email: SNS subscription confirmed")

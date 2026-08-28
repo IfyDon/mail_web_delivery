@@ -278,8 +278,41 @@ class TestRouteInboundEmail:
 
 @pytest.mark.django_db
 class TestSESInboundEmailView:
-    def test_subscription_confirmation_hits_subscribe_url(self, api_client):
+    def test_unsigned_notification_rejected(self, api_client):
+        """No SNS signature at all → rejected before any processing."""
+        resp = api_client.post(
+            "/api/v1/webhooks/ses-inbound-email/",
+            json.dumps({
+                "Type": "Notification",
+                "Message": json.dumps({"notificationType": "Bounce"}),
+            }),
+            content_type="application/json",
+        )
+        assert resp.status_code == 403
+
+    def test_untrusted_signing_cert_host_rejected(self, api_client):
+        """SigningCertURL pointing off AWS's domain → rejected, cert never fetched."""
         with patch("api.v1.views.ses_inbound_email.urllib.request.urlopen") as mock_open:
+            resp = api_client.post(
+                "/api/v1/webhooks/ses-inbound-email/",
+                json.dumps({
+                    "Type": "Notification",
+                    "Message": json.dumps({"notificationType": "Bounce"}),
+                    "MessageId": "id-1",
+                    "TopicArn": "arn:aws:sns:us-east-1:123:t",
+                    "Timestamp": "2024-01-01T00:00:00Z",
+                    "Signature": "ZmFrZQ==",
+                    "SigningCertURL": "https://sns.attacker.com/cert.pem",
+                }),
+                content_type="application/json",
+            )
+        assert resp.status_code == 403
+        mock_open.assert_not_called()
+
+    def test_subscription_confirmation_hits_subscribe_url(self, api_client):
+        with patch(
+            "api.v1.views.ses_inbound_email.verify_sns_message", return_value=True,
+        ), patch("api.v1.views.ses_inbound_email.urllib.request.urlopen") as mock_open:
             resp = api_client.post(
                 "/api/v1/webhooks/ses-inbound-email/",
                 json.dumps({
@@ -293,14 +326,15 @@ class TestSESInboundEmailView:
         mock_open.assert_called_once()
 
     def test_ignores_non_received_notification(self, api_client):
-        resp = api_client.post(
-            "/api/v1/webhooks/ses-inbound-email/",
-            json.dumps({
-                "Type": "Notification",
-                "Message": json.dumps({"notificationType": "Bounce"}),
-            }),
-            content_type="application/json",
-        )
+        with patch("api.v1.views.ses_inbound_email.verify_sns_message", return_value=True):
+            resp = api_client.post(
+                "/api/v1/webhooks/ses-inbound-email/",
+                json.dumps({
+                    "Type": "Notification",
+                    "Message": json.dumps({"notificationType": "Bounce"}),
+                }),
+                content_type="application/json",
+            )
         assert resp.status_code == 200
         assert resp.data["status"] == "ignored"
 
@@ -334,7 +368,9 @@ class TestSESInboundEmailView:
         }
         with patch(
             "api.v1.views.ses_inbound_email.fetch_raw_email", return_value=raw_email,
-        ) as mock_fetch:
+        ) as mock_fetch, patch(
+            "api.v1.views.ses_inbound_email.verify_sns_message", return_value=True,
+        ):
             resp = api_client.post(
                 "/api/v1/webhooks/ses-inbound-email/",
                 json.dumps(notification),
@@ -345,3 +381,68 @@ class TestSESInboundEmailView:
         msg = InboundMessage.objects.get(ses_message_id="ses-xyz-999")
         assert msg.subject == "Ingested"
         assert "Hello world" in msg.text_body
+
+
+# ── SES bounce/complaint SNS webhook ──────────────────────────────────────────
+
+@pytest.mark.django_db
+class TestSESInboundView:
+    def test_unsigned_notification_rejected(self, api_client):
+        resp = api_client.post(
+            "/api/v1/webhooks/ses/",
+            json.dumps({
+                "Type": "Notification",
+                "Message": json.dumps({
+                    "notificationType": "Bounce",
+                    "bounce": {
+                        "bounceType": "Permanent",
+                        "bouncedRecipients": [{"emailAddress": "victim@example.com"}],
+                    },
+                }),
+            }),
+            content_type="application/json",
+        )
+        assert resp.status_code == 403
+
+    def test_forged_bounce_does_not_create_suppression(self, api_client, user, message):
+        """A forged, unsigned Bounce notification must not reach the handler
+        that would otherwise suppress the address platform-wide."""
+        from apps.suppressions.models import Suppression
+
+        resp = api_client.post(
+            "/api/v1/webhooks/ses/",
+            json.dumps({
+                "Type": "Notification",
+                "Message": json.dumps({
+                    "notificationType": "Bounce",
+                    "bounce": {
+                        "bounceType": "Permanent",
+                        "bouncedRecipients": [{"emailAddress": message.to_address}],
+                    },
+                }),
+            }),
+            content_type="application/json",
+        )
+        assert resp.status_code == 403
+        assert not Suppression.objects.filter(email=message.to_address).exists()
+
+    def test_verified_bounce_suppresses_recipient(self, api_client, user, message):
+        from apps.suppressions.models import Suppression
+
+        with patch("api.v1.views.ses_inbound.verify_sns_message", return_value=True):
+            resp = api_client.post(
+                "/api/v1/webhooks/ses/",
+                json.dumps({
+                    "Type": "Notification",
+                    "Message": json.dumps({
+                        "notificationType": "Bounce",
+                        "bounce": {
+                            "bounceType": "Permanent",
+                            "bouncedRecipients": [{"emailAddress": message.to_address}],
+                        },
+                    }),
+                }),
+                content_type="application/json",
+            )
+        assert resp.status_code == 200
+        assert Suppression.objects.filter(email=message.to_address, user=user).exists()

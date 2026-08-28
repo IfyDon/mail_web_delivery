@@ -8,6 +8,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 
+from integrations.ses.sns_verify import is_trusted_aws_url, verify_sns_message
+
 logger = logging.getLogger(__name__)
 
 
@@ -26,12 +28,15 @@ class SESInboundView(APIView):
         except (json.JSONDecodeError, ValueError):
             return Response({"error": "Invalid JSON"}, status=400)
 
+        if not verify_sns_message(body):
+            return Response({"error": "Invalid signature"}, status=403)
+
         msg_type = body.get("Type", "")
 
         # SNS subscription confirmation — fetch the SubscribeURL to confirm
         if msg_type == "SubscriptionConfirmation":
             subscribe_url = body.get("SubscribeURL", "")
-            if subscribe_url.startswith("https://sns."):
+            if is_trusted_aws_url(subscribe_url):
                 try:
                     urllib.request.urlopen(subscribe_url, timeout=5)  # noqa: S310
                     logger.info("ses_inbound: SNS subscription confirmed")

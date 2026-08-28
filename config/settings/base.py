@@ -369,6 +369,11 @@ AWS_SES_REGION = os.getenv('AWS_SES_REGION', 'us-east-1')
 # S3 bucket + key prefix SES writes inbound mail to (see apps.inbound / services.inbound_service)
 AWS_SES_INBOUND_BUCKET = os.getenv('AWS_SES_INBOUND_BUCKET', '')
 AWS_SES_INBOUND_PREFIX = os.getenv('AWS_SES_INBOUND_PREFIX', 'inbound/')
+# Optional extra check on top of signature verification (integrations/ses/sns_verify.py):
+# if set, inbound SNS messages are rejected unless TopicArn is in this list.
+AWS_SNS_EXPECTED_TOPIC_ARNS = [
+    arn.strip() for arn in os.getenv('AWS_SNS_EXPECTED_TOPIC_ARNS', '').split(',') if arn.strip()
+]
 
 # Logging — JSON-structured output for ELK / Datadog / CloudWatch parsing.
 # Falls back to plain text if python-json-logger is not installed.
