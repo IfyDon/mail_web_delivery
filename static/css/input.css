@@ -1,3 +1,45 @@
 @tailwind base;
+
+@layer base {
+  /* Design tokens — one definition per role, referenced by semantic Tailwind
+     classes (bg-surface, text-ink, etc.) everywhere in the dashboard.
+     Flipping .dark on <html> changes every one of these at once instead of
+     requiring a matching dark: class on every single element — the previous
+     per-class approach is exactly how a heading ends up with a dark:
+     variant while its subtitle doesn't. Light values match Tailwind's
+     stock gray/indigo palette; dark values use slightly cooler slate tones
+     with contrast-checked accent colors (indigo-600 fails as *text* on a
+     dark surface — it only works as a solid button fill). */
+  :root {
+    --surface: 249 250 251;      /* gray-50   — page canvas */
+    --panel: 255 255 255;        /* white     — sidebar */
+    --card: 255 255 255;         /* white     — cards, same as panel in light */
+    --line: 229 231 235;         /* gray-200  — borders */
+    --line-subtle: 243 244 246;  /* gray-100  — dividers within a card */
+    --well: 249 250 251;         /* gray-50   — table headers, code blocks, hover */
+    --ink: 17 24 39;             /* gray-900  — headings, primary values */
+    --ink-soft: 75 85 99;        /* gray-600  — body text, labels */
+    --ink-faint: 156 163 175;    /* gray-400  — timestamps, eyebrow labels */
+    --brand: 79 70 229;          /* indigo-600 — links/icons on light */
+    --brand-bg: 238 242 255;     /* indigo-50  — active nav background */
+    --brand-ink: 67 56 202;      /* indigo-700 — text on brand-bg */
+  }
+
+  :root.dark {
+    --surface: 15 23 42;         /* slate-900 */
+    --panel: 11 17 32;           /* darker than surface — sidebar recedes */
+    --card: 30 41 59;            /* slate-800 — lighter than surface, cards lift */
+    --line: 51 65 85;            /* slate-700 */
+    --line-subtle: 30 41 59;     /* slate-800 */
+    --well: 30 41 59;            /* slate-800 */
+    --ink: 241 245 249;          /* slate-100 */
+    --ink-soft: 148 163 184;     /* slate-400 */
+    --ink-faint: 100 116 139;    /* slate-500 */
+    --brand: 165 180 252;        /* indigo-300 — the fix: light indigo as text, not indigo-600 */
+    --brand-bg: 49 46 129;       /* indigo-900 */
+    --brand-ink: 199 210 254;    /* indigo-200 */
+  }
+}
+
 @tailwind components;
 @tailwind utilities;

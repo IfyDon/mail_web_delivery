@@ -3,28 +3,28 @@
 
 {% block content %}
 <div class="mb-6">
-  <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">Audit Log</h1>
-  <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">A read-only record of write actions taken on your account (retained 12 months)</p>
+  <h1 class="text-xl font-bold text-ink">Audit Log</h1>
+  <p class="text-sm text-ink-faint mt-0.5">A read-only record of write actions taken on your account (retained 12 months)</p>
 </div>
 
-<div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+<div class="rounded-xl border border-line bg-card shadow-sm dark:shadow-none overflow-hidden">
   {% if page_obj.object_list %}
   <div class="overflow-x-auto">
     <table class="min-w-full text-sm">
-      <thead class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-800">
+      <thead class="bg-well border-b border-line">
         <tr>
-          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Timestamp</th>
-          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Action</th>
-          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">IP Address</th>
-          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Status</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-ink-faint">Timestamp</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-ink-faint">Action</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-ink-faint">IP Address</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-ink-faint">Status</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
+      <tbody class="divide-y divide-line-subtle">
         {% for entry in page_obj %}
-        <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-          <td class="px-5 py-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ entry.created_at|date:"M j, Y H:i:s" }}</td>
-          <td class="px-5 py-3 font-mono text-xs text-gray-900 dark:text-gray-100">{{ entry.action }}</td>
-          <td class="px-5 py-3 text-xs text-gray-500 dark:text-gray-400">{{ entry.ip_address|default:"—" }}</td>
+        <tr class="hover:bg-well transition-colors">
+          <td class="px-5 py-3 text-xs text-ink-faint whitespace-nowrap">{{ entry.created_at|date:"M j, Y H:i:s" }}</td>
+          <td class="px-5 py-3 font-mono text-xs text-ink">{{ entry.action }}</td>
+          <td class="px-5 py-3 text-xs text-ink-faint">{{ entry.ip_address|default:"—" }}</td>
           <td class="px-5 py-3">
             {% with code=entry.metadata.status_code %}
             <span class="text-xs font-medium {% if code >= 400 %}text-red-600 dark:text-red-400{% else %}text-green-600 dark:text-green-400{% endif %}">
@@ -39,8 +39,8 @@
   </div>
 
   {% if page_obj.paginator.num_pages > 1 %}
-  <div class="px-5 py-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
-    <p class="text-xs text-gray-400 dark:text-gray-500">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</p>
+  <div class="px-5 py-3 border-t border-line-subtle flex items-center justify-between">
+    <p class="text-xs text-ink-faint">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</p>
     <div class="flex gap-2">
       {% if page_obj.has_previous %}
       <a href="?page={{ page_obj.previous_page_number }}" class="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300">← Previous</a>
@@ -54,11 +54,11 @@
 
   {% else %}
   <div class="py-16 text-center">
-    <svg class="mx-auto h-10 w-10 text-gray-300 dark:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg class="mx-auto h-10 w-10 text-ink-faint" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
     </svg>
-    <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">No activity recorded yet.</p>
+    <p class="mt-3 text-sm text-ink-faint">No activity recorded yet.</p>
   </div>
   {% endif %}
 </div>

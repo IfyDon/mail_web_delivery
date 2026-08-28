@@ -1,5 +1,5 @@
 {% load static %}<!doctype html>
-<html lang="en" class="h-full bg-gray-50 dark:bg-gray-950">
+<html lang="en" class="h-full bg-surface">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,12 +13,12 @@
 <div class="flex h-full overflow-hidden">
 
   {# ── Sidebar ─────────────────────────────────────────────────────────── #}
-  <aside class="w-56 shrink-0 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col">
+  <aside class="w-56 shrink-0 bg-panel border-r border-line flex flex-col">
 
-    <div class="h-16 flex items-center justify-between px-5 border-b border-gray-100 dark:border-gray-800">
+    <div class="h-16 flex items-center justify-between px-5 border-b border-line-subtle">
       <a href="/" class="text-lg font-bold text-indigo-600 dark:text-indigo-400">WebMail</a>
       <button type="button" id="theme-toggle" aria-label="Toggle dark mode"
-              class="rounded-lg p-1.5 text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+              class="rounded-lg p-1.5 text-ink-faint hover:bg-well hover:text-ink-soft transition-colors">
         <svg class="h-4 w-4 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
@@ -36,7 +36,7 @@
 
       <a href="/dashboard/"
          class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                {% if p == '/dashboard/' %}bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400{% else %}text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100{% endif %}">
+                {% if p == '/dashboard/' %}bg-brand-bg text-brand-ink{% else %}text-ink-soft hover:bg-well hover:text-ink{% endif %}">
         <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
@@ -46,7 +46,7 @@
 
       <a href="/dashboard/messages/"
          class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                {% if '/messages/' in p %}bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400{% else %}text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100{% endif %}">
+                {% if '/messages/' in p %}bg-brand-bg text-brand-ink{% else %}text-ink-soft hover:bg-well hover:text-ink{% endif %}">
         <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
@@ -56,7 +56,7 @@
 
       <a href="/dashboard/domains/"
          class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                {% if '/domains/' in p %}bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400{% else %}text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100{% endif %}">
+                {% if '/domains/' in p %}bg-brand-bg text-brand-ink{% else %}text-ink-soft hover:bg-well hover:text-ink{% endif %}">
         <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
@@ -66,7 +66,7 @@
 
       <a href="/dashboard/templates/"
          class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                {% if '/templates/' in p %}bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400{% else %}text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100{% endif %}">
+                {% if '/templates/' in p %}bg-brand-bg text-brand-ink{% else %}text-ink-soft hover:bg-well hover:text-ink{% endif %}">
         <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -76,7 +76,7 @@
 
       <a href="/dashboard/streams/"
          class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                {% if '/streams/' in p %}bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400{% else %}text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100{% endif %}">
+                {% if '/streams/' in p %}bg-brand-bg text-brand-ink{% else %}text-ink-soft hover:bg-well hover:text-ink{% endif %}">
         <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M4 6h16M4 12h16M4 18h7"/>
@@ -86,7 +86,7 @@
 
       <a href="/dashboard/analytics/"
          class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                {% if '/analytics/' in p %}bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400{% else %}text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100{% endif %}">
+                {% if '/analytics/' in p %}bg-brand-bg text-brand-ink{% else %}text-ink-soft hover:bg-well hover:text-ink{% endif %}">
         <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
@@ -96,7 +96,7 @@
 
       <a href="/dashboard/webhooks/"
          class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                {% if '/webhooks/' in p %}bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400{% else %}text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100{% endif %}">
+                {% if '/webhooks/' in p %}bg-brand-bg text-brand-ink{% else %}text-ink-soft hover:bg-well hover:text-ink{% endif %}">
         <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M13 10V3L4 14h7v7l9-11h-7z"/>
@@ -106,7 +106,7 @@
 
       <a href="/dashboard/inbound/"
          class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                {% if '/inbound/' in p %}bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400{% else %}text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100{% endif %}">
+                {% if '/inbound/' in p %}bg-brand-bg text-brand-ink{% else %}text-ink-soft hover:bg-well hover:text-ink{% endif %}">
         <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
@@ -116,7 +116,7 @@
 
       <a href="/dashboard/suppressions/"
          class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                {% if '/suppressions/' in p %}bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400{% else %}text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100{% endif %}">
+                {% if '/suppressions/' in p %}bg-brand-bg text-brand-ink{% else %}text-ink-soft hover:bg-well hover:text-ink{% endif %}">
         <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
@@ -126,7 +126,7 @@
 
       <a href="/dashboard/billing/"
          class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                {% if '/billing/' in p %}bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400{% else %}text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100{% endif %}">
+                {% if '/billing/' in p %}bg-brand-bg text-brand-ink{% else %}text-ink-soft hover:bg-well hover:text-ink{% endif %}">
         <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
@@ -136,7 +136,7 @@
 
       <a href="/dashboard/settings/"
          class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                {% if '/settings/' in p %}bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400{% else %}text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100{% endif %}">
+                {% if '/settings/' in p %}bg-brand-bg text-brand-ink{% else %}text-ink-soft hover:bg-well hover:text-ink{% endif %}">
         <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
@@ -146,36 +146,36 @@
       </a>
 
       {# Grouped under Settings: account-level pages, always visible so they stay reachable without a JS toggle. #}
-      <div class="ml-[18px] pl-3 border-l border-gray-100 dark:border-gray-800 space-y-0.5">
+      <div class="ml-[18px] pl-3 border-l border-line-subtle space-y-0.5">
         <a href="/dashboard/contacts/"
            class="block px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-                  {% if '/contacts/' in p %}bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400{% else %}text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100{% endif %}">
+                  {% if '/contacts/' in p %}bg-brand-bg text-brand-ink{% else %}text-ink-faint hover:bg-well hover:text-ink{% endif %}">
           Contacts
         </a>
         <a href="/dashboard/api-keys/create/"
            class="block px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-                  {% if '/api-keys/' in p %}bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400{% else %}text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100{% endif %}">
+                  {% if '/api-keys/' in p %}bg-brand-bg text-brand-ink{% else %}text-ink-faint hover:bg-well hover:text-ink{% endif %}">
           API Keys
         </a>
         <a href="/dashboard/team/"
            class="block px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-                  {% if '/team/' in p %}bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400{% else %}text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100{% endif %}">
+                  {% if '/team/' in p %}bg-brand-bg text-brand-ink{% else %}text-ink-faint hover:bg-well hover:text-ink{% endif %}">
           Team
         </a>
         <a href="/dashboard/audit-log/"
            class="block px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-                  {% if '/audit-log/' in p %}bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400{% else %}text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100{% endif %}">
+                  {% if '/audit-log/' in p %}bg-brand-bg text-brand-ink{% else %}text-ink-faint hover:bg-well hover:text-ink{% endif %}">
           Audit Log
         </a>
         <a href="/api/redoc/" target="_blank"
-           class="block px-3 py-1.5 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
+           class="block px-3 py-1.5 rounded-lg text-sm font-medium text-ink-faint hover:bg-well hover:text-ink transition-colors">
           API Docs
         </a>
       </div>
 
-      <div class="pt-2 mt-2 border-t border-gray-100 dark:border-gray-800">
+      <div class="pt-2 mt-2 border-t border-line-subtle">
         <a href="/admin/" target="_blank"
-           class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+           class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-ink-faint hover:text-ink-soft transition-colors">
           <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
@@ -187,8 +187,8 @@
       {% endwith %}
     </nav>
 
-    <div class="border-t border-gray-100 dark:border-gray-800 px-3 py-3">
-      <p class="text-xs text-gray-500 dark:text-gray-400 truncate mb-1" title="{{ request.user.email }}">{{ request.user.email }}</p>
+    <div class="border-t border-line-subtle px-3 py-3">
+      <p class="text-xs text-ink-faint truncate mb-1" title="{{ request.user.email }}">{{ request.user.email }}</p>
       <form method="post" action="/logout/">
         {% csrf_token %}
         <button type="submit" class="text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium transition-colors">Sign out</button>

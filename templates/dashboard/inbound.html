@@ -4,40 +4,40 @@
 {% block content %}
 <div class="flex items-center justify-between mb-6">
   <div>
-    <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">Inbound Email</h1>
-    <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Route mail sent to your domains into your app</p>
+    <h1 class="text-xl font-bold text-ink">Inbound Email</h1>
+    <p class="text-sm text-ink-faint mt-0.5">Route mail sent to your domains into your app</p>
   </div>
 </div>
 
 {# ── Add route form ───────────────────────────────────────────────────── #}
-<div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm p-5 mb-6">
-  <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Add Route</h2>
+<div class="rounded-xl border border-line bg-card shadow-sm dark:shadow-none p-5 mb-6">
+  <h2 class="text-sm font-semibold text-ink mb-4">Add Route</h2>
   {% if verified_domains %}
   <form method="post" action="/dashboard/inbound/" class="flex flex-wrap items-end gap-3">
     {% csrf_token %}
     <div>
-      <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Domain</label>
+      <label class="block text-xs font-medium text-ink-soft mb-1">Domain</label>
       <select name="domain" required
-              class="rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+              class="rounded-lg border border-line bg-card text-ink px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
         {% for d in verified_domains %}
         <option value="{{ d.id }}">{{ d.domain }}</option>
         {% endfor %}
       </select>
     </div>
     <div>
-      <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Matches</label>
+      <label class="block text-xs font-medium text-ink-soft mb-1">Matches</label>
       <select name="match_type" id="match_type" onchange="document.getElementById('local_part_wrap').classList.toggle('hidden', this.value === 'wildcard')"
-              class="rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+              class="rounded-lg border border-line bg-card text-ink px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
         <option value="wildcard">Entire domain (*@domain)</option>
         <option value="exact">One address</option>
       </select>
     </div>
     <div id="local_part_wrap" class="hidden">
-      <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Address</label>
+      <label class="block text-xs font-medium text-ink-soft mb-1">Address</label>
       <div class="flex items-center gap-1 text-sm">
         <input type="text" name="local_part" placeholder="support"
-               class="w-32 rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 px-3 py-2 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
-        <span class="text-gray-400 dark:text-gray-500">@domain</span>
+               class="w-32 rounded-lg border border-line bg-card text-ink px-3 py-2 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+        <span class="text-ink-faint">@domain</span>
       </div>
     </div>
     <button type="submit"
@@ -46,7 +46,7 @@
     </button>
   </form>
   {% else %}
-  <p class="text-sm text-gray-500 dark:text-gray-400">
+  <p class="text-sm text-ink-faint">
     You need at least one verified domain before you can route inbound mail.
     <a href="/dashboard/domains/" class="text-indigo-600 dark:text-indigo-400 hover:underline">Verify a domain</a>.
   </p>
@@ -55,13 +55,13 @@
 
 {# ── Route list ───────────────────────────────────────────────────────── #}
 {% if routes %}
-<div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm mb-8 overflow-hidden">
-  <div class="divide-y divide-gray-50 dark:divide-gray-800">
+<div class="rounded-xl border border-line bg-card shadow-sm dark:shadow-none mb-8 overflow-hidden">
+  <div class="divide-y divide-line-subtle">
     {% for route in routes %}
     <div class="flex items-center justify-between px-5 py-3">
       <div class="flex items-center gap-2">
-        <span class="inline-block h-2 w-2 rounded-full {% if route.is_active %}bg-green-500{% else %}bg-gray-300{% endif %}"></span>
-        <span class="text-sm font-mono font-medium text-gray-900 dark:text-gray-100">{{ route.address }}</span>
+        <span class="inline-block h-2 w-2 rounded-full {% if route.is_active %}bg-green-500{% else %}bg-gray-300 dark:bg-gray-600{% endif %}"></span>
+        <span class="text-sm font-mono font-medium text-ink">{{ route.address }}</span>
       </div>
       <form method="post" action="/dashboard/inbound/{{ route.pk }}/delete/"
             onsubmit="return confirm('Remove this route? Mail to this address will no longer be routed.')">
@@ -76,46 +76,46 @@
   </div>
 </div>
 
-<p class="text-xs text-gray-400 dark:text-gray-500 mb-8">
-  Point an MX record at <code class="font-mono bg-gray-100 dark:bg-gray-800 rounded px-1 py-0.5">10 inbound-smtp.us-east-1.amazonaws.com</code>
+<p class="text-xs text-ink-faint mb-8">
+  Point an MX record at <code class="font-mono bg-well rounded px-1 py-0.5">10 inbound-smtp.us-east-1.amazonaws.com</code>
   on each domain above to start receiving mail there. Routed mail is stored below and delivered to any webhook
-  subscribed to the <code class="font-mono bg-gray-100 dark:bg-gray-800 rounded px-1 py-0.5">inbound</code> event —
+  subscribed to the <code class="font-mono bg-well rounded px-1 py-0.5">inbound</code> event —
   <a href="/dashboard/webhooks/" class="text-indigo-600 dark:text-indigo-400 hover:underline">configure one</a>.
 </p>
 {% endif %}
 
 {# ── Recent inbound mail ──────────────────────────────────────────────── #}
-<h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Recent Mail</h2>
-<div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+<h2 class="text-sm font-semibold text-ink mb-3">Recent Mail</h2>
+<div class="rounded-xl border border-line bg-card shadow-sm dark:shadow-none overflow-hidden">
   {% if recent_messages %}
   <div class="overflow-x-auto">
     <table class="min-w-full text-sm">
-      <thead class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-800">
+      <thead class="bg-well border-b border-line">
         <tr>
-          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">From</th>
-          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">To</th>
-          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Subject</th>
-          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Status</th>
-          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Received</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-ink-faint">From</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-ink-faint">To</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-ink-faint">Subject</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-ink-faint">Status</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-ink-faint">Received</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
+      <tbody class="divide-y divide-line-subtle">
         {% for msg in recent_messages %}
-        <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+        <tr class="hover:bg-well transition-colors cursor-pointer"
             onclick="window.location='/dashboard/inbound/messages/{{ msg.pk }}/'">
-          <td class="px-5 py-3 text-gray-900 dark:text-gray-100 font-mono text-xs">{{ msg.from_address }}</td>
-          <td class="px-5 py-3 text-gray-600 dark:text-gray-400 font-mono text-xs">{{ msg.to_address }}</td>
-          <td class="px-5 py-3 text-gray-700 dark:text-gray-300 max-w-xs truncate">{{ msg.subject|default:"(no subject)" }}</td>
+          <td class="px-5 py-3 text-ink font-mono text-xs">{{ msg.from_address }}</td>
+          <td class="px-5 py-3 text-ink-soft font-mono text-xs">{{ msg.to_address }}</td>
+          <td class="px-5 py-3 text-ink-soft max-w-xs truncate">{{ msg.subject|default:"(no subject)" }}</td>
           <td class="px-5 py-3">
             <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium
               {% if msg.status == 'forwarded' %}bg-green-100 dark:bg-green-500/10 text-green-800 dark:text-green-400
               {% elif msg.status == 'routed' %}bg-blue-100 dark:bg-blue-500/10 text-blue-800 dark:text-blue-400
               {% elif msg.status == 'forward_failed' %}bg-red-100 dark:bg-red-500/10 text-red-800 dark:text-red-400
-              {% else %}bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400{% endif %}">
+              {% else %}bg-well text-ink-soft{% endif %}">
               {{ msg.get_status_display }}
             </span>
           </td>
-          <td class="px-5 py-3 text-gray-500 dark:text-gray-400 text-xs whitespace-nowrap">{{ msg.received_at|timesince }} ago</td>
+          <td class="px-5 py-3 text-ink-faint text-xs whitespace-nowrap">{{ msg.received_at|timesince }} ago</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -123,12 +123,12 @@
   </div>
   {% else %}
   <div class="py-16 text-center">
-    <svg class="mx-auto h-10 w-10 text-gray-300 dark:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg class="mx-auto h-10 w-10 text-ink-faint" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
             d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
     </svg>
-    <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">No inbound mail yet.</p>
-    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Add a route above and point your domain's MX record at us to start receiving mail.</p>
+    <p class="mt-3 text-sm text-ink-faint">No inbound mail yet.</p>
+    <p class="text-xs text-ink-faint mt-1">Add a route above and point your domain's MX record at us to start receiving mail.</p>
   </div>
   {% endif %}
 </div>

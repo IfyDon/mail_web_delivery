@@ -4,46 +4,46 @@
 {% block content %}
 <div class="flex items-center justify-between mb-6">
   <div>
-    <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">Analytics</h1>
-    <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Email performance over the selected period</p>
+    <h1 class="text-xl font-bold text-ink">Analytics</h1>
+    <p class="text-sm text-ink-faint mt-0.5">Email performance over the selected period</p>
   </div>
   <div class="flex gap-2">
     <a href="?days=7" class="rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors
-       {% if days == 7 %}bg-indigo-600 text-white border-indigo-600{% else %}bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800{% endif %}">7d</a>
+       {% if days == 7 %}bg-indigo-600 text-white border-indigo-600{% else %}bg-card text-ink-soft border-line hover:bg-well{% endif %}">7d</a>
     <a href="?days=30" class="rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors
-       {% if days == 30 %}bg-indigo-600 text-white border-indigo-600{% else %}bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800{% endif %}">30d</a>
+       {% if days == 30 %}bg-indigo-600 text-white border-indigo-600{% else %}bg-card text-ink-soft border-line hover:bg-well{% endif %}">30d</a>
     <a href="?days=90" class="rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors
-       {% if days == 90 %}bg-indigo-600 text-white border-indigo-600{% else %}bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800{% endif %}">90d</a>
+       {% if days == 90 %}bg-indigo-600 text-white border-indigo-600{% else %}bg-card text-ink-soft border-line hover:bg-well{% endif %}">90d</a>
   </div>
 </div>
 
 {# ── Totals row ───────────────────────────────────────────────────────── #}
 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
   {% with t=totals %}
-  <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm text-center">
-    <p class="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">Sent</p>
-    <p class="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">{{ t.sent }}</p>
+  <div class="rounded-xl border border-line bg-card p-4 shadow-sm dark:shadow-none text-center">
+    <p class="text-xs font-semibold uppercase tracking-widest text-ink-faint">Sent</p>
+    <p class="mt-1 text-2xl font-bold text-ink">{{ t.sent }}</p>
   </div>
-  <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm text-center">
-    <p class="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">Delivered</p>
+  <div class="rounded-xl border border-line bg-card p-4 shadow-sm dark:shadow-none text-center">
+    <p class="text-xs font-semibold uppercase tracking-widest text-ink-faint">Delivered</p>
     <p class="mt-1 text-2xl font-bold text-green-700 dark:text-green-400">{{ t.delivered }}</p>
-    {% if t.sent %}<p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ t.delivered|floatformat:0 }}/{{ t.sent }}</p>{% endif %}
+    {% if t.sent %}<p class="text-xs text-ink-faint mt-0.5">{{ t.delivered|floatformat:0 }}/{{ t.sent }}</p>{% endif %}
   </div>
-  <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm text-center">
-    <p class="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">Opened</p>
+  <div class="rounded-xl border border-line bg-card p-4 shadow-sm dark:shadow-none text-center">
+    <p class="text-xs font-semibold uppercase tracking-widest text-ink-faint">Opened</p>
     <p class="mt-1 text-2xl font-bold text-indigo-700 dark:text-indigo-400">{{ t.opened }}</p>
   </div>
-  <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm text-center">
-    <p class="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">Clicked</p>
+  <div class="rounded-xl border border-line bg-card p-4 shadow-sm dark:shadow-none text-center">
+    <p class="text-xs font-semibold uppercase tracking-widest text-ink-faint">Clicked</p>
     <p class="mt-1 text-2xl font-bold text-purple-700 dark:text-purple-400">{{ t.clicked }}</p>
   </div>
-  <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm text-center">
-    <p class="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">Bounced</p>
-    <p class="mt-1 text-2xl font-bold {% if t.bounced %}text-red-600 dark:text-red-400{% else %}text-gray-900 dark:text-gray-100{% endif %}">{{ t.bounced }}</p>
+  <div class="rounded-xl border border-line bg-card p-4 shadow-sm dark:shadow-none text-center">
+    <p class="text-xs font-semibold uppercase tracking-widest text-ink-faint">Bounced</p>
+    <p class="mt-1 text-2xl font-bold {% if t.bounced %}text-red-600 dark:text-red-400{% else %}text-ink{% endif %}">{{ t.bounced }}</p>
   </div>
-  <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm text-center">
-    <p class="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">Complaints</p>
-    <p class="mt-1 text-2xl font-bold {% if t.complained %}text-red-600 dark:text-red-400{% else %}text-gray-900 dark:text-gray-100{% endif %}">{{ t.complained }}</p>
+  <div class="rounded-xl border border-line bg-card p-4 shadow-sm dark:shadow-none text-center">
+    <p class="text-xs font-semibold uppercase tracking-widest text-ink-faint">Complaints</p>
+    <p class="mt-1 text-2xl font-bold {% if t.complained %}text-red-600 dark:text-red-400{% else %}text-ink{% endif %}">{{ t.complained }}</p>
   </div>
   {% endwith %}
 </div>
@@ -51,32 +51,32 @@
 {# ── Sending health ────────────────────────────────────────────────────── #}
 {% if totals.sent > 0 %}
 {% with bounce_pct=totals.bounced|floatformat:1 complaint_pct=totals.complained|floatformat:2 %}
-<div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm p-5 mb-8">
-  <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Sending Health</h2>
+<div class="rounded-xl border border-line bg-card shadow-sm dark:shadow-none p-5 mb-8">
+  <h2 class="text-sm font-semibold text-ink mb-4">Sending Health</h2>
   <div class="grid grid-cols-2 gap-6">
     <div>
       <div class="flex items-center justify-between mb-1">
-        <p class="text-xs font-medium text-gray-600 dark:text-gray-400">Bounce Rate</p>
+        <p class="text-xs font-medium text-ink-soft">Bounce Rate</p>
         <span class="text-xs font-semibold
           {% if totals.bounced > totals.sent|floatformat:0|add:0 %}text-red-600 dark:text-red-400
           {% else %}text-green-600 dark:text-green-400{% endif %}">
           {{ totals.bounced }}/{{ totals.sent }}
         </span>
       </div>
-      <div class="h-2 w-full rounded-full bg-gray-100 dark:bg-gray-800">
+      <div class="h-2 w-full rounded-full bg-well">
         <div class="h-2 rounded-full bg-green-500" style="width: min(100%, calc({{ totals.bounced }} / {{ totals.sent }} * 100%))"></div>
       </div>
-      <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Safe threshold: &lt; 10%</p>
+      <p class="text-xs text-ink-faint mt-1">Safe threshold: &lt; 10%</p>
     </div>
     <div>
       <div class="flex items-center justify-between mb-1">
-        <p class="text-xs font-medium text-gray-600 dark:text-gray-400">Complaint Rate</p>
+        <p class="text-xs font-medium text-ink-soft">Complaint Rate</p>
         <span class="text-xs font-semibold text-green-600 dark:text-green-400">{{ totals.complained }}/{{ totals.sent }}</span>
       </div>
-      <div class="h-2 w-full rounded-full bg-gray-100 dark:bg-gray-800">
+      <div class="h-2 w-full rounded-full bg-well">
         <div class="h-2 rounded-full bg-green-500" style="width: min(100%, calc({{ totals.complained }} / {{ totals.sent }} * 1000%))"></div>
       </div>
-      <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Safe threshold: &lt; 0.1%</p>
+      <p class="text-xs text-ink-faint mt-1">Safe threshold: &lt; 0.1%</p>
     </div>
   </div>
 </div>
@@ -84,36 +84,36 @@
 {% endif %}
 
 {# ── Daily breakdown table ────────────────────────────────────────────── #}
-<div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
-  <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-800">
-    <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Daily Breakdown</h2>
+<div class="rounded-xl border border-line bg-card shadow-sm dark:shadow-none overflow-hidden">
+  <div class="px-5 py-4 border-b border-line-subtle">
+    <h2 class="text-sm font-semibold text-ink">Daily Breakdown</h2>
   </div>
   {% if stats %}
   <div class="overflow-x-auto">
     <table class="min-w-full text-sm">
-      <thead class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-800">
+      <thead class="bg-well border-b border-line">
         <tr>
-          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Date</th>
-          <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Sent</th>
-          <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Delivered</th>
-          <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Opened</th>
-          <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Clicked</th>
-          <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Bounced</th>
-          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 w-40">Volume</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-ink-faint">Date</th>
+          <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-ink-faint">Sent</th>
+          <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-ink-faint">Delivered</th>
+          <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-ink-faint">Opened</th>
+          <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-ink-faint">Clicked</th>
+          <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-ink-faint">Bounced</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-ink-faint w-40">Volume</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
+      <tbody class="divide-y divide-line-subtle">
         {% for row in stats reversed %}
-        <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-          <td class="px-5 py-3 text-xs font-mono text-gray-600 dark:text-gray-400">{{ row.date|date:"M j, Y" }}</td>
-          <td class="px-5 py-3 text-right text-xs font-medium text-gray-900 dark:text-gray-100">{{ row.sent }}</td>
+        <tr class="hover:bg-well transition-colors">
+          <td class="px-5 py-3 text-xs font-mono text-ink-soft">{{ row.date|date:"M j, Y" }}</td>
+          <td class="px-5 py-3 text-right text-xs font-medium text-ink">{{ row.sent }}</td>
           <td class="px-5 py-3 text-right text-xs text-green-700 dark:text-green-400">{{ row.delivered }}</td>
           <td class="px-5 py-3 text-right text-xs text-indigo-700 dark:text-indigo-400">{{ row.opened }}</td>
           <td class="px-5 py-3 text-right text-xs text-purple-700 dark:text-purple-400">{{ row.clicked }}</td>
-          <td class="px-5 py-3 text-right text-xs {% if row.bounced %}text-red-600 dark:text-red-400{% else %}text-gray-400 dark:text-gray-500{% endif %}">{{ row.bounced }}</td>
+          <td class="px-5 py-3 text-right text-xs {% if row.bounced %}text-red-600 dark:text-red-400{% else %}text-ink-faint{% endif %}">{{ row.bounced }}</td>
           <td class="px-5 py-3">
             {% if totals.sent > 0 and row.sent > 0 %}
-            <div class="h-1.5 w-full rounded-full bg-gray-100 dark:bg-gray-800">
+            <div class="h-1.5 w-full rounded-full bg-well">
               <div class="h-1.5 rounded-full bg-indigo-400" style="width: {{ row.sent|floatformat:0 }}px; max-width:100%"></div>
             </div>
             {% endif %}
@@ -125,12 +125,12 @@
   </div>
   {% else %}
   <div class="py-16 text-center">
-    <svg class="mx-auto h-10 w-10 text-gray-300 dark:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg class="mx-auto h-10 w-10 text-ink-faint" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
             d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
     </svg>
-    <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">No stats yet for this period.</p>
-    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Stats are aggregated nightly from sent emails.</p>
+    <p class="mt-3 text-sm text-ink-faint">No stats yet for this period.</p>
+    <p class="mt-1 text-xs text-ink-faint">Stats are aggregated nightly from sent emails.</p>
   </div>
   {% endif %}
 </div>

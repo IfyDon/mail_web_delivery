@@ -4,18 +4,18 @@
 {% block content %}
 <div class="flex items-center justify-between mb-6">
   <div>
-    <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">Suppression List</h1>
-    <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ total }} total suppressed address{{ total|pluralize:"es" }}</p>
+    <h1 class="text-xl font-bold text-ink">Suppression List</h1>
+    <p class="text-sm text-ink-faint mt-0.5">{{ total }} total suppressed address{{ total|pluralize:"es" }}</p>
   </div>
 </div>
 
 {# ── Add manual suppression ───────────────────────────────────────────── #}
-<div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm p-5 mb-5">
-  <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Suppress an address manually</h2>
+<div class="rounded-xl border border-line bg-card shadow-sm dark:shadow-none p-5 mb-5">
+  <h2 class="text-sm font-semibold text-ink mb-3">Suppress an address manually</h2>
   <form method="post" action="/dashboard/suppressions/" class="flex gap-3">
     {% csrf_token %}
     <input type="email" name="email" placeholder="user@example.com" required
-           class="flex-1 rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+           class="flex-1 rounded-lg border border-line bg-card text-ink px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
     <button type="submit"
             class="rounded-lg bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-900 transition-colors">
       Suppress
@@ -27,44 +27,44 @@
 <div class="flex flex-wrap gap-2 mb-5">
   <a href="/dashboard/suppressions/"
      class="rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors
-            {% if not reason_filter %}bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-900 text-white border-gray-800{% else %}bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800{% endif %}">
+            {% if not reason_filter %}bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-900 text-white border-gray-800{% else %}bg-card text-ink-soft border-line hover:bg-well{% endif %}">
     All ({{ total }})
   </a>
   {% for val, label in reason_choices %}
   <a href="/dashboard/suppressions/?reason={{ val }}"
      class="rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors
-            {% if reason_filter == val %}bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-900 text-white border-gray-800{% else %}bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800{% endif %}">
+            {% if reason_filter == val %}bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-900 text-white border-gray-800{% else %}bg-card text-ink-soft border-line hover:bg-well{% endif %}">
     {{ label }}
   </a>
   {% endfor %}
 </div>
 
 {# ── Table ────────────────────────────────────────────────────────────── #}
-<div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+<div class="rounded-xl border border-line bg-card shadow-sm dark:shadow-none overflow-hidden">
   {% if suppressions %}
   <table class="min-w-full text-sm">
-    <thead class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-800">
+    <thead class="bg-well border-b border-line">
       <tr>
-        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Email</th>
-        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Reason</th>
-        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Suppressed</th>
-        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500"></th>
+        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-ink-faint">Email</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-ink-faint">Reason</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-ink-faint">Suppressed</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-ink-faint"></th>
       </tr>
     </thead>
-    <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
+    <tbody class="divide-y divide-line-subtle">
       {% for sup in suppressions %}
-      <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-        <td class="px-5 py-3 font-mono text-xs text-gray-900 dark:text-gray-100">{{ sup.email }}</td>
+      <tr class="hover:bg-well transition-colors">
+        <td class="px-5 py-3 font-mono text-xs text-ink">{{ sup.email }}</td>
         <td class="px-5 py-3">
           <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium
             {% if sup.reason == 'bounce' %}bg-orange-100 dark:bg-orange-500/10 text-orange-800 dark:text-orange-400
             {% elif sup.reason == 'complaint' %}bg-red-100 dark:bg-red-500/10 text-red-800 dark:text-red-400
-            {% elif sup.reason == 'unsubscribe' %}bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400
+            {% elif sup.reason == 'unsubscribe' %}bg-well text-ink-soft
             {% else %}bg-blue-100 dark:bg-blue-500/10 text-blue-800 dark:text-blue-400{% endif %}">
             {{ sup.get_reason_display }}
           </span>
         </td>
-        <td class="px-5 py-3 text-xs text-gray-400 dark:text-gray-500">{{ sup.created_at|date:"M j, Y" }}</td>
+        <td class="px-5 py-3 text-xs text-ink-faint">{{ sup.created_at|date:"M j, Y" }}</td>
         <td class="px-5 py-3 text-right">
           <form method="post" action="/dashboard/suppressions/{{ sup.pk }}/remove/"
                 onsubmit="return confirm('Remove {{ sup.email }} from suppression list? Future emails will be delivered.')">
@@ -80,18 +80,18 @@
     </tbody>
   </table>
   {% if suppressions|length == 200 %}
-  <div class="px-5 py-3 border-t border-gray-100 dark:border-gray-800 text-center">
-    <p class="text-xs text-gray-400 dark:text-gray-500">Showing most recent 200 entries. Use the API to export the full list.</p>
+  <div class="px-5 py-3 border-t border-line-subtle text-center">
+    <p class="text-xs text-ink-faint">Showing most recent 200 entries. Use the API to export the full list.</p>
   </div>
   {% endif %}
 
   {% else %}
   <div class="py-14 text-center">
-    <svg class="mx-auto h-10 w-10 text-gray-300 dark:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg class="mx-auto h-10 w-10 text-ink-faint" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
             d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
     </svg>
-    <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">
+    <p class="mt-3 text-sm text-ink-faint">
       No suppressions{% if reason_filter %} for this reason{% endif %}.
     </p>
   </div>
