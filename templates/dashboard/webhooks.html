@@ -4,28 +4,28 @@
 {% block content %}
 <div class="flex items-center justify-between mb-6">
   <div>
-    <h1 class="text-xl font-bold text-gray-900">Webhooks</h1>
-    <p class="text-sm text-gray-500 mt-0.5">Receive real-time event notifications at your endpoints</p>
+    <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">Webhooks</h1>
+    <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Receive real-time event notifications at your endpoints</p>
   </div>
 </div>
 
 {# ── Add webhook form ─────────────────────────────────────────────────── #}
-<div class="rounded-xl border border-gray-200 bg-white shadow-sm p-5 mb-6">
-  <h2 class="text-sm font-semibold text-gray-900 mb-4">Add Endpoint</h2>
+<div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm p-5 mb-6">
+  <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Add Endpoint</h2>
   <form method="post" action="/dashboard/webhooks/">
     {% csrf_token %}
     <div class="mb-4">
-      <label class="block text-xs font-medium text-gray-700 mb-1">Endpoint URL</label>
+      <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Endpoint URL</label>
       <input type="url" name="url" placeholder="https://yourapp.com/webhooks/email" required
-             class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+             class="w-full rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
     </div>
     <div class="mb-4">
-      <label class="block text-xs font-medium text-gray-700 mb-2">Events to receive</label>
+      <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Events to receive</label>
       <div class="flex flex-wrap gap-3">
         {% for evt in all_event_types %}
-        <label class="flex items-center gap-1.5 text-sm text-gray-600">
+        <label class="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
           <input type="checkbox" name="event_types" value="{{ evt }}" checked
-                 class="h-3.5 w-3.5 rounded border-gray-300 text-indigo-600">
+                 class="h-3.5 w-3.5 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 text-indigo-600 dark:text-indigo-400">
           {{ evt|title|cut:"_" }}
         </label>
         {% endfor %}
@@ -42,37 +42,37 @@
 {% if webhooks %}
 <div class="space-y-4">
   {% for wh in webhooks %}
-  <div class="rounded-xl border border-gray-200 bg-white shadow-sm">
+  <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
     <div class="flex items-start justify-between px-5 py-4">
       <div class="min-w-0 flex-1 mr-4">
         <div class="flex items-center gap-2 mb-1">
           <span class="inline-block h-2 w-2 rounded-full {% if wh.is_active %}bg-green-500{% else %}bg-gray-300{% endif %}"></span>
-          <p class="text-sm font-mono font-medium text-gray-900 truncate">{{ wh.url }}</p>
+          <p class="text-sm font-mono font-medium text-gray-900 dark:text-gray-100 truncate">{{ wh.url }}</p>
         </div>
         <div class="flex flex-wrap gap-1.5">
           {% for evt in wh.event_types %}
-          <span class="rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700">{{ evt }}</span>
+          <span class="rounded-full bg-indigo-50 dark:bg-indigo-500/10 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:text-indigo-400">{{ evt }}</span>
           {% endfor %}
         </div>
         {% with last_log=wh.dispatch_logs.all|first %}
         {% if last_log %}
-        <p class="text-xs text-gray-400 mt-2">
+        <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">
           Last dispatch: {{ last_log.created_at|timesince }} ago —
           {% if last_log.succeeded %}
-          <span class="text-green-600">HTTP {{ last_log.response_status }}</span>
+          <span class="text-green-600 dark:text-green-400">HTTP {{ last_log.response_status }}</span>
           {% else %}
-          <span class="text-red-500">Failed ({{ last_log.response_status|default:"no response" }})</span>
+          <span class="text-red-500 dark:text-red-400">Failed ({{ last_log.response_status|default:"no response" }})</span>
           {% endif %}
         </p>
         {% endif %}
         {% endwith %}
-        <p class="text-xs text-gray-400 mt-0.5">Created {{ wh.created_at|date:"M j, Y" }}</p>
+        <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Created {{ wh.created_at|date:"M j, Y" }}</p>
       </div>
       <form method="post" action="/dashboard/webhooks/{{ wh.pk }}/delete/"
             onsubmit="return confirm('Remove this webhook endpoint?')">
         {% csrf_token %}
         <button type="submit"
-                class="shrink-0 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-100 transition-colors">
+                class="shrink-0 rounded-lg border border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors">
           Remove
         </button>
       </form>
@@ -81,17 +81,17 @@
     {# Recent dispatch logs #}
     {% with logs=wh.dispatch_logs.all|slice:":5" %}
     {% if logs %}
-    <div class="border-t border-gray-100 px-5 py-3">
-      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Recent Dispatches</p>
+    <div class="border-t border-gray-100 dark:border-gray-800 px-5 py-3">
+      <p class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-2">Recent Dispatches</p>
       <div class="space-y-1">
         {% for log in logs %}
         <div class="flex items-center gap-3 text-xs">
-          <span class="{% if log.succeeded %}text-green-600{% else %}text-red-500{% endif %} shrink-0 font-mono">
+          <span class="{% if log.succeeded %}text-green-600 dark:text-green-400{% else %}text-red-500 dark:text-red-400{% endif %} shrink-0 font-mono">
             {{ log.response_status|default:"ERR" }}
           </span>
-          <span class="text-gray-600">{{ log.event_type }}</span>
-          <span class="text-gray-400 ml-auto whitespace-nowrap">{{ log.created_at|timesince }} ago</span>
-          <span class="text-gray-400">#{{ log.attempts }}</span>
+          <span class="text-gray-600 dark:text-gray-400">{{ log.event_type }}</span>
+          <span class="text-gray-400 dark:text-gray-500 ml-auto whitespace-nowrap">{{ log.created_at|timesince }} ago</span>
+          <span class="text-gray-400 dark:text-gray-500">#{{ log.attempts }}</span>
         </div>
         {% endfor %}
       </div>
@@ -104,12 +104,12 @@
 </div>
 
 {% else %}
-<div class="rounded-xl border-2 border-dashed border-gray-200 py-16 text-center">
-  <svg class="mx-auto h-10 w-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<div class="rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-800 py-16 text-center">
+  <svg class="mx-auto h-10 w-10 text-gray-300 dark:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
   </svg>
-  <p class="mt-3 text-sm text-gray-500">No webhook endpoints yet.</p>
-  <p class="text-xs text-gray-400 mt-1">Add an endpoint above to start receiving event notifications.</p>
+  <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">No webhook endpoints yet.</p>
+  <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Add an endpoint above to start receiving event notifications.</p>
 </div>
 {% endif %}
 

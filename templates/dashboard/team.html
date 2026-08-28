@@ -4,20 +4,20 @@
 {% block content %}
 <div class="flex items-center justify-between mb-6">
   <div>
-    <h1 class="text-xl font-bold text-gray-900">Team</h1>
-    <p class="text-sm text-gray-500 mt-0.5">Invite colleagues to access your dashboard</p>
+    <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">Team</h1>
+    <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Invite colleagues to access your dashboard</p>
   </div>
 </div>
 
 {# ── Invite form ──────────────────────────────────────────────────────── #}
-<div class="rounded-xl border border-gray-200 bg-white shadow-sm p-5 mb-6">
-  <h2 class="text-sm font-semibold text-gray-900 mb-3">Invite a team member</h2>
+<div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm p-5 mb-6">
+  <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Invite a team member</h2>
   <form method="post" action="/dashboard/team/" class="flex flex-wrap gap-3">
     {% csrf_token %}
     <input type="email" name="email" placeholder="colleague@example.com" required
-           class="flex-1 min-w-[200px] rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+           class="flex-1 min-w-[200px] rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
     <select name="role"
-            class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+            class="rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
       {% for val, label in role_choices %}
       <option value="{{ val }}" {% if val == 'viewer' %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
@@ -27,33 +27,33 @@
       Send Invite
     </button>
   </form>
-  <p class="text-xs text-gray-400 mt-2">
+  <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">
     Invitations expire after 48 hours. The invited person must sign in (or sign up) with the same email address to accept.
   </p>
 </div>
 
 {# ── Member list ──────────────────────────────────────────────────────── #}
-<div class="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+<div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
   {% if members %}
   <table class="min-w-full text-sm">
-    <thead class="bg-gray-50 border-b border-gray-200">
+    <thead class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-800">
       <tr>
-        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Email</th>
-        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Role</th>
-        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Status</th>
-        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">Invited</th>
-        <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-400"></th>
+        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Email</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Role</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Status</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Invited</th>
+        <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500"></th>
       </tr>
     </thead>
-    <tbody class="divide-y divide-gray-50">
+    <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
       {% for m in members %}
-      <tr class="hover:bg-gray-50 transition-colors">
-        <td class="px-5 py-3 font-mono text-xs text-gray-900">{{ m.email }}</td>
+      <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+        <td class="px-5 py-3 font-mono text-xs text-gray-900 dark:text-gray-100">{{ m.email }}</td>
         <td class="px-5 py-3">
           <form method="post" action="/dashboard/team/{{ m.pk }}/role/" class="inline">
             {% csrf_token %}
             <select name="role" onchange="this.form.submit()"
-                    class="rounded-lg border border-gray-200 px-2 py-1 text-xs focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+                    class="rounded-lg border border-gray-200 dark:border-gray-800 px-2 py-1 text-xs focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
               {% for val, label in role_choices %}
               <option value="{{ val }}" {% if val == m.role %}selected{% endif %}>{{ label }}</option>
               {% endfor %}
@@ -63,27 +63,27 @@
         <td class="px-5 py-3">
           {% if m.is_pending %}
             {% if m.is_expired %}
-            <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800">Expired</span>
+            <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-red-100 dark:bg-red-500/10 text-red-800 dark:text-red-400">Expired</span>
             {% else %}
-            <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800">Pending</span>
+            <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-yellow-100 dark:bg-yellow-500/10 text-yellow-800 dark:text-yellow-400">Pending</span>
             {% endif %}
           {% else %}
-          <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800">Active</span>
+          <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-green-100 dark:bg-green-500/10 text-green-800 dark:text-green-400">Active</span>
           {% endif %}
         </td>
-        <td class="px-5 py-3 text-xs text-gray-400">{{ m.invited_at|date:"M j, Y" }}</td>
+        <td class="px-5 py-3 text-xs text-gray-400 dark:text-gray-500">{{ m.invited_at|date:"M j, Y" }}</td>
         <td class="px-5 py-3 text-right">
           <div class="flex items-center justify-end gap-3">
             {% if m.is_pending %}
             <form method="post" action="/dashboard/team/{{ m.pk }}/resend/">
               {% csrf_token %}
-              <button type="submit" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium transition-colors">Resend</button>
+              <button type="submit" class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium transition-colors">Resend</button>
             </form>
             {% endif %}
             <form method="post" action="/dashboard/team/{{ m.pk }}/remove/"
                   onsubmit="return confirm('Remove {{ m.email }} from your team?')">
               {% csrf_token %}
-              <button type="submit" class="text-xs text-red-500 hover:text-red-700 font-medium transition-colors">Remove</button>
+              <button type="submit" class="text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium transition-colors">Remove</button>
             </form>
           </div>
         </td>
@@ -94,12 +94,12 @@
 
   {% else %}
   <div class="py-16 text-center">
-    <svg class="mx-auto h-10 w-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg class="mx-auto h-10 w-10 text-gray-300 dark:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
             d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-5.13a4 4 0 11-8 0 4 4 0 018 0zm6 3a4 4 0 10-8 0"/>
     </svg>
-    <p class="mt-3 text-sm text-gray-500">No team members yet.</p>
-    <p class="mt-1 text-xs text-gray-400">Invite a colleague above to get started.</p>
+    <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">No team members yet.</p>
+    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Invite a colleague above to get started.</p>
   </div>
   {% endif %}
 </div>

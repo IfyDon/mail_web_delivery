@@ -5,38 +5,38 @@
 <div class="max-w-lg mx-auto">
 
   <div class="mb-6">
-    <a href="/dashboard/" class="text-sm text-indigo-600 hover:text-indigo-800 transition-colors">
+    <a href="/dashboard/" class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors">
       ← Back to Dashboard
     </a>
-    <h1 class="mt-2 text-2xl font-bold text-gray-900">Create API Key</h1>
-    <p class="mt-1 text-sm text-gray-500">Give your key a descriptive name so you can identify it later.</p>
+    <h1 class="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100">Create API Key</h1>
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Give your key a descriptive name so you can identify it later.</p>
   </div>
 
   {% if created_key %}
   {# ── Key created — show once ───────────────────────────────────────── #}
-  <div class="rounded-xl border border-green-200 bg-green-50 p-6 mb-6">
+  <div class="rounded-xl border border-green-200 dark:border-green-500/30 bg-green-50 dark:bg-green-500/10 p-6 mb-6">
     <div class="flex items-center gap-2 mb-3">
-      <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="h-5 w-5 text-green-500 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
       </svg>
-      <p class="text-sm font-semibold text-green-800">Key "{{ key_name }}" created successfully</p>
+      <p class="text-sm font-semibold text-green-800 dark:text-green-400">Key "{{ key_name }}" created successfully</p>
     </div>
 
-    <p class="text-xs text-red-700 font-medium mb-3">
+    <p class="text-xs text-red-700 dark:text-red-400 font-medium mb-3">
       Copy this key now — it will never be shown again.
     </p>
 
     <div class="relative">
       <code id="api-key-value"
-            class="block w-full break-all rounded-lg bg-white border border-green-200 px-4 py-3 text-sm font-mono text-gray-900 pr-20">{{ created_key }}</code>
+            class="block w-full break-all rounded-lg bg-white dark:bg-gray-900 border border-green-200 dark:border-green-500/30 px-4 py-3 text-sm font-mono text-gray-900 dark:text-gray-100 pr-20">{{ created_key }}</code>
       <button onclick="copyKey()"
               class="absolute right-2 top-1/2 -translate-y-1/2 rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700 transition-colors">
         Copy
       </button>
     </div>
 
-    <p class="mt-4 text-xs text-gray-500">
+    <p class="mt-4 text-xs text-gray-500 dark:text-gray-400">
       Use this key in the <code class="font-mono">Authorization: Bearer &lt;key&gt;</code> header on all API requests.
     </p>
   </div>
@@ -64,20 +64,20 @@
   {% else %}
   {# ── Create form ───────────────────────────────────────────────────── #}
   {% if error %}
-  <div class="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+  <div class="mb-4 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 px-4 py-3 text-sm text-red-700 dark:text-red-400">
     {{ error }}
   </div>
   {% endif %}
 
-  <div class="rounded-xl border border-gray-200 bg-white shadow-sm p-6">
+  <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm p-6">
     <form method="post">
       {% csrf_token %}
       <div class="mb-5">
-        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Key Name</label>
+        <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Key Name</label>
         <input type="text" id="name" name="name" value="{{ name|default:'' }}"
                placeholder="e.g. Production, My App, CI/CD"
                autofocus required
-               class="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900
+               class="block w-full rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 px-4 py-2.5 text-sm text-gray-900 dark:text-gray-100
                       focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-colors">
       </div>
 
@@ -89,7 +89,7 @@
     </form>
   </div>
 
-  <p class="mt-4 text-xs text-gray-400 text-center">
+  <p class="mt-4 text-xs text-gray-400 dark:text-gray-500 text-center">
     The full key is shown only once immediately after creation.
   </p>
   {% endif %}

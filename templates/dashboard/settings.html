@@ -3,31 +3,31 @@
 
 {% block content %}
 <div class="mb-6">
-  <h1 class="text-xl font-bold text-gray-900">Settings</h1>
-  <p class="text-sm text-gray-500 mt-0.5">Manage your password and two-factor authentication</p>
+  <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">Settings</h1>
+  <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Manage your password and two-factor authentication</p>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
   {# ── Password ─────────────────────────────────────────────────────────── #}
-  <div class="rounded-xl border border-gray-200 bg-white shadow-sm p-6">
-    <h2 class="text-sm font-semibold text-gray-900 mb-4">Change Password</h2>
+  <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm p-6">
+    <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Change Password</h2>
     <form method="post" action="/dashboard/settings/password/" class="space-y-3">
       {% csrf_token %}
       <div>
-        <label class="block text-xs font-medium text-gray-700 mb-1">Current password</label>
+        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Current password</label>
         <input type="password" name="current_password" required
-               class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+               class="w-full rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
       </div>
       <div>
-        <label class="block text-xs font-medium text-gray-700 mb-1">New password</label>
+        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">New password</label>
         <input type="password" name="new_password1" required
-               class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+               class="w-full rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
       </div>
       <div>
-        <label class="block text-xs font-medium text-gray-700 mb-1">Confirm new password</label>
+        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm new password</label>
         <input type="password" name="new_password2" required
-               class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+               class="w-full rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
       </div>
       <button type="submit"
               class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors">
@@ -37,20 +37,20 @@
   </div>
 
   {# ── 2FA ──────────────────────────────────────────────────────────────── #}
-  <div class="rounded-xl border border-gray-200 bg-white shadow-sm p-6">
+  <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm p-6">
     <div class="flex items-center justify-between mb-4">
-      <h2 class="text-sm font-semibold text-gray-900">Two-Factor Authentication</h2>
+      <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Two-Factor Authentication</h2>
       {% if has_2fa %}
-      <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800">Enabled</span>
+      <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 dark:bg-green-500/10 text-green-800 dark:text-green-400">Enabled</span>
       {% else %}
-      <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-600">Disabled</span>
+      <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">Disabled</span>
       {% endif %}
     </div>
 
     {% if backup_codes %}
-    <div class="rounded-lg bg-yellow-50 border border-yellow-200 px-4 py-3 mb-4">
-      <p class="text-xs font-semibold text-yellow-800 mb-2">Save these backup codes — shown only once. Each can be used once if you lose your authenticator.</p>
-      <div class="grid grid-cols-2 gap-1 font-mono text-xs text-yellow-900">
+    <div class="rounded-lg bg-yellow-50 dark:bg-yellow-500/10 border border-yellow-200 dark:border-yellow-500/30 px-4 py-3 mb-4">
+      <p class="text-xs font-semibold text-yellow-800 dark:text-yellow-400 mb-2">Save these backup codes — shown only once. Each can be used once if you lose your authenticator.</p>
+      <div class="grid grid-cols-2 gap-1 font-mono text-xs text-yellow-900 dark:text-yellow-200">
         {% for code in backup_codes %}
         <span>{{ code }}</span>
         {% endfor %}
@@ -59,25 +59,25 @@
     {% endif %}
 
     {% if has_2fa %}
-    <p class="text-sm text-gray-500 mb-4">Your account is protected with an authenticator app.</p>
+    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Your account is protected with an authenticator app.</p>
     <form method="post" action="/dashboard/settings/2fa/disable/" class="flex gap-3"
           onsubmit="return confirm('Disable two-factor authentication?')">
       {% csrf_token %}
       <input type="password" name="password" placeholder="Confirm your password" required
-             class="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+             class="flex-1 rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
       <button type="submit"
-              class="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-100 transition-colors">
+              class="rounded-lg border border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors">
         Disable
       </button>
     </form>
 
     {% elif pending_device %}
-    <p class="text-sm text-gray-500 mb-3">Scan this QR code with your authenticator app (Google Authenticator, 1Password, Authy…), then enter the 6-digit code to confirm.</p>
-    <img src="{{ qr_data_uri }}" alt="2FA QR code" class="mx-auto mb-4 h-40 w-40 rounded-lg border border-gray-200">
+    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Scan this QR code with your authenticator app (Google Authenticator, 1Password, Authy…), then enter the 6-digit code to confirm.</p>
+    <img src="{{ qr_data_uri }}" alt="2FA QR code" class="mx-auto mb-4 h-40 w-40 rounded-lg border border-gray-200 dark:border-gray-800">
     <form method="post" action="/dashboard/settings/2fa/confirm/" class="flex gap-3">
       {% csrf_token %}
       <input type="text" name="code" inputmode="numeric" placeholder="123456" required
-             class="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm text-center tracking-widest focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+             class="flex-1 rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 px-3 py-2 text-sm text-center tracking-widest focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
       <button type="submit"
               class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors">
         Confirm
@@ -85,7 +85,7 @@
     </form>
 
     {% else %}
-    <p class="text-sm text-gray-500 mb-4">Add an extra layer of security to your account with an authenticator app.</p>
+    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Add an extra layer of security to your account with an authenticator app.</p>
     <form method="post" action="/dashboard/settings/2fa/setup/">
       {% csrf_token %}
       <button type="submit"
@@ -97,17 +97,17 @@
   </div>
 
   {# ── Privacy & data ───────────────────────────────────────────────────── #}
-  <div class="rounded-xl border border-gray-200 bg-white shadow-sm p-6 lg:col-span-2">
-    <h2 class="text-sm font-semibold text-gray-900 mb-1">Privacy &amp; Data</h2>
-    <p class="text-sm text-gray-500 mb-4">Export everything we hold about you, or permanently delete your account.</p>
+  <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm p-6 lg:col-span-2">
+    <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">Privacy &amp; Data</h2>
+    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Export everything we hold about you, or permanently delete your account.</p>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div>
-        <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-3">Export your data</h3>
+        <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 mb-3">Export your data</h3>
         <form method="post" action="/dashboard/settings/export/" class="mb-3">
           {% csrf_token %}
           <button type="submit"
-                  class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                  class="rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
             Request Data Export
           </button>
         </form>
@@ -115,14 +115,14 @@
         <ul class="space-y-1.5 text-sm">
           {% for req in export_requests %}
           <li class="flex items-center justify-between">
-            <span class="text-gray-500 text-xs">{{ req.requested_at|date:"M j, Y H:i" }}</span>
+            <span class="text-gray-500 dark:text-gray-400 text-xs">{{ req.requested_at|date:"M j, Y H:i" }}</span>
             {% if req.status == 'ready' %}
             <a href="/dashboard/settings/export/{{ req.pk }}/download/"
-               class="text-indigo-600 hover:underline text-xs font-medium">Download</a>
+               class="text-indigo-600 dark:text-indigo-400 hover:underline text-xs font-medium">Download</a>
             {% elif req.status == 'failed' %}
-            <span class="text-red-500 text-xs">Failed</span>
+            <span class="text-red-500 dark:text-red-400 text-xs">Failed</span>
             {% else %}
-            <span class="text-yellow-600 text-xs">Preparing…</span>
+            <span class="text-yellow-600 dark:text-yellow-400 text-xs">Preparing…</span>
             {% endif %}
           </li>
           {% endfor %}
@@ -131,19 +131,19 @@
       </div>
 
       <div>
-        <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-3">Delete your account</h3>
-        <p class="text-xs text-gray-400 mb-3">
+        <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 mb-3">Delete your account</h3>
+        <p class="text-xs text-gray-400 dark:text-gray-500 mb-3">
           This permanently erases your domains, messages, templates, webhooks, and API keys. It cannot be undone.
         </p>
         <form method="post" action="/dashboard/settings/delete-account/" class="space-y-2"
               onsubmit="return confirm('This permanently deletes your account and data. Are you sure?')">
           {% csrf_token %}
           <input type="password" name="password" placeholder="Confirm your password" required
-                 class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none">
+                 class="w-full rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none">
           <input type="text" name="confirm_text" placeholder='Type "DELETE" to confirm' required
-                 class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none">
+                 class="w-full rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none">
           <button type="submit"
-                  class="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-100 transition-colors">
+                  class="rounded-lg border border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors">
             Delete Account
           </button>
         </form>
