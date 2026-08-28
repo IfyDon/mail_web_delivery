@@ -22,4 +22,14 @@ app.conf.include = [
     'workers.tasks.aggregate_stats',
     'workers.tasks.reset_quota',
     'workers.tasks.decay_scores',
+    # These six are all referenced by CELERY_BEAT_SCHEDULE (or, for
+    # data_export, dispatched on demand) but were missing from this list —
+    # the worker never registered them, so every scheduled run published a
+    # message for a task name it didn't recognize and could never execute.
+    'workers.tasks.data_export',
+    'workers.tasks.retry_stuck',
+    'workers.tasks.check_bounce_rate',
+    'workers.tasks.rotate_dkim',
+    'workers.tasks.cleanup_idempotency',
+    'workers.tasks.cleanup_audit_log',
 ]
